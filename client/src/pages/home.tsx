@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { macroInputSchema, type MacroInput, mealTypeEnum } from "@shared/schema";
@@ -23,6 +23,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { Loader2 } from 'lucide-react';
 import { FavoriteButton, CelebrationAnimation } from "@/components/ui/celebration";
+import type { Recipe } from "@/types/recipe";
+
 
 export default function Home() {
   const { toast } = useToast();
@@ -30,6 +32,13 @@ export default function Home() {
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
   const [showingMore, setShowingMore] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // Add queries for favorites
+  const queryClient = useQueryClient();
+  const { data: favorites } = useQuery<Recipe[]>({
+    queryKey: ['/api/favorites'],
+    queryFn: () => apiRequest("GET", "/api/favorites").then(res => res.json())
+  });
 
   const form = useForm<MacroInput>({
     resolver: zodResolver(macroInputSchema),
@@ -157,6 +166,7 @@ export default function Home() {
 
   const favoriteMutation = useMutation({
     mutationFn: async (meal: any) => {
+      // First save the recipe
       const recipe = {
         name: meal.name,
         description: meal.description,
@@ -168,9 +178,13 @@ export default function Home() {
       };
       const res = await apiRequest("POST", "/api/recipes", recipe);
       const savedRecipe = await res.json();
+
+      // Then add it to favorites
+      await apiRequest("POST", `/api/favorites/${savedRecipe.id}`);
       return savedRecipe;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 500);
       toast({
@@ -422,13 +436,13 @@ export default function Home() {
                       )}
                     </Button>
                     <FavoriteButton
-                      isFavorite={meal.isStoredRecipe}
+                      isFavorite={favorites?.some((f: Recipe) => f.name === meal.name)}
                       onClick={() => {
-                        if (!meal.isStoredRecipe) {
+                        if (!meal.isStoredRecipe && !favorites?.some((f: Recipe) => f.name === meal.name)) {
                           favoriteMutation.mutate(meal);
                         }
                       }}
-                      disabled={favoriteMutation.isPending || meal.isStoredRecipe}
+                      disabled={favoriteMutation.isPending || meal.isStoredRecipe || favorites?.some((f: Recipe) => f.name === meal.name)}
                       className="ml-2"
                     />
                   </div>
