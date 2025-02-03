@@ -39,9 +39,13 @@ export default function Home() {
       });
     },
     onError: (error) => {
+      let description = error.message;
+      if (description.includes("rate limit")) {
+        description = "You've hit the API rate limit. Please wait a few minutes before trying again.";
+      }
       toast({
         title: "Error",
-        description: error.message,
+        description,
         variant: "destructive"
       });
     }
