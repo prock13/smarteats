@@ -43,7 +43,7 @@ export async function generateMealSuggestions(
     const storedRecipes = await storage.getRecipes();
 
     const storedRecipesPrompt = storedRecipes.length > 0
-      ? `Consider using these stored recipes that match the macro requirements:
+      ? `Here are some stored recipes that you can consider along with suggesting new recipes:
 ${storedRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
@@ -58,7 +58,12 @@ ${storedRecipes.map(recipe => `
 
 ${storedRecipesPrompt}
 
-Please suggest ${mealCount} meal(s) that will help meet these targets. When appropriate, use the stored recipes provided above, otherwise suggest new meals. You must respond with ONLY a valid JSON object in this exact structure, without any additional text or explanation:
+Please suggest ${mealCount} meal(s) that will help meet these targets. For your suggestions:
+1. Include a mix of both stored recipes and new creative meal ideas
+2. Aim to include at least one stored recipe if it reasonably fits the macro requirements
+3. Always suggest new creative meals even if there are perfect matches in stored recipes
+
+You must respond with ONLY a valid JSON object in this exact structure, without any additional text or explanation:
 {
   "meals": [
     {
@@ -74,7 +79,7 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. When appr
   ]
 }
 
-Make sure the total macros across all meals sum up approximately to the target amounts. Prefer using stored recipes when their macros are close to what's needed, but feel free to suggest new meals when stored recipes don't fit the requirements well.`;
+Make sure the total macros across all meals sum up approximately to the target amounts.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
