@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+import { storage } from "./storage";
+import type { Recipe } from "@shared/schema";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing OPENAI_API_KEY environment variable");
@@ -37,12 +39,26 @@ export async function generateMealSuggestions(
     // Check rate limit before making the request
     checkRateLimit();
 
+    // Fetch stored recipes
+    const storedRecipes = await storage.getRecipes();
+
+    const storedRecipesPrompt = storedRecipes.length > 0
+      ? `Consider using these stored recipes that match the macro requirements:
+${storedRecipes.map(recipe => `
+- ${recipe.name}
+  Description: ${recipe.description}
+  Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
+`).join('\n')}`
+      : '';
+
     const prompt = `Given the following macro nutrient targets remaining for the day:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
 
-Please suggest ${mealCount} meal(s) that will help meet these targets. You must respond with ONLY a valid JSON object in this exact structure:
+${storedRecipesPrompt}
+
+Please suggest ${mealCount} meal(s) that will help meet these targets. When appropriate, use the stored recipes provided above, otherwise suggest new meals. You must respond with ONLY a valid JSON object in this exact structure:
 {
   "meals": [
     {
@@ -52,16 +68,18 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. You must 
         "carbs": number,
         "protein": number,
         "fats": number
-      }
+      },
+      "isStoredRecipe": boolean
     }
   ]
 }
 
-Make sure the total macros across all meals sum up approximately to the target amounts. Do not include any explanation or additional text outside the JSON object.`;
+Make sure the total macros across all meals sum up approximately to the target amounts. Prefer using stored recipes when their macros are close to what's needed, but feel free to suggest new meals when stored recipes don't fit the requirements well. Do not include any explanation or additional text outside the JSON object.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
     });
 
     const content = response.choices[0].message.content;

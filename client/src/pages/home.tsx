@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   const { toast } = useToast();
@@ -142,8 +143,11 @@ export default function Home() {
           <div className="space-y-4">
             {suggestions.meals.map((meal: any, index: number) => (
               <Card key={index}>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle>{meal.name}</CardTitle>
+                  {meal.isStoredRecipe && (
+                    <Badge variant="secondary">Saved Recipe</Badge>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <p className="mb-4">{meal.description}</p>
@@ -153,13 +157,13 @@ export default function Home() {
                       <span>{meal.macros.carbs}g</span>
                     </div>
                     <Progress value={(meal.macros.carbs / form.getValues("targetCarbs")) * 100} className="bg-blue-200" />
-                    
+
                     <div className="flex items-center justify-between">
                       <span>Protein</span>
                       <span>{meal.macros.protein}g</span>
                     </div>
                     <Progress value={(meal.macros.protein / form.getValues("targetProtein")) * 100} className="bg-red-200" />
-                    
+
                     <div className="flex items-center justify-between">
                       <span>Fats</span>
                       <span>{meal.macros.fats}g</span>
