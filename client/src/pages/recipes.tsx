@@ -14,54 +14,13 @@ import { Pencil, Trash2 } from "lucide-react";
 import { AutoSelectInput } from "@/components/ui/auto-select-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {Badge} from "@/components/ui/badge";
-import { FavoriteButton, CelebrationAnimation } from "@/components/ui/celebration";
 
 export default function Recipes() {
   const { toast } = useToast();
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
-  const [showCelebration, setShowCelebration] = useState(false);
 
   const { data: recipes, isLoading } = useQuery({
     queryKey: ['/api/recipes'],
-  });
-
-  const { data: favorites } = useQuery({
-    queryKey: ['/api/favorites'],
-  });
-
-  const favoriteMutation = useMutation({
-    mutationFn: async (recipeId: number) => {
-      const res = await apiRequest("POST", `/api/favorites/${recipeId}`);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 500);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
-
-  const unfavoriteMutation = useMutation({
-    mutationFn: async (recipeId: number) => {
-      await apiRequest("DELETE", `/api/favorites/${recipeId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
   });
 
   const form = useForm<InsertRecipe>({
@@ -167,7 +126,6 @@ export default function Recipes() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      {showCelebration && <CelebrationAnimation />}
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
@@ -201,18 +159,6 @@ export default function Recipes() {
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <FavoriteButton
-                              isFavorite={favorites?.some((f: Recipe) => f.id === recipe.id) ?? false}
-                              onClick={() => {
-                                const isFavorite = favorites?.some((f: Recipe) => f.id === recipe.id);
-                                if (isFavorite) {
-                                  unfavoriteMutation.mutate(recipe.id);
-                                } else {
-                                  favoriteMutation.mutate(recipe.id);
-                                }
-                              }}
-                              disabled={favoriteMutation.isPending || unfavoriteMutation.isPending}
-                            />
                             <Button
                               variant="ghost"
                               size="icon"

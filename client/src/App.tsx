@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Calendar from "@/pages/calendar";
 import Recipes from "@/pages/recipes";
+import Favorites from "@/pages/favorites";
 import Auth from "@/pages/auth";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,11 @@ function Navigation() {
                   Recipes
                 </span>
               </Link>
+              <Link href="/favorites">
+                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
+                  Favorites
+                </span>
+              </Link>
             </div>
           </div>
           <div className="flex items-center">
@@ -63,6 +69,7 @@ function Router() {
       <ProtectedRoute path="/" component={Home} />
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/recipes" component={Recipes} />
+      <ProtectedRoute path="/favorites" component={Favorites} />
       <Route component={NotFound} />
     </Switch>
   );
