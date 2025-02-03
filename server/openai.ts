@@ -44,10 +44,21 @@ export async function generateMealSuggestions(
     const storedRecipes = await storage.getRecipes();
 
     // Filter out recipes that should be excluded and don't match dietary preference
-    const availableStoredRecipes = storedRecipes.filter(
-      recipe => !excludeRecipes.includes(recipe.name) && 
-                (recipe.dietaryRestriction === "none" || recipe.dietaryRestriction === dietaryPreference)
-    );
+    const availableStoredRecipes = storedRecipes.filter(recipe => {
+      // Exclude recipes that were already suggested
+      if (excludeRecipes.includes(recipe.name)) {
+        return false;
+      }
+
+      // If user requests a specific dietary preference
+      if (dietaryPreference !== "none") {
+        // Only include recipes that exactly match the preference
+        return recipe.dietaryRestriction === dietaryPreference;
+      }
+
+      // If no preference specified, include all recipes
+      return true;
+    });
 
     const storedRecipesPrompt = availableStoredRecipes.length > 0
       ? `Here are some stored recipes that you can consider along with suggesting new recipes:
@@ -55,6 +66,7 @@ ${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
+  Dietary Restriction: ${recipe.dietaryRestriction}
 `).join('\n')}`
       : '';
 
