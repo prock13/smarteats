@@ -8,14 +8,14 @@ import { ZodError } from "zod";
 export function registerRoutes(app: Express): Server {
   app.post("/api/meal-suggestions", async (req, res) => {
     try {
-      console.log("Received meal suggestions request:", req.body);
+      console.log("Received meal suggestions request:", JSON.stringify(req.body, null, 2));
       const input = macroInputSchema.parse(req.body);
-      console.log("Parsed input:", input);
+      console.log("Parsed input:", JSON.stringify(input, null, 2));
 
       // Check cache first
       const cached = await storage.getMealSuggestions(input);
       if (cached) {
-        console.log("Returning cached suggestions");
+        console.log("Returning cached suggestions:", JSON.stringify(cached, null, 2));
         return res.json(cached);
       }
 
@@ -30,10 +30,11 @@ export function registerRoutes(app: Express): Server {
         input.recipeLimit
       );
 
-      console.log("Generated suggestions:", suggestions);
+      console.log("Generated suggestions:", JSON.stringify(suggestions, null, 2));
 
       // Cache and return results
       const saved = await storage.saveMealSuggestions(input, suggestions);
+      console.log("Saved and returning suggestions:", JSON.stringify(saved, null, 2));
       res.json(saved);
     } catch (error) {
       console.error("Error in meal suggestions:", error);

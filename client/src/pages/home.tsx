@@ -47,10 +47,14 @@ export default function Home() {
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput) => {
+      console.log("Submitting data:", data);
       const res = await apiRequest("POST", "/api/meal-suggestions", data);
-      return res.json();
+      const jsonResponse = await res.json();
+      console.log("Received response:", jsonResponse);
+      return jsonResponse;
     },
     onSuccess: (data) => {
+      console.log("Setting suggestions:", data);
       setSuggestions(data.suggestions);
       toast({
         title: "Success!",
@@ -58,6 +62,7 @@ export default function Home() {
       });
     },
     onError: (error) => {
+      console.error("Mutation error:", error);
       let description = error.message;
       if (description.includes("Rate limit exceeded")) {
         const waitTime = description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
@@ -91,7 +96,10 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
+              <form onSubmit={form.handleSubmit((data) => {
+                console.log("Form submitted with data:", data);
+                mutation.mutate(data);
+              })} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -246,9 +254,9 @@ export default function Home() {
           </div>
         )}
 
-        {suggestions?.meals && (
+        {suggestions && (
           <div className="space-y-4">
-            {suggestions.meals.map((meal: any, index: number) => (
+            {suggestions.meals?.map((meal: any, index: number) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle>{meal.name}</CardTitle>
