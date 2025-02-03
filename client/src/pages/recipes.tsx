@@ -59,6 +59,30 @@ export default function Recipes() {
     }
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (data: InsertRecipe & { id: number }) => {
+      const { id, ...recipe } = data;
+      const res = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+      toast({
+        title: "Success!",
+        description: "Recipe updated successfully"
+      });
+      form.reset();
+      setEditingRecipe(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/recipes/${id}`);
@@ -88,8 +112,16 @@ export default function Recipes() {
       carbs: recipe.carbs,
       protein: recipe.protein,
       fats: recipe.fats,
-      dietaryRestriction: recipe.dietaryRestriction,
+      dietaryRestriction: recipe.dietaryRestriction as any,
     });
+  };
+
+  const onSubmit = (data: InsertRecipe) => {
+    if (editingRecipe) {
+      updateMutation.mutate({ ...data, id: editingRecipe.id });
+    } else {
+      createMutation.mutate(data);
+    }
   };
 
   return (
@@ -190,7 +222,7 @@ export default function Recipes() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="name"
@@ -301,8 +333,14 @@ export default function Recipes() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button type="submit" className="flex-1" disabled={createMutation.isPending}>
-                      {createMutation.isPending ? "Saving..." : (editingRecipe ? "Update Recipe" : "Create Recipe")}
+                    <Button 
+                      type="submit" 
+                      className="flex-1" 
+                      disabled={createMutation.isPending || updateMutation.isPending}
+                    >
+                      {createMutation.isPending || updateMutation.isPending
+                        ? "Saving..."
+                        : (editingRecipe ? "Update Recipe" : "Create Recipe")}
                     </Button>
                     {editingRecipe && (
                       <Button 

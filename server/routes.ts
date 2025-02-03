@@ -149,6 +149,31 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.put("/api/recipes/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        throw new Error("Invalid recipe ID");
+      }
+
+      const existing = await storage.getRecipeById(id);
+      if (!existing) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+
+      const recipe = insertRecipeSchema.parse(req.body);
+      const updated = await storage.updateRecipe(id, recipe);
+      res.json(updated);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
   app.delete("/api/recipes/:id", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {

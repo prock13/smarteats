@@ -26,6 +26,7 @@ export interface IStorage {
   getRecipes(): Promise<Recipe[]>;
   getRecipeById(id: number): Promise<Recipe | undefined>;
   saveRecipe(recipe: InsertRecipe): Promise<Recipe>;
+  updateRecipe(id: number, recipe: InsertRecipe): Promise<Recipe>;
   deleteRecipe(id: number): Promise<void>;
 
   // Session store
@@ -138,6 +139,15 @@ export class DatabaseStorage implements IStorage {
       .values(recipe)
       .returning();
     return saved;
+  }
+
+  async updateRecipe(id: number, recipe: InsertRecipe): Promise<Recipe> {
+    const [updated] = await db
+      .update(recipes)
+      .set(recipe)
+      .where(eq(recipes.id, id))
+      .returning();
+    return updated;
   }
 
   async deleteRecipe(id: number): Promise<void> {
