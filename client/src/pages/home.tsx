@@ -22,13 +22,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { Loader2 } from 'lucide-react';
-
+import { FavoriteButton, CelebrationAnimation } from "@/components/ui/celebration";
 
 export default function Home() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
   const [showingMore, setShowingMore] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const form = useForm<MacroInput>({
     resolver: zodResolver(macroInputSchema),
@@ -54,7 +55,6 @@ export default function Home() {
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
       console.log("Submitting data:", JSON.stringify(data, null, 2));
 
-      // If appendResults is true, include the names of existing recipes to exclude
       const requestData = {
         ...data,
         excludeRecipes: data.appendResults && suggestions?.meals
@@ -155,6 +155,38 @@ export default function Home() {
     }
   });
 
+  const favoriteMutation = useMutation({
+    mutationFn: async (meal: any) => {
+      const recipe = {
+        name: meal.name,
+        description: meal.description,
+        instructions: meal.description, 
+        carbs: meal.macros.carbs,
+        protein: meal.macros.protein,
+        fats: meal.macros.fats,
+        dietaryRestriction: form.getValues("dietaryPreference")
+      };
+      const res = await apiRequest("POST", "/api/recipes", recipe);
+      const savedRecipe = await res.json();
+      return savedRecipe;
+    },
+    onSuccess: () => {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 500);
+      toast({
+        title: "Success!",
+        description: "Recipe saved to favorites"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const onSubmit = (data: MacroInput) => {
     console.log("Form submitted with data:", JSON.stringify(data, null, 2));
     if (!data.mealTypes || data.mealTypes.length === 0) {
@@ -177,6 +209,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
+      {showCelebration && <CelebrationAnimation />}
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
@@ -388,6 +421,16 @@ export default function Home() {
                         </>
                       )}
                     </Button>
+                    <FavoriteButton
+                      isFavorite={meal.isStoredRecipe}
+                      onClick={() => {
+                        if (!meal.isStoredRecipe) {
+                          favoriteMutation.mutate(meal);
+                        }
+                      }}
+                      disabled={favoriteMutation.isPending || meal.isStoredRecipe}
+                      className="ml-2"
+                    />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -424,7 +467,6 @@ export default function Home() {
               </Card>
             ))}
 
-            {/* Add Show More button */}
             <div className="flex justify-center pt-4">
               <Button
                 variant="outline"
