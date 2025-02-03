@@ -46,7 +46,9 @@ export default function Favorites() {
                 </CardHeader>
                 <CardContent>
                   <p className="mb-4 text-muted-foreground">{recipe.description}</p>
-                  <p className="mb-4">{recipe.instructions}</p>
+                  {recipe.instructions !== recipe.description && (
+                    <p className="mb-4">{recipe.instructions}</p>
+                  )}
 
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
