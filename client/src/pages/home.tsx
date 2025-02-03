@@ -7,11 +7,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { AutoSelectInput } from "@/components/ui/auto-select-input";
 
 export default function Home() {
   const { toast } = useToast();
@@ -82,7 +82,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>Carbohydrates (g)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                          <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -94,7 +94,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>Protein (g)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                          <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -106,7 +106,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>Fats (g)</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                          <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -118,7 +118,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>Number of Meals</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" max="10" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                          <AutoSelectInput type="number" min="1" max="10" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
                       </FormItem>
                     )}

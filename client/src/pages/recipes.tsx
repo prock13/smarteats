@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2 } from "lucide-react";
+import { AutoSelectInput } from "@/components/ui/auto-select-input";
 
 export default function Recipes() {
   const { toast } = useToast();
@@ -228,7 +229,7 @@ export default function Recipes() {
                         <FormItem>
                           <FormLabel>Carbs (g)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -241,7 +242,7 @@ export default function Recipes() {
                         <FormItem>
                           <FormLabel>Protein (g)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -254,7 +255,7 @@ export default function Recipes() {
                         <FormItem>
                           <FormLabel>Fats (g)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                           </FormControl>
                         </FormItem>
                       )}
