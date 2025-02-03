@@ -1,0 +1,45 @@
+import OpenAI from "openai";
+
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error("Missing OPENAI_API_KEY environment variable");
+}
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+export async function generateMealSuggestions(
+  carbs: number,
+  protein: number,
+  fats: number,
+  mealCount: number
+) {
+  const prompt = `Given the following macro nutrient targets remaining for the day:
+- Carbohydrates: ${carbs}g
+- Protein: ${protein}g
+- Fats: ${fats}g
+
+Please suggest ${mealCount} meal(s) that will help meet these targets. Format the response as a JSON object with this structure:
+{
+  "meals": [
+    {
+      "name": "Meal name",
+      "description": "Brief description with cooking instructions",
+      "macros": {
+        "carbs": number,
+        "protein": number,
+        "fats": number
+      }
+    }
+  ]
+}
+
+Make sure the total macros across all meals sum up approximately to the target amounts.`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" }
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+}
