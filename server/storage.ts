@@ -1,4 +1,4 @@
-import { meals, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type InsertMealPlan } from "@shared/schema";
+import { meals, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type InsertMealPlan, type Recipe, type InsertRecipe } from "@shared/schema";
 
 export interface IStorage {
   getMealSuggestions(input: MacroInput): Promise<MealSuggestion | undefined>;
@@ -6,19 +6,28 @@ export interface IStorage {
   getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]>;
   saveMealPlan(plan: InsertMealPlan): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
+  // New recipe methods
+  getRecipes(): Promise<Recipe[]>;
+  getRecipeById(id: number): Promise<Recipe | undefined>;
+  saveRecipe(recipe: InsertRecipe): Promise<Recipe>;
+  deleteRecipe(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private mealSuggestions: Map<string, MealSuggestion>;
   private mealPlans: Map<number, MealPlan>;
+  private recipes: Map<number, Recipe>;
   private currentSuggestionId: number;
   private currentPlanId: number;
+  private currentRecipeId: number;
 
   constructor() {
     this.mealSuggestions = new Map();
     this.mealPlans = new Map();
+    this.recipes = new Map();
     this.currentSuggestionId = 1;
     this.currentPlanId = 1;
+    this.currentRecipeId = 1;
   }
 
   private createKey(input: MacroInput): string {
@@ -64,6 +73,29 @@ export class MemStorage implements IStorage {
 
   async deleteMealPlan(id: number): Promise<void> {
     this.mealPlans.delete(id);
+  }
+
+  // Recipe methods implementation
+  async getRecipes(): Promise<Recipe[]> {
+    return Array.from(this.recipes.values());
+  }
+
+  async getRecipeById(id: number): Promise<Recipe | undefined> {
+    return this.recipes.get(id);
+  }
+
+  async saveRecipe(recipe: InsertRecipe): Promise<Recipe> {
+    const newRecipe: Recipe = {
+      id: this.currentRecipeId++,
+      ...recipe,
+      createdAt: new Date(),
+    };
+    this.recipes.set(newRecipe.id, newRecipe);
+    return newRecipe;
+  }
+
+  async deleteRecipe(id: number): Promise<void> {
+    this.recipes.delete(id);
   }
 }
 

@@ -11,6 +11,17 @@ export const meals = pgTable("meals", {
   description: text("description").notNull(),
 });
 
+export const recipes = pgTable("recipes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  instructions: text("instructions").notNull(),
+  carbs: integer("carbs").notNull(),
+  protein: integer("protein").notNull(),
+  fats: integer("fats").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const mealSuggestions = pgTable("meal_suggestions", {
   id: serial("id").primaryKey(),
   suggestions: jsonb("suggestions").notNull(),
@@ -23,8 +34,8 @@ export const mealSuggestions = pgTable("meal_suggestions", {
 export const mealPlans = pgTable("meal_plans", {
   id: serial("id").primaryKey(),
   date: timestamp("date").notNull(),
-  meal: jsonb("meal").notNull(), // Store the meal data
-  mealType: text("meal_type").notNull(), // breakfast, lunch, dinner, snack
+  meal: jsonb("meal").notNull(),
+  mealType: text("meal_type").notNull(),
 });
 
 export const macroInputSchema = z.object({
@@ -34,8 +45,17 @@ export const macroInputSchema = z.object({
   mealCount: z.number().min(1).max(10),
 });
 
+export const insertRecipeSchema = z.object({
+  name: z.string().min(1, "Recipe name is required"),
+  description: z.string().min(1, "Description is required"),
+  instructions: z.string().min(1, "Instructions are required"),
+  carbs: z.number().min(0, "Carbs must be 0 or greater"),
+  protein: z.number().min(0, "Protein must be 0 or greater"),
+  fats: z.number().min(0, "Fats must be 0 or greater"),
+});
+
 export const mealPlanSchema = z.object({
-  date: z.string(), // ISO date string
+  date: z.string(),
   meal: z.object({
     name: z.string(),
     description: z.string(),
@@ -50,6 +70,8 @@ export const mealPlanSchema = z.object({
 
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
+export type Recipe = typeof recipes.$inferSelect;
+export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;
 export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof mealPlanSchema>;

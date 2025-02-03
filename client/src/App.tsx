@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Calendar from "@/pages/calendar";
+import Recipes from "@/pages/recipes";
 
 function Navigation() {
   return (
@@ -23,6 +24,11 @@ function Navigation() {
                   Calendar
                 </a>
               </Link>
+              <Link href="/recipes">
+                <a className="inline-flex items-center px-1 pt-1 text-sm font-medium">
+                  Recipes
+                </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -36,6 +42,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/calendar" component={Calendar} />
+      <Route path="/recipes" component={Recipes} />
       <Route component={NotFound} />
     </Switch>
   );

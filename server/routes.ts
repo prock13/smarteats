@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
-import { macroInputSchema, mealPlanSchema } from "@shared/schema";
+import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
 import { ZodError } from "zod";
 
 export function registerRoutes(app: Express): Server {
@@ -68,6 +68,60 @@ export function registerRoutes(app: Express): Server {
         throw new Error("Invalid meal plan ID");
       }
       await storage.deleteMealPlan(id);
+      res.status(204).send();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  // Recipe routes
+  app.get("/api/recipes", async (_req, res) => {
+    try {
+      const recipes = await storage.getRecipes();
+      res.json(recipes);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.get("/api/recipes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        throw new Error("Invalid recipe ID");
+      }
+      const recipe = await storage.getRecipeById(id);
+      if (!recipe) {
+        res.status(404).json({ message: "Recipe not found" });
+        return;
+      }
+      res.json(recipe);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.post("/api/recipes", async (req, res) => {
+    try {
+      const recipe = insertRecipeSchema.parse(req.body);
+      const saved = await storage.saveRecipe(recipe);
+      res.json(saved);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.delete("/api/recipes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        throw new Error("Invalid recipe ID");
+      }
+      await storage.deleteRecipe(id);
       res.status(204).send();
     } catch (error) {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
