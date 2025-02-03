@@ -58,7 +58,7 @@ ${storedRecipes.map(recipe => `
 
 ${storedRecipesPrompt}
 
-Please suggest ${mealCount} meal(s) that will help meet these targets. When appropriate, use the stored recipes provided above, otherwise suggest new meals. You must respond with ONLY a valid JSON object in this exact structure:
+Please suggest ${mealCount} meal(s) that will help meet these targets. When appropriate, use the stored recipes provided above, otherwise suggest new meals. You must respond with ONLY a valid JSON object in this exact structure, without any additional text or explanation:
 {
   "meals": [
     {
@@ -74,12 +74,11 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. When appr
   ]
 }
 
-Make sure the total macros across all meals sum up approximately to the target amounts. Prefer using stored recipes when their macros are close to what's needed, but feel free to suggest new meals when stored recipes don't fit the requirements well. Do not include any explanation or additional text outside the JSON object.`;
+Make sure the total macros across all meals sum up approximately to the target amounts. Prefer using stored recipes when their macros are close to what's needed, but feel free to suggest new meals when stored recipes don't fit the requirements well.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
     });
 
     const content = response.choices[0].message.content;
