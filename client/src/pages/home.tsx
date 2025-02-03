@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { macroInputSchema, type MacroInput } from "@shared/schema";
+import { macroInputSchema, type MacroInput, mealTypeEnum } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,12 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { DietaryPreference, MealType } from "@shared/schema";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 
 export default function Home() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
+  const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
 
   const form = useForm<MacroInput>({
     resolver: zodResolver(macroInputSchema),
@@ -39,7 +40,7 @@ export default function Home() {
     }
   });
 
-  const mealTypeOptions: { label: string; value: MealType }[] = [
+  const mealTypeOptions: { label: string; value: string }[] = [
     { label: "Breakfast", value: "breakfast" },
     { label: "Lunch", value: "lunch" },
     { label: "Dinner", value: "dinner" },
@@ -95,6 +96,36 @@ export default function Home() {
       toast({
         title: "Error",
         description,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const addToCalendarMutation = useMutation({
+    mutationFn: async ({ meal, mealType }: { meal: any; mealType: string }) => {
+      const today = new Date().toISOString();
+      const mealPlan = {
+        date: today,
+        meal: {
+          name: meal.name,
+          description: meal.description,
+          macros: meal.macros
+        },
+        mealType
+      };
+      const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Meal added to today's calendar"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
         variant: "destructive"
       });
     }
@@ -293,9 +324,41 @@ export default function Home() {
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle>{meal.name}</CardTitle>
-                  {meal.isStoredRecipe && (
-                    <Badge variant="secondary">Saved Recipe</Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {meal.isStoredRecipe && (
+                      <Badge variant="secondary">Saved Recipe</Badge>
+                    )}
+                    <Select
+                      value={selectedMealType}
+                      onValueChange={setSelectedMealType}
+                    >
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue placeholder="Select meal type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mealTypeOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addToCalendarMutation.mutate({ meal, mealType: selectedMealType })}
+                      disabled={addToCalendarMutation.isPending}
+                    >
+                      {addToCalendarMutation.isPending ? (
+                        "Adding..."
+                      ) : (
+                        <>
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          Add to Calendar
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <p className="mb-4">{meal.description}</p>
