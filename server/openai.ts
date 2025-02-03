@@ -38,10 +38,8 @@ export async function generateMealSuggestions(
   recipeLimit?: number,
 ) {
   try {
-    // Check rate limit before making the request
     checkRateLimit();
 
-    // Fetch stored recipes
     const storedRecipes = await storage.getRecipes();
 
     const storedRecipesPrompt = storedRecipes.length > 0
@@ -65,7 +63,7 @@ ${storedRecipes.map(recipe => `
       ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.`
       : '';
 
-    const prompt = `Given the following macro nutrient targets remaining for the day:
+    const prompt = `You are a nutrition expert. Given the following macro nutrient targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
@@ -82,7 +80,7 @@ Please suggest ${mealTypes.length} meal(s) that will help meet these targets. Fo
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
 
-You must respond with ONLY a valid JSON object in this exact structure, without any additional text or explanation:
+You must respond with ONLY a valid JSON object in this exact structure:
 {
   "meals": [
     {
@@ -96,9 +94,9 @@ You must respond with ONLY a valid JSON object in this exact structure, without 
       "isStoredRecipe": boolean
     }
   ]
-}
+}`;
 
-Make sure the total macros across all meals sum up approximately to the target amounts.`;
+    console.log("Sending prompt to OpenAI:", prompt);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -111,7 +109,11 @@ Make sure the total macros across all meals sum up approximately to the target a
       throw new Error("Failed to generate meal suggestions");
     }
 
-    return JSON.parse(content);
+    console.log("OpenAI response:", content);
+    const parsedContent = JSON.parse(content);
+    console.log("Parsed OpenAI response:", parsedContent);
+
+    return parsedContent;
   } catch (error: any) {
     if (error?.status === 429) {
       throw new Error("OpenAI API rate limit exceeded. Please try again in a few minutes.");

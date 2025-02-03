@@ -55,11 +55,20 @@ export default function Home() {
     },
     onSuccess: (data) => {
       console.log("Setting suggestions:", data);
-      setSuggestions(data.suggestions);
-      toast({
-        title: "Success!",
-        description: "Here are your meal suggestions"
-      });
+      if (data && data.suggestions && data.suggestions.meals) {
+        setSuggestions(data.suggestions);
+        toast({
+          title: "Success!",
+          description: "Here are your meal suggestions"
+        });
+      } else {
+        console.error("Invalid response format:", data);
+        toast({
+          title: "Error",
+          description: "Received invalid meal suggestions format",
+          variant: "destructive"
+        });
+      }
     },
     onError: (error) => {
       console.error("Mutation error:", error);
@@ -77,6 +86,20 @@ export default function Home() {
       });
     }
   });
+
+  const onSubmit = (data: MacroInput) => {
+    console.log("Form submitted with data:", data);
+    // Ensure we have at least one meal type selected
+    if (!data.mealTypes || data.mealTypes.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one meal type",
+        variant: "destructive"
+      });
+      return;
+    }
+    mutation.mutate(data);
+  };
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -96,10 +119,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => {
-                console.log("Form submitted with data:", data);
-                mutation.mutate(data);
-              })} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -254,9 +274,9 @@ export default function Home() {
           </div>
         )}
 
-        {suggestions && (
+        {suggestions && suggestions.meals && (
           <div className="space-y-4">
-            {suggestions.meals?.map((meal: any, index: number) => (
+            {suggestions.meals.map((meal: any, index: number) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle>{meal.name}</CardTitle>
