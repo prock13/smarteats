@@ -3,10 +3,18 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
+import { setupAuth } from "./auth";
 
 export function registerRoutes(app: Express): Server {
+  // Set up authentication routes and middleware
+  setupAuth(app);
+
   app.post("/api/meal-suggestions", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       console.log("Received meal suggestions request:", JSON.stringify(req.body, null, 2));
 
       const input = macroInputSchema.parse(req.body);
@@ -44,6 +52,10 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/meal-plans", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const startDate = new Date(req.query.startDate as string);
       const endDate = new Date(req.query.endDate as string);
 
@@ -61,6 +73,10 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/meal-plans", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const plan = mealPlanSchema.parse(req.body);
       const saved = await storage.saveMealPlan(plan);
       res.json(saved);
@@ -72,6 +88,10 @@ export function registerRoutes(app: Express): Server {
 
   app.delete("/api/meal-plans/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         throw new Error("Invalid meal plan ID");
@@ -87,6 +107,10 @@ export function registerRoutes(app: Express): Server {
   // Recipe routes
   app.get("/api/recipes", async (_req, res) => {
     try {
+      if (!_req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const recipes = await storage.getRecipes();
       res.json(recipes);
     } catch (error) {
@@ -97,6 +121,10 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/recipes/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         throw new Error("Invalid recipe ID");
@@ -115,6 +143,10 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/recipes", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const recipe = insertRecipeSchema.parse(req.body);
       const saved = await storage.saveRecipe(recipe);
       res.json(saved);
@@ -126,6 +158,10 @@ export function registerRoutes(app: Express): Server {
 
   app.delete("/api/recipes/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         throw new Error("Invalid recipe ID");

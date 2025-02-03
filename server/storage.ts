@@ -1,20 +1,62 @@
-import { meals, recipes, mealSuggestions, mealPlans, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type InsertMealPlan, type Recipe, type InsertRecipe } from "@shared/schema";
+import { users, meals, recipes, mealSuggestions, mealPlans, type User, type InsertUser, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type InsertMealPlan, type Recipe, type InsertRecipe } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+
+  // Meal suggestion operations
   getMealSuggestions(input: MacroInput): Promise<MealSuggestion | undefined>;
   saveMealSuggestions(input: MacroInput, suggestions: any): Promise<MealSuggestion>;
+
+  // Meal plan operations
   getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]>;
   saveMealPlan(plan: InsertMealPlan): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
+
+  // Recipe operations
   getRecipes(): Promise<Recipe[]>;
   getRecipeById(id: number): Promise<Recipe | undefined>;
   saveRecipe(recipe: InsertRecipe): Promise<Recipe>;
   deleteRecipe(id: number): Promise<void>;
+
+  // Session store
+  sessionStore: session.Store;
 }
 
 export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
+    });
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [created] = await db.insert(users).values(user).returning();
+    return created;
+  }
+
   private createKey(input: MacroInput): string {
     return `${input.targetCarbs}-${input.targetProtein}-${input.targetFats}-${input.mealTypes.join(',')}-${input.dietaryPreference}`;
   }

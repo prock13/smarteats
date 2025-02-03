@@ -2,6 +2,13 @@ import { pgTable, text, serial, integer, jsonb, timestamp } from "drizzle-orm/pg
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const meals = pgTable("meals", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -9,6 +16,7 @@ export const meals = pgTable("meals", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   description: text("description").notNull(),
+  userId: integer("user_id").references(() => users.id),
 });
 
 export const recipes = pgTable("recipes", {
@@ -20,6 +28,7 @@ export const recipes = pgTable("recipes", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  userId: integer("user_id").references(() => users.id),
 });
 
 export const mealSuggestions = pgTable("meal_suggestions", {
@@ -29,6 +38,7 @@ export const mealSuggestions = pgTable("meal_suggestions", {
   targetProtein: integer("target_protein").notNull(),
   targetFats: integer("target_fats").notNull(),
   mealCount: integer("meal_count").notNull(),
+  userId: integer("user_id").references(() => users.id),
 });
 
 export const mealPlans = pgTable("meal_plans", {
@@ -36,6 +46,7 @@ export const mealPlans = pgTable("meal_plans", {
   date: timestamp("date").notNull(),
   meal: jsonb("meal").notNull(),
   mealType: text("meal_type").notNull(),
+  userId: integer("user_id").references(() => users.id),
 });
 
 export const dietaryPreferenceEnum = z.enum([
@@ -86,6 +97,12 @@ export const mealPlanSchema = z.object({
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
 });
 
+// User related schemas
+export const insertUserSchema = createInsertSchema(users).extend({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+});
+
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;
@@ -95,3 +112,5 @@ export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof mealPlanSchema>;
 export type DietaryPreference = z.infer<typeof dietaryPreferenceEnum>;
 export type MealType = z.infer<typeof mealTypeEnum>;
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
