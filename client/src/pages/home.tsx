@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { DietaryPreference } from "@shared/schema";
+import type { DietaryPreference, MealType } from "@shared/schema";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Home() {
   const { toast } = useToast();
@@ -31,15 +32,25 @@ export default function Home() {
       targetCarbs: 0,
       targetProtein: 0,
       targetFats: 0,
-      mealCount: 1,
+      mealTypes: [],
       dietaryPreference: "none",
       recipeLimit: undefined
     }
   });
 
+  const mealTypeOptions: { label: string; value: MealType }[] = [
+    { label: "Breakfast", value: "breakfast" },
+    { label: "Lunch", value: "lunch" },
+    { label: "Dinner", value: "dinner" },
+    { label: "Snack", value: "snack" },
+  ];
+
   const mutation = useMutation({
     mutationFn: async (data: MacroInput) => {
-      const res = await apiRequest("POST", "/api/meal-suggestions", data);
+      const res = await apiRequest("POST", "/api/meal-suggestions", {
+        ...data,
+        mealCount: data.mealTypes.length
+      });
       return res.json();
     },
     onSuccess: (data) => {
@@ -123,13 +134,45 @@ export default function Home() {
                   />
                   <FormField
                     control={form.control}
-                    name="mealCount"
-                    render={({ field }) => (
+                    name="mealTypes"
+                    render={() => (
                       <FormItem>
-                        <FormLabel>Number of Meals</FormLabel>
-                        <FormControl>
-                          <AutoSelectInput type="number" min="1" max="10" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                        </FormControl>
+                        <FormLabel>Meal Types</FormLabel>
+                        <div className="grid grid-cols-2 gap-2">
+                          {mealTypeOptions.map((option) => (
+                            <FormField
+                              key={option.value}
+                              control={form.control}
+                              name="mealTypes"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={option.value}
+                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                  >
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value?.includes(option.value)}
+                                        onCheckedChange={(checked) => {
+                                          return checked
+                                            ? field.onChange([...field.value, option.value])
+                                            : field.onChange(
+                                                field.value?.filter(
+                                                  (value) => value !== option.value
+                                                )
+                                              );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {option.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
                       </FormItem>
                     )}
                   />

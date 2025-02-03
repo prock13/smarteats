@@ -51,13 +51,16 @@ export const dietaryPreferenceEnum = z.enum([
   "kosher"
 ]);
 
+export const mealTypeEnum = z.enum(["breakfast", "lunch", "dinner", "snack"]);
+
 export const macroInputSchema = z.object({
   targetCarbs: z.number().min(0).max(1000),
   targetProtein: z.number().min(0).max(1000),
   targetFats: z.number().min(0).max(1000),
   mealCount: z.number().min(1).max(10),
   dietaryPreference: dietaryPreferenceEnum.default("none"),
-  recipeLimit: z.number().min(1).max(20).optional()
+  recipeLimit: z.number().min(1).max(20).optional(),
+  mealTypes: z.array(mealTypeEnum).min(1, "Select at least one meal type")
 });
 
 export const insertRecipeSchema = z.object({
@@ -91,3 +94,4 @@ export type MealSuggestion = typeof mealSuggestions.$inferSelect;
 export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof mealPlanSchema>;
 export type DietaryPreference = z.infer<typeof dietaryPreferenceEnum>;
+export type MealType = z.infer<typeof mealTypeEnum>;
