@@ -3,12 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
-import { ZodError } from "zod";
 
 export function registerRoutes(app: Express): Server {
   app.post("/api/meal-suggestions", async (req, res) => {
     try {
       console.log("Received meal suggestions request:", JSON.stringify(req.body, null, 2));
+
       const input = macroInputSchema.parse(req.body);
       console.log("Parsed input:", JSON.stringify(input, null, 2));
 
@@ -19,8 +19,7 @@ export function registerRoutes(app: Express): Server {
         return res.json(cached);
       }
 
-      // Generate new suggestions
-      console.log("Generating new suggestions");
+      console.log("Generating new suggestions via OpenAI");
       const suggestions = await generateMealSuggestions(
         input.targetCarbs,
         input.targetProtein,
@@ -30,7 +29,7 @@ export function registerRoutes(app: Express): Server {
         input.recipeLimit
       );
 
-      console.log("Generated suggestions:", JSON.stringify(suggestions, null, 2));
+      console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
 
       // Cache and return results
       const saved = await storage.saveMealSuggestions(input, suggestions);

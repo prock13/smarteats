@@ -34,7 +34,8 @@ export default function Home() {
       targetFats: 0,
       mealTypes: [],
       dietaryPreference: "none",
-      recipeLimit: undefined
+      recipeLimit: undefined,
+      mealCount: 1
     }
   });
 
@@ -47,28 +48,40 @@ export default function Home() {
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput) => {
-      console.log("Submitting data:", data);
+      console.log("Submitting data:", JSON.stringify(data, null, 2));
       const res = await apiRequest("POST", "/api/meal-suggestions", data);
       const jsonResponse = await res.json();
-      console.log("Received response:", jsonResponse);
+      console.log("Received API response:", JSON.stringify(jsonResponse, null, 2));
       return jsonResponse;
     },
     onSuccess: (data) => {
-      console.log("Setting suggestions:", data);
-      if (data && data.suggestions && data.suggestions.meals) {
-        setSuggestions(data.suggestions);
-        toast({
-          title: "Success!",
-          description: "Here are your meal suggestions"
-        });
-      } else {
-        console.error("Invalid response format:", data);
+      console.log("Processing success response:", JSON.stringify(data, null, 2));
+      if (!data) {
+        console.error("No data received");
         toast({
           title: "Error",
-          description: "Received invalid meal suggestions format",
+          description: "No response data received",
           variant: "destructive"
         });
+        return;
       }
+
+      if (!data.suggestions) {
+        console.error("No suggestions in response:", data);
+        toast({
+          title: "Error",
+          description: "No meal suggestions received",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log("Setting suggestions state:", JSON.stringify(data.suggestions, null, 2));
+      setSuggestions(data.suggestions);
+      toast({
+        title: "Success!",
+        description: "Here are your meal suggestions"
+      });
     },
     onError: (error) => {
       console.error("Mutation error:", error);
@@ -88,8 +101,7 @@ export default function Home() {
   });
 
   const onSubmit = (data: MacroInput) => {
-    console.log("Form submitted with data:", data);
-    // Ensure we have at least one meal type selected
+    console.log("Form submitted with data:", JSON.stringify(data, null, 2));
     if (!data.mealTypes || data.mealTypes.length === 0) {
       toast({
         title: "Error",
@@ -98,6 +110,7 @@ export default function Home() {
       });
       return;
     }
+    data.mealCount = data.mealTypes.length;
     mutation.mutate(data);
   };
 
@@ -241,17 +254,17 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>Maximum Recipe Suggestions (Optional)</FormLabel>
                         <FormControl>
-                          <AutoSelectInput 
-                            type="number" 
-                            min="1" 
-                            max="20" 
+                          <AutoSelectInput
+                            type="number"
+                            min="1"
+                            max="20"
                             placeholder="Unlimited"
-                            {...field} 
-                            value={field.value ?? ''} 
+                            {...field}
+                            value={field.value ?? ''}
                             onChange={e => {
                               const val = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(val);
-                            }} 
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -274,7 +287,7 @@ export default function Home() {
           </div>
         )}
 
-        {suggestions && suggestions.meals && (
+        {suggestions && suggestions.meals && suggestions.meals.length > 0 ? (
           <div className="space-y-4">
             {suggestions.meals.map((meal: any, index: number) => (
               <Card key={index}>
@@ -291,24 +304,39 @@ export default function Home() {
                       <span>Carbs</span>
                       <span>{meal.macros.carbs}g</span>
                     </div>
-                    <Progress value={(meal.macros.carbs / form.getValues("targetCarbs")) * 100} className="bg-blue-200" />
+                    <Progress
+                      value={form.getValues("targetCarbs") > 0 ? (meal.macros.carbs / form.getValues("targetCarbs")) * 100 : 0}
+                      className="bg-blue-200"
+                    />
 
                     <div className="flex items-center justify-between">
                       <span>Protein</span>
                       <span>{meal.macros.protein}g</span>
                     </div>
-                    <Progress value={(meal.macros.protein / form.getValues("targetProtein")) * 100} className="bg-red-200" />
+                    <Progress
+                      value={form.getValues("targetProtein") > 0 ? (meal.macros.protein / form.getValues("targetProtein")) * 100 : 0}
+                      className="bg-red-200"
+                    />
 
                     <div className="flex items-center justify-between">
                       <span>Fats</span>
                       <span>{meal.macros.fats}g</span>
                     </div>
-                    <Progress value={(meal.macros.fats / form.getValues("targetFats")) * 100} className="bg-yellow-200" />
+                    <Progress
+                      value={form.getValues("targetFats") > 0 ? (meal.macros.fats / form.getValues("targetFats")) * 100 : 0}
+                      className="bg-yellow-200"
+                    />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+        ) : (
+          mutation.isPending ? (
+            <div className="text-center text-muted-foreground">
+              Generating meal suggestions...
+            </div>
+          ) : null
         )}
       </div>
     </div>
