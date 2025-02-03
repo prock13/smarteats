@@ -53,7 +53,16 @@ export default function Home() {
   const mutation = useMutation({
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
       console.log("Submitting data:", JSON.stringify(data, null, 2));
-      const res = await apiRequest("POST", "/api/meal-suggestions", data);
+
+      // If appendResults is true, include the names of existing recipes to exclude
+      const requestData = {
+        ...data,
+        excludeRecipes: data.appendResults && suggestions?.meals
+          ? suggestions.meals.map((meal: any) => meal.name)
+          : []
+      };
+
+      const res = await apiRequest("POST", "/api/meal-suggestions", requestData);
       const jsonResponse = await res.json();
       console.log("Received API response:", JSON.stringify(jsonResponse, null, 2));
       return { response: jsonResponse, appendResults: data.appendResults };

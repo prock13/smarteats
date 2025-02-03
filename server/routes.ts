@@ -20,11 +20,17 @@ export function registerRoutes(app: Express): Server {
       const input = macroInputSchema.parse(req.body);
       console.log("Parsed input:", JSON.stringify(input, null, 2));
 
-      // Check cache first
-      const cached = await storage.getMealSuggestions(input);
-      if (cached) {
-        console.log("Returning cached suggestions:", JSON.stringify(cached, null, 2));
-        return res.json(cached);
+      // Skip cache if we're requesting more recipes
+      const skipCache = req.body.appendResults === true;
+      const excludeRecipes = req.body.excludeRecipes || [];
+
+      if (!skipCache) {
+        // Check cache first
+        const cached = await storage.getMealSuggestions(input);
+        if (cached) {
+          console.log("Returning cached suggestions:", JSON.stringify(cached, null, 2));
+          return res.json(cached);
+        }
       }
 
       console.log("Generating new suggestions via OpenAI");
@@ -34,15 +40,21 @@ export function registerRoutes(app: Express): Server {
         input.targetFats,
         input.mealTypes,
         input.dietaryPreference,
-        input.recipeLimit
+        input.recipeLimit,
+        excludeRecipes
       );
 
       console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
 
-      // Cache and return results
-      const saved = await storage.saveMealSuggestions(input, suggestions);
-      console.log("Saved and returning suggestions:", JSON.stringify(saved, null, 2));
-      res.json(saved);
+      // Cache only if not requesting more recipes
+      if (!skipCache) {
+        // Cache and return results
+        const saved = await storage.saveMealSuggestions(input, suggestions);
+        console.log("Saved and returning suggestions:", JSON.stringify(saved, null, 2));
+        res.json(saved);
+      } else {
+        res.json({ suggestions });
+      }
     } catch (error) {
       console.error("Error in meal suggestions:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";

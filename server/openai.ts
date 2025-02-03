@@ -36,19 +36,29 @@ export async function generateMealSuggestions(
   mealTypes: string[],
   dietaryPreference: string = "none",
   recipeLimit?: number,
+  excludeRecipes: string[] = [],
 ) {
   try {
     checkRateLimit();
 
     const storedRecipes = await storage.getRecipes();
 
-    const storedRecipesPrompt = storedRecipes.length > 0
+    // Filter out recipes that should be excluded
+    const availableStoredRecipes = storedRecipes.filter(
+      recipe => !excludeRecipes.includes(recipe.name)
+    );
+
+    const storedRecipesPrompt = availableStoredRecipes.length > 0
       ? `Here are some stored recipes that you can consider along with suggesting new recipes:
-${storedRecipes.map(recipe => `
+${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
 `).join('\n')}`
+      : '';
+
+    const excludeRecipesPrompt = excludeRecipes.length > 0
+      ? `\nPlease do NOT suggest any of these previously suggested recipes: ${excludeRecipes.join(', ')}`
       : '';
 
     const dietaryRestrictionPrompt = dietaryPreference !== "none"
@@ -70,6 +80,7 @@ ${storedRecipes.map(recipe => `
 ${dietaryRestrictionPrompt}
 ${mealTypesPrompt}
 ${recipeLimitPrompt}
+${excludeRecipesPrompt}
 
 ${storedRecipesPrompt}
 
