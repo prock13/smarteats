@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, jsonb, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -30,6 +30,13 @@ export const recipes = pgTable("recipes", {
   dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   userId: integer("user_id").references(() => users.id),
+});
+
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  recipeId: integer("recipe_id").notNull().references(() => recipes.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const mealSuggestions = pgTable("meal_suggestions", {
@@ -99,11 +106,12 @@ export const mealPlanSchema = z.object({
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
 });
 
-// User related schemas
 export const insertUserSchema = createInsertSchema(users).extend({
   password: z.string().min(6, "Password must be at least 6 characters"),
   username: z.string().min(3, "Username must be at least 3 characters"),
 });
+
+export const insertFavoriteSchema = createInsertSchema(favorites);
 
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
@@ -115,3 +123,5 @@ export type DietaryPreference = z.infer<typeof dietaryPreferenceEnum>;
 export type MealType = z.infer<typeof mealTypeEnum>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;

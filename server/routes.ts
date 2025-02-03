@@ -192,6 +192,83 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Add favorite routes
+  app.get("/api/favorites", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const recipes = await storage.getFavorites(req.user!.id);
+      res.json(recipes);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.post("/api/favorites/:recipeId", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const recipeId = parseInt(req.params.recipeId);
+      if (isNaN(recipeId)) {
+        throw new Error("Invalid recipe ID");
+      }
+
+      const recipe = await storage.getRecipeById(recipeId);
+      if (!recipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+
+      const favorite = await storage.addFavorite(req.user!.id, recipeId);
+      res.json(favorite);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.delete("/api/favorites/:recipeId", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const recipeId = parseInt(req.params.recipeId);
+      if (isNaN(recipeId)) {
+        throw new Error("Invalid recipe ID");
+      }
+
+      await storage.removeFavorite(req.user!.id, recipeId);
+      res.status(204).send();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.get("/api/favorites/:recipeId", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const recipeId = parseInt(req.params.recipeId);
+      if (isNaN(recipeId)) {
+        throw new Error("Invalid recipe ID");
+      }
+
+      const isFavorite = await storage.isFavorite(req.user!.id, recipeId);
+      res.json({ isFavorite });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
