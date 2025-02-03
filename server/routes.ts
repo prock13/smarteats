@@ -21,10 +21,9 @@ export function registerRoutes(app: Express): Server {
         input.targetCarbs,
         input.targetProtein,
         input.targetFats,
-        input.mealCount,
+        input.mealTypes,
         input.dietaryPreference,
-        input.recipeLimit,
-        input.mealTypes
+        input.recipeLimit
       );
 
       // Cache and return results

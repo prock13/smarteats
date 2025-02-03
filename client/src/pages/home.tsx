@@ -6,7 +6,7 @@ import { macroInputSchema, type MacroInput } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,10 +47,7 @@ export default function Home() {
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput) => {
-      const res = await apiRequest("POST", "/api/meal-suggestions", {
-        ...data,
-        mealCount: data.mealTypes.length
-      });
+      const res = await apiRequest("POST", "/api/meal-suggestions", data);
       return res.json();
     },
     onSuccess: (data) => {
@@ -105,6 +102,7 @@ export default function Home() {
                         <FormControl>
                           <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -117,6 +115,7 @@ export default function Home() {
                         <FormControl>
                           <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -129,6 +128,7 @@ export default function Home() {
                         <FormControl>
                           <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -173,6 +173,7 @@ export default function Home() {
                             />
                           ))}
                         </div>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -201,6 +202,7 @@ export default function Home() {
                             <SelectItem value="kosher">Kosher</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -224,6 +226,7 @@ export default function Home() {
                             }} 
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

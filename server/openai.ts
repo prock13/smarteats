@@ -33,10 +33,9 @@ export async function generateMealSuggestions(
   carbs: number,
   protein: number,
   fats: number,
-  mealCount: number,
+  mealTypes: string[],
   dietaryPreference: string = "none",
   recipeLimit?: number,
-  mealTypes: string[] = []
 ) {
   try {
     // Check rate limit before making the request
@@ -76,7 +75,7 @@ ${recipeLimitPrompt}
 
 ${storedRecipesPrompt}
 
-Please suggest ${mealCount} meal(s) that will help meet these targets. For your suggestions:
+Please suggest ${mealTypes.length} meal(s) that will help meet these targets. For your suggestions:
 1. Include a mix of both stored recipes and new creative meal ideas
 2. Aim to include at least one stored recipe if it reasonably fits the macro requirements
 3. Always suggest new creative meals even if there are perfect matches in stored recipes
@@ -104,6 +103,7 @@ Make sure the total macros across all meals sum up approximately to the target a
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
     });
 
     const content = response.choices[0].message.content;
