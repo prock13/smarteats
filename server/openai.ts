@@ -42,7 +42,7 @@ export async function generateMealSuggestions(
 - Protein: ${protein}g
 - Fats: ${fats}g
 
-Please suggest ${mealCount} meal(s) that will help meet these targets. Format the response as a JSON object with this structure:
+Please suggest ${mealCount} meal(s) that will help meet these targets. You must respond with ONLY a valid JSON object in this exact structure:
 {
   "meals": [
     {
@@ -57,12 +57,11 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. Format th
   ]
 }
 
-Make sure the total macros across all meals sum up approximately to the target amounts.`;
+Make sure the total macros across all meals sum up approximately to the target amounts. Do not include any explanation or additional text outside the JSON object.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
     });
 
     const content = response.choices[0].message.content;
