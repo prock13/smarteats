@@ -41,5 +41,10 @@ Make sure the total macros across all meals sum up approximately to the target a
     response_format: { type: "json_object" }
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  const content = response.choices[0].message.content;
+  if (!content) {
+    throw new Error("Failed to generate meal suggestions");
+  }
+
+  return JSON.parse(content);
 }
