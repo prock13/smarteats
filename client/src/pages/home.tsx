@@ -21,11 +21,14 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, PlusCircle } from "lucide-react";
+import { Loader2 } from 'lucide-react';
+
 
 export default function Home() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
+  const [showingMore, setShowingMore] = useState(false);
 
   const form = useForm<MacroInput>({
     resolver: zodResolver(macroInputSchema),
@@ -48,16 +51,18 @@ export default function Home() {
   ];
 
   const mutation = useMutation({
-    mutationFn: async (data: MacroInput) => {
+    mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
       console.log("Submitting data:", JSON.stringify(data, null, 2));
       const res = await apiRequest("POST", "/api/meal-suggestions", data);
       const jsonResponse = await res.json();
       console.log("Received API response:", JSON.stringify(jsonResponse, null, 2));
-      return jsonResponse;
+      return { response: jsonResponse, appendResults: data.appendResults };
     },
     onSuccess: (data) => {
       console.log("Processing success response:", JSON.stringify(data, null, 2));
-      if (!data) {
+      const { response, appendResults } = data;
+
+      if (!response) {
         console.error("No data received");
         toast({
           title: "Error",
@@ -67,8 +72,8 @@ export default function Home() {
         return;
       }
 
-      if (!data.suggestions) {
-        console.error("No suggestions in response:", data);
+      if (!response.suggestions) {
+        console.error("No suggestions in response:", response);
         toast({
           title: "Error",
           description: "No meal suggestions received",
@@ -77,15 +82,25 @@ export default function Home() {
         return;
       }
 
-      console.log("Setting suggestions state:", JSON.stringify(data.suggestions, null, 2));
-      setSuggestions(data.suggestions);
+      console.log("Setting suggestions state:", JSON.stringify(response.suggestions, null, 2));
+      if (appendResults && suggestions?.meals) {
+        setSuggestions({
+          ...response.suggestions,
+          meals: [...suggestions.meals, ...response.suggestions.meals]
+        });
+      } else {
+        setSuggestions(response.suggestions);
+      }
+
+      setShowingMore(false);
       toast({
         title: "Success!",
-        description: "Here are your meal suggestions"
+        description: appendResults ? "More meal suggestions added" : "Here are your meal suggestions"
       });
     },
     onError: (error) => {
       console.error("Mutation error:", error);
+      setShowingMore(false);
       let description = error.message;
       if (description.includes("Rate limit exceeded")) {
         const waitTime = description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
@@ -143,6 +158,12 @@ export default function Home() {
     }
     data.mealCount = data.mealTypes.length;
     mutation.mutate(data);
+  };
+
+  const handleShowMore = () => {
+    setShowingMore(true);
+    const currentData = form.getValues();
+    mutation.mutate({ ...currentData, appendResults: true });
   };
 
   return (
@@ -393,6 +414,29 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+
+            {/* Add Show More button */}
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleShowMore}
+                disabled={mutation.isPending || showingMore}
+                className="w-full max-w-[200px]"
+              >
+                {showingMore ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading more...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Show More Options
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         ) : (
           mutation.isPending ? (
