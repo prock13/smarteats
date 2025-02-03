@@ -1,4 +1,4 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,56 +9,117 @@ import Home from "@/pages/home";
 import Calendar from "@/pages/calendar";
 import Recipes from "@/pages/recipes";
 import Favorites from "@/pages/favorites";
+import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  Avatar,
+  Box,
+  Container,
+  useTheme
+} from '@mui/material';
+import { 
+  CalendarMonth, 
+  Restaurant, 
+  Favorite,
+  AccountCircle
+} from '@mui/icons-material';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 
 function Navigation() {
   const { user, logoutMutation } = useAuth();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [, setLocation] = useLocation();
+  const theme = useTheme();
 
   if (!user) return null;
 
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigate = (path: string) => {
+    setLocation(path);
+    handleClose();
+  };
+
   return (
-    <nav className="border-b bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex space-x-8">
-              <Link href="/">
-                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
-                  Meal Planner
-                </span>
-              </Link>
-              <Link href="/calendar">
-                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
-                  Calendar
-                </span>
-              </Link>
-              <Link href="/recipes">
-                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
-                  Recipes
-                </span>
-              </Link>
-              <Link href="/favorites">
-                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
-                  Favorites
-                </span>
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center">
+    <AppBar position="static" color="default" elevation={1}>
+      <Container maxWidth="lg">
+        <Toolbar>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            onClick={() => setLocation('/')}
+          >
+            Meal Planner
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button
-              variant="ghost"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
+              color="inherit"
+              startIcon={<CalendarMonth />}
+              onClick={() => setLocation('/calendar')}
             >
-              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+              Calendar
             </Button>
-          </div>
-        </div>
-      </div>
-    </nav>
+            <Button
+              color="inherit"
+              startIcon={<Restaurant />}
+              onClick={() => setLocation('/recipes')}
+            >
+              Recipes
+            </Button>
+            <Button
+              color="inherit"
+              startIcon={<Favorite />}
+              onClick={() => setLocation('/favorites')}
+            >
+              Favorites
+            </Button>
+
+            <IconButton
+              size="large"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={() => handleNavigate('/profile')}>Profile</MenuItem>
+              <MenuItem onClick={() => logoutMutation.mutate()}>
+                {logoutMutation.isPending ? "Logging out..." : "Logout"}
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 }
 
@@ -67,6 +128,7 @@ function Router() {
     <Switch>
       <Route path="/auth" component={Auth} />
       <ProtectedRoute path="/" component={Home} />
+      <ProtectedRoute path="/planner" component={Planner} />
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/recipes" component={Recipes} />
       <ProtectedRoute path="/favorites" component={Favorites} />
@@ -79,10 +141,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="min-h-screen bg-background">
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
           <Navigation />
-          <Router />
-        </div>
+          <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Router />
+          </Container>
+        </Box>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
