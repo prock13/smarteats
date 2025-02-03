@@ -80,7 +80,7 @@ Please suggest ${mealTypes.length} meal(s) that will help meet these targets. Fo
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
 
-You must respond with ONLY a valid JSON object in this exact structure:
+IMPORTANT: You must respond with ONLY a JSON object, no other text. The response must strictly follow this structure:
 {
   "meals": [
     {
@@ -100,8 +100,17 @@ You must respond with ONLY a valid JSON object in this exact structure:
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
     });
 
     const content = response.choices[0].message.content;
@@ -110,10 +119,21 @@ You must respond with ONLY a valid JSON object in this exact structure:
     }
 
     console.log("OpenAI response:", content);
-    const parsedContent = JSON.parse(content);
-    console.log("Parsed OpenAI response:", parsedContent);
 
-    return parsedContent;
+    try {
+      const parsedContent = JSON.parse(content);
+      console.log("Parsed OpenAI response:", parsedContent);
+
+      // Validate the response structure
+      if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
+        throw new Error("Invalid response format: missing or invalid meals array");
+      }
+
+      return parsedContent;
+    } catch (parseError) {
+      console.error("Failed to parse OpenAI response:", parseError);
+      throw new Error("Failed to parse meal suggestions");
+    }
   } catch (error: any) {
     if (error?.status === 429) {
       throw new Error("OpenAI API rate limit exceeded. Please try again in a few minutes.");
