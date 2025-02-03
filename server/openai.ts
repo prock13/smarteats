@@ -6,7 +6,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+// the newest OpenAI model is "gpt-3.5-turbo" which is a fast and cheap model
 export async function generateMealSuggestions(
   carbs: number,
   protein: number,
@@ -36,7 +36,7 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. Format th
 Make sure the total macros across all meals sum up approximately to the target amounts.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" }
   });
