@@ -2,11 +2,24 @@ import { useQuery } from "@tanstack/react-query";
 import type { Recipe } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 export default function Favorites() {
-  const { data: favorites, isLoading } = useQuery({
+  const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
     queryKey: ['/api/favorites'],
   });
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center text-destructive">
+            Error loading favorites: {error.message}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -22,8 +35,10 @@ export default function Favorites() {
 
         <div className="space-y-4">
           {isLoading ? (
-            <div>Loading favorite recipes...</div>
-          ) : favorites?.length > 0 ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : favorites && favorites.length > 0 ? (
             favorites.map((recipe: Recipe) => (
               <Card key={recipe.id}>
                 <CardHeader>
@@ -32,7 +47,7 @@ export default function Favorites() {
                 <CardContent>
                   <p className="mb-4 text-muted-foreground">{recipe.description}</p>
                   <p className="mb-4">{recipe.instructions}</p>
-                  
+
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Carbs:</span>{" "}
@@ -47,7 +62,7 @@ export default function Favorites() {
                       {recipe.fats}g
                     </div>
                   </div>
-                  
+
                   {recipe.dietaryRestriction !== "none" && (
                     <Badge className="mt-4" variant="secondary">
                       {recipe.dietaryRestriction}

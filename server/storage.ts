@@ -163,26 +163,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFavorites(userId: number): Promise<Recipe[]> {
+    console.log("Getting favorites for user:", userId);
     const result = await db
       .select({
-        recipe: recipes
+        id: recipes.id,
+        name: recipes.name,
+        description: recipes.description,
+        instructions: recipes.instructions,
+        carbs: recipes.carbs,
+        protein: recipes.protein,
+        fats: recipes.fats,
+        dietaryRestriction: recipes.dietaryRestriction,
+        createdAt: recipes.createdAt,
+        userId: recipes.userId
       })
       .from(favorites)
       .innerJoin(recipes, eq(favorites.recipeId, recipes.id))
       .where(eq(favorites.userId, userId));
 
-    return result.map(r => r.recipe);
+    console.log("Found favorites:", result);
+    return result;
   }
 
   async addFavorite(userId: number, recipeId: number): Promise<Favorite> {
+    console.log("Adding favorite for user:", userId, "recipe:", recipeId);
     const [favorite] = await db
       .insert(favorites)
       .values({ userId, recipeId })
       .returning();
+    console.log("Added favorite:", favorite);
     return favorite;
   }
 
   async removeFavorite(userId: number, recipeId: number): Promise<void> {
+    console.log("Removing favorite for user:", userId, "recipe:", recipeId);
     await db
       .delete(favorites)
       .where(

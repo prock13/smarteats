@@ -199,9 +199,12 @@ export function registerRoutes(app: Express): Server {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
+      console.log("Getting favorites for user:", req.user!.id);
       const recipes = await storage.getFavorites(req.user!.id);
+      console.log("Retrieved favorites:", recipes);
       res.json(recipes);
     } catch (error) {
+      console.error("Error getting favorites:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
@@ -218,14 +221,17 @@ export function registerRoutes(app: Express): Server {
         throw new Error("Invalid recipe ID");
       }
 
+      console.log("Adding favorite - User:", req.user!.id, "Recipe:", recipeId);
       const recipe = await storage.getRecipeById(recipeId);
       if (!recipe) {
         return res.status(404).json({ message: "Recipe not found" });
       }
 
       const favorite = await storage.addFavorite(req.user!.id, recipeId);
+      console.log("Added favorite:", favorite);
       res.json(favorite);
     } catch (error) {
+      console.error("Error adding favorite:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
@@ -242,9 +248,12 @@ export function registerRoutes(app: Express): Server {
         throw new Error("Invalid recipe ID");
       }
 
+      console.log("Removing favorite - User:", req.user!.id, "Recipe:", recipeId); // Added logging
       await storage.removeFavorite(req.user!.id, recipeId);
+      console.log("Removed favorite"); // Added logging
       res.status(204).send();
     } catch (error) {
+      console.error("Error removing favorite:", error); // Modified logging message
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
