@@ -140,6 +140,14 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
         throw new Error("Invalid response format: missing or invalid meals array");
       }
 
+      // Verify isStoredRecipe flag against actual stored recipes
+      parsedContent.meals = parsedContent.meals.map(meal => ({
+        ...meal,
+        isStoredRecipe: availableStoredRecipes.some(
+          recipe => recipe.name.toLowerCase() === meal.name.toLowerCase()
+        )
+      }));
+
       return parsedContent;
     } catch (parseError) {
       console.error("Failed to parse OpenAI response:", parseError);
