@@ -40,8 +40,11 @@ export default function Home() {
     },
     onError: (error) => {
       let description = error.message;
-      if (description.includes("rate limit")) {
-        description = "You've hit the API rate limit. Please wait a few minutes before trying again.";
+      if (description.includes("Rate limit exceeded")) {
+        const waitTime = description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
+        description = `You've made too many requests. Please wait ${waitTime} before trying again.`;
+      } else if (description.includes("OpenAI API rate limit")) {
+        description = "OpenAI's rate limit has been reached. Please try again in a few minutes.";
       }
       toast({
         title: "Error",

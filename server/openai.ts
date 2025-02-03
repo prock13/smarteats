@@ -6,6 +6,27 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Simple rate limiting mechanism
+const requestTimestamps: number[] = [];
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 3; // Maximum 3 requests per minute
+
+function checkRateLimit() {
+  const now = Date.now();
+  // Remove timestamps older than our window
+  while (requestTimestamps.length > 0 && requestTimestamps[0] < now - RATE_LIMIT_WINDOW) {
+    requestTimestamps.shift();
+  }
+
+  if (requestTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    const oldestRequest = requestTimestamps[0];
+    const timeToWait = Math.ceil((oldestRequest + RATE_LIMIT_WINDOW - now) / 1000);
+    throw new Error(`Rate limit exceeded. Please wait ${timeToWait} seconds before trying again.`);
+  }
+
+  requestTimestamps.push(now);
+}
+
 // the newest OpenAI model is "gpt-3.5-turbo" which is a fast and cheap model
 export async function generateMealSuggestions(
   carbs: number,
@@ -14,6 +35,9 @@ export async function generateMealSuggestions(
   mealCount: number
 ) {
   try {
+    // Check rate limit before making the request
+    checkRateLimit();
+
     const prompt = `Given the following macro nutrient targets remaining for the day:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
