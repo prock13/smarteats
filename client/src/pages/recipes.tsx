@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2 } from "lucide-react";
 import { AutoSelectInput } from "@/components/ui/auto-select-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {Badge} from "@/components/ui/badge";
 
 export default function Recipes() {
   const { toast } = useToast();
@@ -30,6 +32,7 @@ export default function Recipes() {
       carbs: 0,
       protein: 0,
       fats: 0,
+      dietaryRestriction: "none",
     }
   });
 
@@ -85,6 +88,7 @@ export default function Recipes() {
       carbs: recipe.carbs,
       protein: recipe.protein,
       fats: recipe.fats,
+      dietaryRestriction: recipe.dietaryRestriction,
     });
   };
 
@@ -159,6 +163,11 @@ export default function Recipes() {
                               {recipe.fats}g
                             </div>
                           </div>
+                          {recipe.dietaryRestriction !== "none" && (
+                            <Badge className="mt-2" variant="secondary">
+                              {recipe.dietaryRestriction}
+                            </Badge>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
@@ -221,6 +230,35 @@ export default function Recipes() {
                     )}
                   />
 
+                  <FormField
+                    control={form.control}
+                    name="dietaryRestriction"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dietary Restriction</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select dietary restriction" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">No Restrictions</SelectItem>
+                            <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                            <SelectItem value="vegan">Vegan</SelectItem>
+                            <SelectItem value="pescatarian">Pescatarian</SelectItem>
+                            <SelectItem value="keto">Keto</SelectItem>
+                            <SelectItem value="paleo">Paleo</SelectItem>
+                            <SelectItem value="gluten-free">Gluten-Free</SelectItem>
+                            <SelectItem value="dairy-free">Dairy-Free</SelectItem>
+                            <SelectItem value="halal">Halal</SelectItem>
+                            <SelectItem value="kosher">Kosher</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
                   <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
@@ -279,6 +317,7 @@ export default function Recipes() {
                             carbs: 0,
                             protein: 0,
                             fats: 0,
+                            dietaryRestriction: "none",
                           });
                         }}
                       >

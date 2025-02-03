@@ -43,9 +43,10 @@ export async function generateMealSuggestions(
 
     const storedRecipes = await storage.getRecipes();
 
-    // Filter out recipes that should be excluded
+    // Filter out recipes that should be excluded and don't match dietary preference
     const availableStoredRecipes = storedRecipes.filter(
-      recipe => !excludeRecipes.includes(recipe.name)
+      recipe => !excludeRecipes.includes(recipe.name) && 
+                (recipe.dietaryRestriction === "none" || recipe.dietaryRestriction === dietaryPreference)
     );
 
     const storedRecipesPrompt = availableStoredRecipes.length > 0

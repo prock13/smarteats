@@ -27,6 +27,7 @@ export const recipes = pgTable("recipes", {
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
+  dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   userId: integer("user_id").references(() => users.id),
 });
@@ -81,6 +82,7 @@ export const insertRecipeSchema = z.object({
   carbs: z.number().min(0, "Carbs must be 0 or greater"),
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
+  dietaryRestriction: dietaryPreferenceEnum.default("none"),
 });
 
 export const mealPlanSchema = z.object({
@@ -109,7 +111,6 @@ export type Recipe = typeof recipes.$inferSelect;
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;
 export type MealPlan = typeof mealPlans.$inferSelect;
-export type InsertMealPlan = z.infer<typeof mealPlanSchema>;
 export type DietaryPreference = z.infer<typeof dietaryPreferenceEnum>;
 export type MealType = z.infer<typeof mealTypeEnum>;
 export type User = typeof users.$inferSelect;
