@@ -38,11 +38,26 @@ export const mealPlans = pgTable("meal_plans", {
   mealType: text("meal_type").notNull(),
 });
 
+export const dietaryPreferenceEnum = z.enum([
+  "none",
+  "vegetarian",
+  "vegan",
+  "pescatarian",
+  "keto",
+  "paleo",
+  "gluten-free",
+  "dairy-free",
+  "halal",
+  "kosher"
+]);
+
 export const macroInputSchema = z.object({
   targetCarbs: z.number().min(0).max(1000),
   targetProtein: z.number().min(0).max(1000),
   targetFats: z.number().min(0).max(1000),
   mealCount: z.number().min(1).max(10),
+  dietaryPreference: dietaryPreferenceEnum.default("none"),
+  recipeLimit: z.number().min(1).max(20).optional()
 });
 
 export const insertRecipeSchema = z.object({
@@ -75,3 +90,4 @@ export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;
 export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof mealPlanSchema>;
+export type DietaryPreference = z.infer<typeof dietaryPreferenceEnum>;

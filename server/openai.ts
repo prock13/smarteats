@@ -33,7 +33,9 @@ export async function generateMealSuggestions(
   carbs: number,
   protein: number,
   fats: number,
-  mealCount: number
+  mealCount: number,
+  dietaryPreference: string = "none",
+  recipeLimit?: number
 ) {
   try {
     // Check rate limit before making the request
@@ -51,10 +53,20 @@ ${storedRecipes.map(recipe => `
 `).join('\n')}`
       : '';
 
+    const dietaryRestrictionPrompt = dietaryPreference !== "none"
+      ? `\nDietary Preference: ${dietaryPreference}. Please ensure all suggestions comply with ${dietaryPreference} dietary requirements.`
+      : '';
+
+    const recipeLimitPrompt = recipeLimit
+      ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.`
+      : '\nPlease suggest multiple meal options that meet these criteria.';
+
     const prompt = `Given the following macro nutrient targets remaining for the day:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
+${dietaryRestrictionPrompt}
+${recipeLimitPrompt}
 
 ${storedRecipesPrompt}
 
@@ -62,6 +74,7 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. For your 
 1. Include a mix of both stored recipes and new creative meal ideas
 2. Aim to include at least one stored recipe if it reasonably fits the macro requirements
 3. Always suggest new creative meals even if there are perfect matches in stored recipes
+4. Ensure all suggestions comply with the dietary preferences specified
 
 You must respond with ONLY a valid JSON object in this exact structure, without any additional text or explanation:
 {

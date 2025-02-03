@@ -12,6 +12,14 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { AutoSelectInput } from "@/components/ui/auto-select-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { DietaryPreference } from "@shared/schema";
 
 export default function Home() {
   const { toast } = useToast();
@@ -23,7 +31,9 @@ export default function Home() {
       targetCarbs: 0,
       targetProtein: 0,
       targetFats: 0,
-      mealCount: 1
+      mealCount: 1,
+      dietaryPreference: "none",
+      recipeLimit: undefined
     }
   });
 
@@ -119,6 +129,57 @@ export default function Home() {
                         <FormLabel>Number of Meals</FormLabel>
                         <FormControl>
                           <AutoSelectInput type="number" min="1" max="10" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dietaryPreference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dietary Preference</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select dietary preference" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">No Restrictions</SelectItem>
+                            <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                            <SelectItem value="vegan">Vegan</SelectItem>
+                            <SelectItem value="pescatarian">Pescatarian</SelectItem>
+                            <SelectItem value="keto">Keto</SelectItem>
+                            <SelectItem value="paleo">Paleo</SelectItem>
+                            <SelectItem value="gluten-free">Gluten-Free</SelectItem>
+                            <SelectItem value="dairy-free">Dairy-Free</SelectItem>
+                            <SelectItem value="halal">Halal</SelectItem>
+                            <SelectItem value="kosher">Kosher</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="recipeLimit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Maximum Recipe Suggestions (Optional)</FormLabel>
+                        <FormControl>
+                          <AutoSelectInput 
+                            type="number" 
+                            min="1" 
+                            max="20" 
+                            placeholder="Unlimited"
+                            {...field} 
+                            value={field.value ?? ''} 
+                            onChange={e => {
+                              const val = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(val);
+                            }} 
+                          />
                         </FormControl>
                       </FormItem>
                     )}
