@@ -16,11 +16,10 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   private createKey(input: MacroInput): string {
-    return `${input.targetCarbs}-${input.targetProtein}-${input.targetFats}-${input.mealCount}`;
+    return `${input.targetCarbs}-${input.targetProtein}-${input.targetFats}-${input.mealTypes.join(',')}-${input.dietaryPreference}`;
   }
 
   async getMealSuggestions(input: MacroInput): Promise<MealSuggestion | undefined> {
-    const key = this.createKey(input);
     const [suggestion] = await db
       .select()
       .from(mealSuggestions)
@@ -29,7 +28,7 @@ export class DatabaseStorage implements IStorage {
           eq(mealSuggestions.targetCarbs, input.targetCarbs),
           eq(mealSuggestions.targetProtein, input.targetProtein),
           eq(mealSuggestions.targetFats, input.targetFats),
-          eq(mealSuggestions.mealCount, input.mealCount)
+          eq(mealSuggestions.mealCount, input.mealTypes.length)
         )
       );
     return suggestion;
@@ -43,7 +42,7 @@ export class DatabaseStorage implements IStorage {
         targetCarbs: input.targetCarbs,
         targetProtein: input.targetProtein,
         targetFats: input.targetFats,
-        mealCount: input.mealCount
+        mealCount: input.mealTypes.length
       })
       .returning();
     return suggestion;

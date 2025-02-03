@@ -8,15 +8,19 @@ import { ZodError } from "zod";
 export function registerRoutes(app: Express): Server {
   app.post("/api/meal-suggestions", async (req, res) => {
     try {
+      console.log("Received meal suggestions request:", req.body);
       const input = macroInputSchema.parse(req.body);
+      console.log("Parsed input:", input);
 
       // Check cache first
       const cached = await storage.getMealSuggestions(input);
       if (cached) {
+        console.log("Returning cached suggestions");
         return res.json(cached);
       }
 
       // Generate new suggestions
+      console.log("Generating new suggestions");
       const suggestions = await generateMealSuggestions(
         input.targetCarbs,
         input.targetProtein,
@@ -26,10 +30,13 @@ export function registerRoutes(app: Express): Server {
         input.recipeLimit
       );
 
+      console.log("Generated suggestions:", suggestions);
+
       // Cache and return results
       const saved = await storage.saveMealSuggestions(input, suggestions);
       res.json(saved);
     } catch (error) {
+      console.error("Error in meal suggestions:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
