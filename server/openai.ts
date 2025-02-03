@@ -27,7 +27,6 @@ function checkRateLimit() {
   requestTimestamps.push(now);
 }
 
-// the newest OpenAI model is "gpt-3.5-turbo" which is a fast and cheap model
 export async function generateMealSuggestions(
   carbs: number,
   protein: number,
@@ -61,7 +60,7 @@ Please suggest ${mealCount} meal(s) that will help meet these targets. Format th
 Make sure the total macros across all meals sum up approximately to the target amounts.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" }
     });
