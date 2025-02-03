@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
+import {insertFavoriteSchema} from "@shared/schema"; //Added import
+
 
 export function registerRoutes(app: Express): Server {
   // Set up authentication routes and middleware
@@ -210,26 +212,18 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/favorites/:recipeId", async (req, res) => {
+  app.post("/api/favorites", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const recipeId = parseInt(req.params.recipeId);
-      if (isNaN(recipeId)) {
-        throw new Error("Invalid recipe ID");
-      }
+      const favorite = insertFavoriteSchema.omit({ userId: true }).parse(req.body);
+      console.log("Adding favorite for user:", req.user!.id, "Recipe:", favorite);
 
-      console.log("Adding favorite - User:", req.user!.id, "Recipe:", recipeId);
-      const recipe = await storage.getRecipeById(recipeId);
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
-
-      const favorite = await storage.addFavorite(req.user!.id, recipeId);
-      console.log("Added favorite:", favorite);
-      res.json(favorite);
+      const savedFavorite = await storage.addFavorite(req.user!.id, favorite);
+      console.log("Added favorite:", savedFavorite);
+      res.json(savedFavorite);
     } catch (error) {
       console.error("Error adding favorite:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
@@ -237,40 +231,36 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.delete("/api/favorites/:recipeId", async (req, res) => {
+  app.delete("/api/favorites/:id", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const recipeId = parseInt(req.params.recipeId);
-      if (isNaN(recipeId)) {
-        throw new Error("Invalid recipe ID");
+      const favoriteId = parseInt(req.params.id);
+      if (isNaN(favoriteId)) {
+        throw new Error("Invalid favorite ID");
       }
 
-      console.log("Removing favorite - User:", req.user!.id, "Recipe:", recipeId); // Added logging
-      await storage.removeFavorite(req.user!.id, recipeId);
-      console.log("Removed favorite"); // Added logging
+      console.log("Removing favorite - User:", req.user!.id, "FavoriteId:", favoriteId);
+      await storage.removeFavorite(req.user!.id, favoriteId);
+      console.log("Removed favorite");
       res.status(204).send();
     } catch (error) {
-      console.error("Error removing favorite:", error); // Modified logging message
+      console.error("Error removing favorite:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
   });
 
-  app.get("/api/favorites/:recipeId", async (req, res) => {
+  app.get("/api/favorites/check/:name", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const recipeId = parseInt(req.params.recipeId);
-      if (isNaN(recipeId)) {
-        throw new Error("Invalid recipe ID");
-      }
-
-      const isFavorite = await storage.isFavorite(req.user!.id, recipeId);
+      const recipeName = req.params.name;
+      const isFavorite = await storage.isFavorite(req.user!.id, recipeName);
       res.json({ isFavorite });
     } catch (error) {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";

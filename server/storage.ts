@@ -31,9 +31,9 @@ export interface IStorage {
 
   // Favorite operations
   getFavorites(userId: number): Promise<Recipe[]>;
-  addFavorite(userId: number, recipeId: number): Promise<Favorite>;
-  removeFavorite(userId: number, recipeId: number): Promise<void>;
-  isFavorite(userId: number, recipeId: number): Promise<boolean>;
+  addFavorite(userId: number, favorite: Omit<InsertFavorite, "userId">): Promise<Favorite>;
+  removeFavorite(userId: number, favoriteId: number): Promise<void>;
+  isFavorite(userId: number, recipeName: string): Promise<boolean>;
 
   // Session store
   sessionStore: session.Store;
@@ -165,56 +165,44 @@ export class DatabaseStorage implements IStorage {
   async getFavorites(userId: number): Promise<Recipe[]> {
     console.log("Getting favorites for user:", userId);
     const result = await db
-      .select({
-        id: recipes.id,
-        name: recipes.name,
-        description: recipes.description,
-        instructions: recipes.instructions,
-        carbs: recipes.carbs,
-        protein: recipes.protein,
-        fats: recipes.fats,
-        dietaryRestriction: recipes.dietaryRestriction,
-        createdAt: recipes.createdAt,
-        userId: recipes.userId
-      })
+      .select()
       .from(favorites)
-      .innerJoin(recipes, eq(favorites.recipeId, recipes.id))
       .where(eq(favorites.userId, userId));
 
     console.log("Found favorites:", result);
     return result;
   }
 
-  async addFavorite(userId: number, recipeId: number): Promise<Favorite> {
-    console.log("Adding favorite for user:", userId, "recipe:", recipeId);
-    const [favorite] = await db
+  async addFavorite(userId: number, favorite: Omit<InsertFavorite, "userId">): Promise<Favorite> {
+    console.log("Adding favorite for user:", userId, "recipe:", favorite);
+    const [savedFavorite] = await db
       .insert(favorites)
-      .values({ userId, recipeId })
+      .values({ ...favorite, userId })
       .returning();
-    console.log("Added favorite:", favorite);
-    return favorite;
+    console.log("Added favorite:", savedFavorite);
+    return savedFavorite;
   }
 
-  async removeFavorite(userId: number, recipeId: number): Promise<void> {
-    console.log("Removing favorite for user:", userId, "recipe:", recipeId);
+  async removeFavorite(userId: number, favoriteId: number): Promise<void> {
+    console.log("Removing favorite for user:", userId, "favoriteId:", favoriteId);
     await db
       .delete(favorites)
       .where(
         and(
           eq(favorites.userId, userId),
-          eq(favorites.recipeId, recipeId)
+          eq(favorites.id, favoriteId)
         )
       );
   }
 
-  async isFavorite(userId: number, recipeId: number): Promise<boolean> {
+  async isFavorite(userId: number, recipeName: string): Promise<boolean> {
     const [favorite] = await db
       .select()
       .from(favorites)
       .where(
         and(
           eq(favorites.userId, userId),
-          eq(favorites.recipeId, recipeId)
+          eq(favorites.name, recipeName)
         )
       );
     return !!favorite;

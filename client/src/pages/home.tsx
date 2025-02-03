@@ -166,8 +166,7 @@ export default function Home() {
 
   const favoriteMutation = useMutation({
     mutationFn: async (meal: any) => {
-      // First save the recipe
-      const recipe = {
+      const favorite = {
         name: meal.name,
         description: meal.description,
         instructions: meal.description, 
@@ -176,12 +175,8 @@ export default function Home() {
         fats: meal.macros.fats,
         dietaryRestriction: form.getValues("dietaryPreference")
       };
-      const res = await apiRequest("POST", "/api/recipes", recipe);
-      const savedRecipe = await res.json();
-
-      // Then add it to favorites
-      await apiRequest("POST", `/api/favorites/${savedRecipe.id}`);
-      return savedRecipe;
+      const res = await apiRequest("POST", "/api/favorites", favorite);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });

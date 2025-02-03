@@ -35,7 +35,13 @@ export const recipes = pgTable("recipes", {
 export const favorites = pgTable("favorites", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
-  recipeId: integer("recipe_id").notNull().references(() => recipes.id),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  instructions: text("instructions").notNull(),
+  carbs: integer("carbs").notNull(),
+  protein: integer("protein").notNull(),
+  fats: integer("fats").notNull(),
+  dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -111,7 +117,16 @@ export const insertUserSchema = createInsertSchema(users).extend({
   username: z.string().min(3, "Username must be at least 3 characters"),
 });
 
-export const insertFavoriteSchema = createInsertSchema(favorites);
+export const insertFavoriteSchema = createInsertSchema(favorites).extend({
+  userId: z.number(),
+  name: z.string().min(1, "Recipe name is required"),
+  description: z.string().min(1, "Description is required"),
+  instructions: z.string().min(1, "Instructions are required"),
+  carbs: z.number().min(0, "Carbs must be 0 or greater"),
+  protein: z.number().min(0, "Protein must be 0 or greater"),
+  fats: z.number().min(0, "Fats must be 0 or greater"),
+  dietaryRestriction: dietaryPreferenceEnum.default("none"),
+});
 
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
