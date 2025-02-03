@@ -15,19 +15,19 @@ function Navigation() {
           <div className="flex">
             <div className="flex space-x-8">
               <Link href="/">
-                <a className="inline-flex items-center px-1 pt-1 text-sm font-medium">
+                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
                   Meal Planner
-                </a>
+                </span>
               </Link>
               <Link href="/calendar">
-                <a className="inline-flex items-center px-1 pt-1 text-sm font-medium">
+                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
                   Calendar
-                </a>
+                </span>
               </Link>
               <Link href="/recipes">
-                <a className="inline-flex items-center px-1 pt-1 text-sm font-medium">
+                <span className="inline-flex items-center px-1 pt-1 text-sm font-medium cursor-pointer hover:text-primary">
                   Recipes
-                </a>
+                </span>
               </Link>
             </div>
           </div>
