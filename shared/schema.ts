@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -20,6 +20,13 @@ export const mealSuggestions = pgTable("meal_suggestions", {
   mealCount: integer("meal_count").notNull(),
 });
 
+export const mealPlans = pgTable("meal_plans", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").notNull(),
+  meal: jsonb("meal").notNull(), // Store the meal data
+  mealType: text("meal_type").notNull(), // breakfast, lunch, dinner, snack
+});
+
 export const macroInputSchema = z.object({
   targetCarbs: z.number().min(0).max(1000),
   targetProtein: z.number().min(0).max(1000),
@@ -27,6 +34,22 @@ export const macroInputSchema = z.object({
   mealCount: z.number().min(1).max(10),
 });
 
+export const mealPlanSchema = z.object({
+  date: z.string(), // ISO date string
+  meal: z.object({
+    name: z.string(),
+    description: z.string(),
+    macros: z.object({
+      carbs: z.number(),
+      protein: z.number(),
+      fats: z.number(),
+    }),
+  }),
+  mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+});
+
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;
+export type MealPlan = typeof mealPlans.$inferSelect;
+export type InsertMealPlan = z.infer<typeof mealPlanSchema>;
