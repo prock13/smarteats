@@ -70,8 +70,9 @@ export default function CalendarPage() {
   });
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Create date at start of day in local timezone to avoid timezone issues
-    const selectedDate = new Date(e.target.value);
+    // Add time component (12:00:00) to avoid timezone issues
+    const dateString = `${e.target.value}T12:00:00`;
+    const selectedDate = new Date(dateString);
     setDate(startOfDay(selectedDate));
   };
 
