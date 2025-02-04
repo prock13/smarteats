@@ -632,13 +632,14 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={
+                            value={Math.min(
                               form.getValues("targetCarbs") > 0
                                 ? (meal.macros.carbs /
                                   form.getValues("targetCarbs")) *
                                   100
-                                : 0
-                            }
+                                : 0,
+                              100
+                            )}
                             sx={{
                               mb: 2.5,
                               height: 8,
@@ -646,7 +647,8 @@ export default function Planner() {
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
                                 borderRadius: 4,
-                                backgroundColor: 'primary.main'
+                                backgroundColor: 'primary.main',
+                                transition: 'transform 0.4s linear'
                               }
                             }}
                           />
@@ -667,13 +669,14 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={
+                            value={Math.min(
                               form.getValues("targetProtein") > 0
                                 ? (meal.macros.protein /
                                   form.getValues("targetProtein")) *
                                   100
-                                : 0
-                            }
+                                : 0,
+                              100
+                            )}
                             sx={{
                               mb: 2.5,
                               height: 8,
@@ -681,7 +684,8 @@ export default function Planner() {
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
                                 borderRadius: 4,
-                                backgroundColor: 'success.main'
+                                backgroundColor: 'success.main',
+                                transition: 'transform 0.4s linear'
                               }
                             }}
                           />
@@ -702,13 +706,14 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={
+                            value={Math.min(
                               form.getValues("targetFats") > 0
                                 ? (meal.macros.fats /
                                   form.getValues("targetFats")) *
                                   100
-                                : 0
-                            }
+                                : 0,
+                              100
+                            )}
                             sx={{
                               mb: 2.5,
                               height: 8,
@@ -716,7 +721,8 @@ export default function Planner() {
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
                                 borderRadius: 4,
-                                backgroundColor: 'warning.main'
+                                backgroundColor: 'warning.main',
+                                transition: 'transform 0.4s linear'
                               }
                             }}
                           />
