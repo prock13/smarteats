@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Container,
@@ -24,9 +24,16 @@ import {
   FormControlLabel,
   CircularProgress,
   LinearProgress,
+  Menu,
 } from "@mui/material";
+import {
+  Twitter as TwitterIcon,
+  Facebook as FacebookIcon,
+  LinkedIn as LinkedInIcon,
+} from "@mui/icons-material";
 import { mealTypeEnum } from "@shared/schema";
 import { RecipeCard } from "@/components/ui/RecipeCard";
+import type { Recipe } from "@shared/schema";
 
 const pantryInputSchema = z.object({
   carbSource: z.string().min(1, "Carbohydrate source is required"),
@@ -62,6 +69,13 @@ const mealTypeOptions = [
 export default function PantryPage() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
+  const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
+  const [sharingMeal, setSharingMeal] = useState<any>(null);
+  const queryClient = useQueryClient();
+
+  const { data: favorites } = useQuery<Recipe[]>({
+    queryKey: ["/api/favorites"],
+  });
 
   const form = useForm<PantryInput>({
     resolver: zodResolver(pantryInputSchema),
@@ -72,6 +86,66 @@ export default function PantryPage() {
       mealType: "dinner",
       dietaryPreference: "none",
       includeUserRecipes: false,
+    },
+  });
+
+  const addToCalendarMutation = useMutation({
+    mutationFn: async ({ meal, mealType }: { meal: any; mealType: string }) => {
+      const today = new Date().toISOString();
+      const mealPlan = {
+        date: today,
+        meal: {
+          name: meal.name,
+          description: meal.description,
+          macros: meal.macros,
+        },
+        mealType,
+      };
+      const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Meal added to today's calendar",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const favoriteMutation = useMutation({
+    mutationFn: async (meal: any) => {
+      const favorite = {
+        name: meal.name,
+        description: meal.description,
+        instructions: meal.instructions,
+        carbs: meal.macros.carbs,
+        protein: meal.macros.protein,
+        fats: meal.macros.fats,
+        dietaryRestriction: form.getValues("dietaryPreference"),
+      };
+      const res = await apiRequest("POST", "/api/favorites", favorite);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Success!",
+        description: "Recipe saved to favorites",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -131,6 +205,44 @@ export default function PantryPage() {
     console.log("Submitting form data:", data);
     setSuggestions(null);
     mutation.mutate(data);
+  };
+
+  const handleShareClick = (
+    event: React.MouseEvent<HTMLElement>,
+    meal: any,
+  ) => {
+    setShareAnchorEl(event.currentTarget);
+    setSharingMeal(meal);
+  };
+
+  const handleShareClose = () => {
+    setShareAnchorEl(null);
+    setSharingMeal(null);
+  };
+
+  const shareRecipe = async (platform: string) => {
+    if (!sharingMeal) return;
+
+    const shareText = `Check out this recipe from Smart Meal Planner!\n\nRecipe: ${sharingMeal.name}\n${sharingMeal.description}\n\nNutritional Info:\n• Carbs: ${sharingMeal.macros.carbs}g\n• Protein: ${sharingMeal.macros.protein}g\n• Fats: ${sharingMeal.macros.fats}g\n\nDiscover more recipes at: ${window.location.origin}`;
+    const baseUrl = window.location.origin;
+
+    let platformUrl = "";
+    switch (platform) {
+      case "twitter":
+        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
+        break;
+      case "facebook":
+        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
+        break;
+      case "linkedin":
+        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
+        break;
+    }
+
+    if (platformUrl) {
+      window.open(platformUrl, "_blank", "noopener,noreferrer");
+    }
+    handleShareClose();
   };
 
   return (
@@ -286,14 +398,39 @@ export default function PantryPage() {
                 <Grid item xs={12} md={6} key={index}>
                   <RecipeCard
                     meal={meal}
-                    onShare={() => {}}
-                    showAddToCalendar={false}
+                    onShare={handleShareClick}
+                    targetMacros={{
+                      carbs: meal.macros.carbs,
+                      protein: meal.macros.protein,
+                      fats: meal.macros.fats,
+                    }}
+                    favorites={favorites}
+                    showAddToCalendar={true}
+                    addToCalendar={addToCalendarMutation.mutate}
+                    isFavorite={favorites?.some((fav) => fav.name === meal.name)}
+                    favoriteRecipe={favoriteMutation.mutate}
                   />
                 </Grid>
               ))}
             </Grid>
           </Box>
         )}
+
+        <Menu
+          anchorEl={shareAnchorEl}
+          open={Boolean(shareAnchorEl)}
+          onClose={handleShareClose}
+        >
+          <MenuItem onClick={() => shareRecipe("twitter")}>
+            <TwitterIcon sx={{ mr: 1 }} /> Share on Twitter
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("facebook")}>
+            <FacebookIcon sx={{ mr: 1 }} /> Share on Facebook
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("linkedin")}>
+            <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
+          </MenuItem>
+        </Menu>
       </Container>
     </Box>
   );
