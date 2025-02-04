@@ -3,8 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
-import { setupAuth } from "./auth";
-import {insertFavoriteSchema} from "@shared/schema"; //Added import
+import { setupAuth, comparePasswords, hashPassword } from "./auth";
+import { insertFavoriteSchema } from "@shared/schema";
 
 
 export function registerRoutes(app: Express): Server {
