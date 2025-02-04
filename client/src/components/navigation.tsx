@@ -54,7 +54,7 @@ export default function Navigation() {
             }}
             onClick={() => setLocation("/")}
           >
-            <Logo sx={{ fontSize: 32 }} />
+            <Logo sx={{ fontSize: 50 }} />
             {/*<Typography
               variant="h6"
               component="div"
