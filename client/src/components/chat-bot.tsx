@@ -73,7 +73,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   return (
     <Drawer open={open} onClose={onClose}>
       <DrawerContent className="h-[80vh]">
-        <DrawerHeader className="border-b">
+        <DrawerHeader>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               src="/chef-avatar.png"
@@ -130,7 +130,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           <div ref={messagesEndRef} />
         </Box>
 
-        <DrawerFooter className="border-t">
+        <DrawerFooter>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               fullWidth
