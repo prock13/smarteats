@@ -76,18 +76,19 @@ export default function PantryPage() {
 
   const mutation = useMutation({
     mutationFn: async (data: PantryInput) => {
-      const res = await apiRequest(
+      const response = await apiRequest(
         "POST",
         "/api/pantry-suggestions",
-        data,
+        data
       );
-      return res.json();
+      return response.json();
     },
     onSuccess: (data) => {
-      if (!data || !data.suggestions) {
+      console.log("Received response:", data);
+      if (!data?.suggestions?.meals?.length) {
         toast({
           title: "Error",
-          description: "No meal suggestions received",
+          description: "No meal suggestions found",
           variant: "destructive",
         });
         return;
@@ -95,20 +96,22 @@ export default function PantryPage() {
 
       setSuggestions(data.suggestions);
       toast({
-        title: "Success!",
-        description: "Here are your meal suggestions based on your pantry items",
+        title: "Success",
+        description: "Found meal suggestions based on your pantry items",
       });
     },
     onError: (error: Error) => {
+      console.error("Mutation error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to get meal suggestions",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: PantryInput) => {
+    console.log("Submitting form data:", data);
     mutation.mutate(data);
   };
 
@@ -163,7 +166,7 @@ export default function PantryPage() {
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth required>
                     <FormLabel>Meal Type</FormLabel>
                     <Select
                       {...form.register("mealType")}

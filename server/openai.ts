@@ -47,6 +47,18 @@ export async function generateMealSuggestions(
   try {
     checkRateLimit();
 
+    console.log("Starting meal suggestions generation with:", {
+      carbs,
+      protein,
+      fats,
+      mealTypes,
+      dietaryPreference,
+      recipeLimit,
+      excludeRecipes,
+      includeUserRecipes,
+      pantryItems
+    });
+
     const storedRecipes = await storage.getRecipes();
 
     // Filter out recipes that should be excluded and don't match dietary preference
@@ -168,22 +180,25 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
           content: prompt
         }
       ],
+      response_format: { type: "json_object" },
       temperature: 0.7,
     });
 
     const content = response.choices[0].message.content;
     if (!content) {
+      console.error("No content received from OpenAI");
       throw new Error("Failed to generate meal suggestions");
     }
 
-    console.log("OpenAI response:", content);
+    console.log("OpenAI raw response:", content);
 
     try {
       const parsedContent = JSON.parse(content);
-      console.log("Parsed OpenAI response:", parsedContent);
+      console.log("Parsed OpenAI response:", JSON.stringify(parsedContent, null, 2));
 
       // Validate the response structure
       if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
+        console.error("Invalid response format:", parsedContent);
         throw new Error("Invalid response format: missing or invalid meals array");
       }
 
@@ -201,6 +216,7 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
       throw new Error("Failed to parse meal suggestions");
     }
   } catch (error: any) {
+    console.error("Error in generateMealSuggestions:", error);
     if (error?.status === 429) {
       throw new Error("OpenAI API rate limit exceeded. Please try again in a few minutes.");
     } else if (error?.status === 401) {
