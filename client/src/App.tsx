@@ -6,7 +6,6 @@ import { ThemeProvider as CustomThemeProvider } from "@/hooks/use-theme";
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { useTheme } from "@/hooks/use-theme";
-import { TutorialProvider } from "@/components/tutorial/TutorialProvider";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Calendar from "@/pages/calendar";
@@ -56,9 +55,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CustomThemeProvider>
-          <TutorialProvider>
-            <ThemedApp />
-          </TutorialProvider>
+          <ThemedApp />
         </CustomThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
