@@ -15,11 +15,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  IconButton
+  IconButton,
+  TextField
 } from "@mui/material";
-import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { type InsertMealPlan } from "@shared/schema";
@@ -100,12 +98,13 @@ export default function CalendarPage() {
         <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>Calendar</Typography>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DateCalendar 
-                value={date}
-                onChange={(newDate) => setDate(newDate)}
-              />
-            </LocalizationProvider>
+            <TextField
+              type="date"
+              value={date ? format(date, "yyyy-MM-dd") : ""}
+              onChange={(e) => setDate(new Date(e.target.value))}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
             {date && (
               <Box sx={{ mt: 2 }}>
                 <FormControl fullWidth>

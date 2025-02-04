@@ -1,0 +1,52 @@
+Missing "./_lib/format/longFormatters" specifier in "date-fns" package [plugin vite:dep-pre-bundle]
+
+    node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46041:24:
+      46041 │ function e(e,n,r){throw new Error(r?`No known conditions for "${n}" specifier in "${e}" package`:`Missing "${n}" specifier in "${e}" packag...
+            ╵                         ^
+
+    at e (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46041:25)
+    at n (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46041:627)
+    at o (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46041:1297)
+    at resolveExportsOrImports (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46662:18)
+    at resolveDeepImport (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46685:25)
+    at tryNodeResolve (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46450:16)
+    at ResolveIdContext.resolveId (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46200:19)
+    at PluginContainer.resolveId (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:49015:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:66266:15)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46934:12:
+      46934 │       build.onResolve(
+            ╵             ~~~~~~~~~
+
+    at setup (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46934:13)
+    at handlePlugins (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1150:21)
+    at buildOrContextImpl (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:873:5)
+    at Object.buildOrContext (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:699:5)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:2032:68
+    at new Promise (<anonymous>)
+    at Object.context (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:2032:27)
+    at Object.context (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1874:58)
+    at prepareEsbuildOptimizerRun (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:50924:33)
+
+  The plugin "vite:dep-pre-bundle" was triggered by this import
+
+    node_modules/@mui/x-date-pickers/AdapterDateFns/AdapterDateFns.js:46:27:
+      46 │ import longFormatters from 'date-fns/_lib/format/longFormatters';
+         ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472
+  let error = new Error(text);
+              ^
+
+Error: Build failed with 1 error:
+node_modules/vite/dist/node/chunks/dep-BWSbWtLw.js:46041:24: ERROR: [plugin: vite:dep-pre-bundle] Missing "./_lib/format/longFormatters" specifier in "date-fns" package
+    at failureErrorWithLog (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1353:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  errors: [Getter/Setter],
+  warnings: [Getter/Setter]
+}

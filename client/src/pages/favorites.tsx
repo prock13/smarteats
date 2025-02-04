@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Recipe } from "@shared/schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Container, Typography, Box, Paper, Grid, Chip } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 
 export default function Favorites() {
   const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
@@ -11,77 +10,95 @@ export default function Favorites() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center text-destructive">
-            Error loading favorites: {error.message}
-          </div>
-        </div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography color="error">
+            Error loading favorites: {(error as Error).message}
+          </Typography>
+        </Box>
+      </Container>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ maxWidth: '4xl', mx: 'auto', mb: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h3" component="h1" 
+            sx={{ 
+              background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1
+            }}>
             Favorite Recipes
-          </h1>
-          <p className="text-muted-foreground">
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             Your saved favorite recipes from meal suggestions
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="space-y-4">
+        <Box sx={{ mt: 4 }}>
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
           ) : favorites && favorites.length > 0 ? (
-            favorites.map((recipe: Recipe) => (
-              <Card key={recipe.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">{recipe.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-4 text-muted-foreground">{recipe.description}</p>
-                  {recipe.instructions !== recipe.description && (
-                    <p className="mb-4">{recipe.instructions}</p>
-                  )}
+            <Grid container spacing={3}>
+              {favorites.map((recipe: Recipe) => (
+                <Grid item xs={12} key={recipe.id}>
+                  <Paper elevation={2} sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      {recipe.name}
+                    </Typography>
+                    <Typography color="text.secondary" paragraph>
+                      {recipe.description}
+                    </Typography>
+                    {recipe.instructions !== recipe.description && (
+                      <Typography paragraph>
+                        {recipe.instructions}
+                      </Typography>
+                    )}
 
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Carbs:</span>{" "}
-                      {recipe.carbs}g
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Protein:</span>{" "}
-                      {recipe.protein}g
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Fats:</span>{" "}
-                      {recipe.fats}g
-                    </div>
-                  </div>
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Carbs: {recipe.carbs}g
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Protein: {recipe.protein}g
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Fats: {recipe.fats}g
+                        </Typography>
+                      </Grid>
+                    </Grid>
 
-                  {recipe.dietaryRestriction !== "none" && (
-                    <Badge className="mt-4" variant="secondary">
-                      {recipe.dietaryRestriction}
-                    </Badge>
-                  )}
-                </CardContent>
-              </Card>
-            ))
+                    {recipe.dietaryRestriction !== "none" && (
+                      <Chip 
+                        label={recipe.dietaryRestriction}
+                        color="default"
+                        size="small"
+                        sx={{ mt: 1 }}
+                      />
+                    )}
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
           ) : (
-            <Card>
-              <CardContent className="text-center py-8 text-muted-foreground">
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography color="text.secondary">
                 No favorite recipes yet. Mark some recipes as favorites from the meal suggestions to see them here.
-              </CardContent>
-            </Card>
+              </Typography>
+            </Paper>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Container>
   );
 }
