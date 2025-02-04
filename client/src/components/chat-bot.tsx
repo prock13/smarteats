@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Box, TextField, Typography, IconButton, Paper, Avatar } from "@mui/material";
+import { Box, TextField, Typography, IconButton, Paper, Avatar, styled } from "@mui/material";
 import { Send as SendIcon, Close as CloseIcon } from "@mui/icons-material";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { getChatbotResponse } from "@/lib/chatbot-service";
 import { useAuth } from "@/hooks/use-auth";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
 
 interface Message {
   role: "user" | "assistant";
@@ -71,13 +73,13 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   };
 
   return (
-    <Drawer open={open} onClose={onClose}>
-      <DrawerContent className="h-[80vh]" style={{ 
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)'
+    <Drawer open={open} onClose={onClose} shouldScaleBackground={false}>
+      <DrawerContent className="h-[80vh]" sx={{ 
+        backgroundColor: theme => theme.palette.mode === 'dark' ? '#333' : 'var(--background)', // Lighter background for dark mode
+        color: theme => theme.palette.mode === 'dark' ? '#eee' : 'var(--foreground)' //Improved contrast for dark mode
       }}>
-        <DrawerHeader className="border-b">
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <DrawerHeader className="border-b relative">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pr: 8 }}>
             <Avatar
               src="/chef-avatar.png"
               alt="Chef Nina"
@@ -85,7 +87,16 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
             />
             <DrawerTitle>Chat with Chef Nina</DrawerTitle>
           </Box>
-          <IconButton onClick={onClose} edge="end" color="inherit">
+          <IconButton 
+            onClick={onClose} 
+            color="inherit"
+            sx={{ 
+              position: 'absolute',
+              right: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)'
+            }}
+          >
             <CloseIcon />
           </IconButton>
         </DrawerHeader>
@@ -97,7 +108,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex", 
           flexDirection: "column", 
           gap: 2,
-          bgcolor: 'background.default',
+          bgcolor: theme => theme.palette.mode === 'dark' ? '#222' : 'background.default', //Darker background for dark mode
           color: 'text.primary'
         }}>
           {messages.map((message, index) => (
