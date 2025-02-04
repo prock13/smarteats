@@ -11,6 +11,11 @@ import {
   MenuItem,
   Box,
   Container,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   CalendarMonth,
@@ -18,6 +23,7 @@ import {
   Favorite,
   AccountCircle,
   Chat as ChatIcon,
+  Menu as MenuIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -27,6 +33,7 @@ export default function Navigation() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [, setLocation] = useLocation();
   const [chatOpen, setChatOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (!user) return null;
 
@@ -41,13 +48,61 @@ export default function Navigation() {
   const handleNavigate = (path: string) => {
     setLocation(path);
     handleClose();
+    setMobileOpen(false);
   };
+
+  const navigationItems = [
+    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
+    { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
+    { icon: <Favorite />, text: "Favorites", path: "/favorites" },
+  ];
+
+  const mobileDrawer = (
+    <Drawer
+      variant="temporary"
+      anchor="left"
+      open={mobileOpen}
+      onClose={() => setMobileOpen(false)}
+      ModalProps={{ keepMounted: true }}
+      sx={{ 
+        display: { xs: 'block', md: 'none' },
+        '& .MuiDrawer-paper': { width: 240, bgcolor: 'background.paper' },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Logo sx={{ fontSize: 40 }} />
+      </Box>
+      <List>
+        {navigationItems.map((item) => (
+          <ListItem 
+            button 
+            key={item.text} 
+            onClick={() => handleNavigate(item.path)}
+            sx={{ color: 'text.primary' }}
+          >
+            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
+  );
 
   return (
     <>
       <AppBar position="static" color="default" elevation={1}>
         <Container maxWidth="lg">
           <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={() => setMobileOpen(true)}
+              sx={{ mr: 2, display: { md: 'none' } }}
+            >
+              <MenuIcon />
+            </IconButton>
+
             <Box
               sx={{
                 display: "flex",
@@ -61,28 +116,17 @@ export default function Navigation() {
               <Logo sx={{ fontSize: 50 }} />
             </Box>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Button
-                color="inherit"
-                startIcon={<CalendarMonth />}
-                onClick={() => setLocation("/calendar")}
-              >
-                Calendar
-              </Button>
-              <Button
-                color="inherit"
-                startIcon={<Restaurant />}
-                onClick={() => setLocation("/recipes")}
-              >
-                My Recipes
-              </Button>
-              <Button
-                color="inherit"
-                startIcon={<Favorite />}
-                onClick={() => setLocation("/favorites")}
-              >
-                Favorites
-              </Button>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: "center", gap: 2 }}>
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.text}
+                  color="inherit"
+                  startIcon={item.icon}
+                  onClick={() => handleNavigate(item.path)}
+                >
+                  {item.text}
+                </Button>
+              ))}
 
               <IconButton
                 color="inherit"
@@ -120,10 +164,28 @@ export default function Navigation() {
                 </MenuItem>
               </Menu>
             </Box>
+
+            {/* Mobile-only icons */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
+              <IconButton
+                color="inherit"
+                onClick={() => setChatOpen(true)}
+              >
+                <ChatIcon />
+              </IconButton>
+              <IconButton
+                size="large"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+            </Box>
           </Toolbar>
         </Container>
       </AppBar>
 
+      {mobileDrawer}
       <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
     </>
   );

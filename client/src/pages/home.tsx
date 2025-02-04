@@ -31,19 +31,6 @@ import { useState } from "react";
 
 const features = [
   {
-    title: "Chef Nina - AI Assistant",
-    description:
-      "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
-    icon: <ChatIcon sx={{ fontSize: 40 }} />,
-    route: "/",
-    details: [
-      "Get personalized meal suggestions based on your preferences",
-      "Real-time nutritional guidance and recipe modifications",
-      "Interactive meal planning assistance",
-      "24/7 availability for all your culinary questions",
-    ],
-  },
-  {
     title: "Macro Meal Planner",
     description:
       "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
@@ -54,6 +41,19 @@ const features = [
       "AI-powered recipe generation tailored to your dietary preferences",
       "Easy-to-follow recipes with detailed instructions",
       "Quick macro calculation and portion adjustments",
+    ],
+  },
+  {
+    title: "Chef Nina - AI Assistant",
+    description:
+      "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
+    icon: <ChatIcon sx={{ fontSize: 40 }} />,
+    route: "/",
+    details: [
+      "Get personalized meal suggestions based on your preferences",
+      "Real-time nutritional guidance and recipe modifications",
+      "Interactive meal planning assistance",
+      "24/7 availability for all your culinary questions",
     ],
   },
   {
