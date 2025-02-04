@@ -12,7 +12,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const requestTimestamps: number[] = [];
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 3; // Maximum 3 requests per minute
-const API_TIMEOUT = 30000; // 30 second timeout
+const API_TIMEOUT = 60000; // 60 second timeout
 
 function checkRateLimit() {
   const now = Date.now();
@@ -49,131 +49,50 @@ export async function generateMealSuggestions(
     checkRateLimit();
 
     console.log("Starting meal suggestions generation with:", {
-      carbs,
-      protein,
-      fats,
+      pantryItems,
       mealTypes,
-      dietaryPreference,
-      recipeLimit,
-      excludeRecipes,
-      includeUserRecipes,
-      pantryItems
+      dietaryPreference
     });
 
-    const storedRecipes = await storage.getRecipes();
+    // Simplified prompt for faster response
+    const prompt = `Create a recipe using these ingredients:
+- Main carb: ${pantryItems?.carbSource}
+- Main protein: ${pantryItems?.proteinSource}
+- Main fat: ${pantryItems?.fatSource}
 
-    const availableStoredRecipes = storedRecipes.filter(recipe => {
-      if (!includeUserRecipes) {
-        return false;
-      }
+The recipe should be suitable for: ${mealTypes[0]}
+Dietary preference: ${dietaryPreference}
 
-      if (excludeRecipes.includes(recipe.name)) {
-        return false;
-      }
-
-      if (dietaryPreference !== "none") {
-        return recipe.dietaryRestriction === dietaryPreference;
-      }
-
-      return true;
-    });
-
-    const storedRecipesPrompt = availableStoredRecipes.length > 0
-      ? `Here are some stored recipes that you can suggest. IMPORTANT: Do not modify or combine these recipes, suggest them exactly as they are:\n${availableStoredRecipes.map(recipe => `
-- ${recipe.name}
-  Description: ${recipe.description}
-  Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
-  Dietary Restriction: ${recipe.dietaryRestriction}
-`).join('\n')}`
-      : '';
-
-    const excludeRecipesPrompt = excludeRecipes.length > 0
-      ? `\nPlease do NOT suggest any of these previously suggested recipes: ${excludeRecipes.join(', ')}`
-      : '';
-
-    const dietaryRestrictionPrompt = dietaryPreference !== "none"
-      ? `\nDietary Preference: ${dietaryPreference}. Please ensure all suggestions comply with ${dietaryPreference} dietary requirements.`
-      : '';
-
-    const recipeLimitPrompt = recipeLimit
-      ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.`
-      : '\nPlease suggest multiple meal options that meet these criteria.';
-
-    const mealTypesPrompt = mealTypes.length > 0
-      ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.`
-      : '';
-
-    const pantryPrompt = pantryItems
-      ? `\nPlease create recipes using these available ingredients:
-- Carbohydrate Source: ${pantryItems.carbSource}
-- Protein Source: ${pantryItems.proteinSource}
-- Fat Source: ${pantryItems.fatSource}
-
-IMPORTANT: Focus on creating recipes that primarily use these ingredients. You may suggest additional common ingredients (spices, vegetables, etc) to complete the recipe, but the main components should use the provided ingredients.`
-      : '';
-
-    const basePrompt = pantryItems
-      ? `You are a creative chef. Given the following ingredients and preferences:`
-      : `You are a nutrition expert. Given the following macro nutrient targets:
-- Carbohydrates: ${carbs}g
-- Protein: ${protein}g
-- Fats: ${fats}g`;
-
-    const prompt = `${basePrompt}
-${pantryPrompt}
-${dietaryRestrictionPrompt}
-${mealTypesPrompt}
-${recipeLimitPrompt}
-${excludeRecipesPrompt}
-
-${storedRecipesPrompt}
-
-Please suggest ${mealTypes.length} meal(s) that will help meet these targets. For your suggestions:
-1. If a stored recipe matches the requirements closely, suggest it exactly as-is
-2. Otherwise, create completely new recipe suggestions
-3. IMPORTANT: Never combine or modify stored recipes - either suggest them exactly as-is or create entirely new recipes
-4. Ensure all suggestions comply with the dietary preferences specified
-5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
-6. Provide detailed nutritional information and step-by-step cooking instructions
-7. IMPORTANT: If using pantry ingredients, ensure the suggested recipes primarily use the provided ingredients
-
-Your response must be a valid JSON object following this exact structure (no additional text):
+Respond with a JSON object in this exact format:
 {
   "meals": [
     {
-      "name": "Meal name",
-      "description": "Brief description of the meal",
-      "instructions": "Detailed step-by-step cooking instructions",
+      "name": "Recipe name",
+      "description": "Brief description",
+      "instructions": "Step-by-step instructions",
       "macros": {
         "carbs": number,
         "protein": number,
         "fats": number,
-        "calories": number,
-        "fiber": number,
-        "sugar": number
-      },
-      "nutrients": {
-        "vitamins": ["Vitamin A", "Vitamin C", etc],
-        "minerals": ["Iron", "Calcium", etc]
+        "calories": number
       },
       "cookingTime": {
         "prep": number,
         "cook": number,
         "total": number
-      },
-      "isStoredRecipe": boolean
+      }
     }
   ]
 }`;
 
-    console.log("Sending prompt to OpenAI:", prompt);
+    console.log("Sending prompt to OpenAI");
 
     const responsePromise = openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text. Never modify or combine existing recipes - suggest them exactly as-is or create entirely new recipes."
+          content: "You are a chef. Always respond with valid JSON only. Keep recipes simple and focused on the main ingredients provided."
         },
         {
           role: "user",
@@ -185,10 +104,12 @@ Your response must be a valid JSON object following this exact structure (no add
 
     // Add timeout to the OpenAI request
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("OpenAI API request timed out after 30 seconds")), API_TIMEOUT);
+      setTimeout(() => reject(new Error("OpenAI API request timed out after 60 seconds")), API_TIMEOUT);
     });
 
+    console.log("Waiting for OpenAI response...");
     const response = await Promise.race([responsePromise, timeoutPromise]) as any;
+    console.log("Received response from OpenAI");
 
     const content = response.choices[0].message.content;
     if (!content) {
@@ -196,25 +117,16 @@ Your response must be a valid JSON object following this exact structure (no add
       throw new Error("Failed to generate meal suggestions");
     }
 
-    console.log("OpenAI raw response:", content);
+    console.log("Raw response from OpenAI:", content);
 
     try {
       const parsedContent = JSON.parse(content);
-      console.log("Parsed OpenAI response:", JSON.stringify(parsedContent, null, 2));
+      console.log("Successfully parsed response");
 
-      // Validate the response structure
       if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
         console.error("Invalid response format:", parsedContent);
         throw new Error("Invalid response format: missing or invalid meals array");
       }
-
-      // Verify isStoredRecipe flag against actual stored recipes
-      parsedContent.meals = parsedContent.meals.map((meal: any) => ({
-        ...meal,
-        isStoredRecipe: availableStoredRecipes.some(
-          recipe => recipe.name.toLowerCase() === meal.name.toLowerCase()
-        )
-      }));
 
       return parsedContent;
     } catch (parseError) {

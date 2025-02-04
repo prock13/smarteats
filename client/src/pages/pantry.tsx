@@ -77,7 +77,7 @@ export default function PantryPage() {
   const mutation = useMutation({
     mutationFn: async (data: PantryInput) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 75000); // 75 second timeout
 
       try {
         const response = await apiRequest(
