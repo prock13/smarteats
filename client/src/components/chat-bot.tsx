@@ -107,7 +107,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex", 
           flexDirection: "column", 
           gap: 2,
-          bgcolor: theme => theme.palette.mode === 'dark' ? '#4f4f4f' : 'background.default',
+          bgcolor: theme => theme.palette.mode === 'dark' ? '#3f3f3f' : 'background.default',
           color: 'text.primary'
         }}>
           {messages.map((message, index) => (
