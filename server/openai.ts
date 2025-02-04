@@ -137,7 +137,7 @@ Please suggest ${mealTypes.length} meal(s) that will help meet these targets. Fo
 6. Provide detailed nutritional information and step-by-step cooking instructions
 7. IMPORTANT: If using pantry ingredients, ensure the suggested recipes primarily use the provided ingredients
 
-IMPORTANT: You must respond with ONLY a JSON object, no other text. The response must strictly follow this structure:
+Your response must be a valid JSON object following this exact structure (no additional text):
 {
   "meals": [
     {
@@ -180,7 +180,6 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
           content: prompt
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 0.7,
     });
 
