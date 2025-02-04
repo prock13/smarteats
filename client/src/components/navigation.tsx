@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useState } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import {
   AppBar,
@@ -11,14 +11,14 @@ import {
   MenuItem,
   Box,
   Container,
-} from '@mui/material';
+} from "@mui/material";
 import {
   CalendarMonth,
   Restaurant,
   Favorite,
-  AccountCircle
-} from '@mui/icons-material';
-import { Logo } from './logo';
+  AccountCircle,
+} from "@mui/icons-material";
+import { Logo } from "./logo";
 
 export default function Navigation() {
   const { user, logoutMutation } = useAuth();
@@ -46,51 +46,47 @@ export default function Navigation() {
         <Toolbar>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 1,
               flexGrow: 1,
-              cursor: 'pointer'
+              cursor: "pointer",
             }}
-            onClick={() => setLocation('/')}
+            onClick={() => setLocation("/")}
           >
             <Logo sx={{ fontSize: 32 }} />
-            <Typography
+            {/*<Typography
               variant="h6"
               component="div"
             >
               Meal Planner
-            </Typography>
+            </Typography> */}
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Button
               color="inherit"
               startIcon={<CalendarMonth />}
-              onClick={() => setLocation('/calendar')}
+              onClick={() => setLocation("/calendar")}
             >
               Calendar
             </Button>
             <Button
               color="inherit"
               startIcon={<Restaurant />}
-              onClick={() => setLocation('/recipes')}
+              onClick={() => setLocation("/recipes")}
             >
-              Recipes
+              My Recipes
             </Button>
             <Button
               color="inherit"
               startIcon={<Favorite />}
-              onClick={() => setLocation('/favorites')}
+              onClick={() => setLocation("/favorites")}
             >
               Favorites
             </Button>
 
-            <IconButton
-              size="large"
-              onClick={handleMenu}
-              color="inherit"
-            >
+            <IconButton size="large" onClick={handleMenu} color="inherit">
               <AccountCircle />
             </IconButton>
             <Menu
@@ -98,15 +94,17 @@ export default function Navigation() {
               open={Boolean(anchorEl)}
               onClose={handleClose}
               anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
+                vertical: "bottom",
+                horizontal: "right",
               }}
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
             >
-              <MenuItem onClick={() => handleNavigate('/profile')}>Profile</MenuItem>
+              <MenuItem onClick={() => handleNavigate("/profile")}>
+                Profile
+              </MenuItem>
               <MenuItem onClick={() => logoutMutation.mutate()}>
                 {logoutMutation.isPending ? "Logging out..." : "Logout"}
               </MenuItem>

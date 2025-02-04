@@ -37,6 +37,7 @@ export async function generateMealSuggestions(
   dietaryPreference: string = "none",
   recipeLimit?: number,
   excludeRecipes: string[] = [],
+  includeUserRecipes: boolean = true,
 ) {
   try {
     checkRateLimit();
@@ -45,6 +46,11 @@ export async function generateMealSuggestions(
 
     // Filter out recipes that should be excluded and don't match dietary preference
     const availableStoredRecipes = storedRecipes.filter(recipe => {
+      // If user doesn't want to include their recipes, return false
+      if (!includeUserRecipes) {
+        return false;
+      }
+
       // Exclude recipes that were already suggested
       if (excludeRecipes.includes(recipe.name)) {
         return false;

@@ -87,6 +87,7 @@ export default function Planner() {
       mealTypes: [],
       dietaryPreference: "none",
       mealCount: 1,
+      includeUserRecipes: true, // Add default value
     },
   });
 
@@ -396,6 +397,14 @@ export default function Planner() {
                       ))}
                     </Select>
                   </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox {...form.register("includeUserRecipes")} defaultChecked={true} />
+                    }
+                    label="Include My Recipes"
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <Button

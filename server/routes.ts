@@ -32,8 +32,9 @@ export function registerRoutes(app: Express): Server {
         input.targetFats,
         input.mealTypes,
         input.dietaryPreference,
-        input.recipeLimit,
-        excludeRecipes
+        input.mealCount,
+        excludeRecipes,
+        input.includeUserRecipes
       );
 
       console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
