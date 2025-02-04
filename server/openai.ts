@@ -12,6 +12,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const requestTimestamps: number[] = [];
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 3; // Maximum 3 requests per minute
+const API_TIMEOUT = 30000; // 30 second timeout
 
 function checkRateLimit() {
   const now = Date.now();
@@ -61,7 +62,6 @@ export async function generateMealSuggestions(
 
     const storedRecipes = await storage.getRecipes();
 
-    // Filter out recipes that should be excluded and don't match dietary preference
     const availableStoredRecipes = storedRecipes.filter(recipe => {
       if (!includeUserRecipes) {
         return false;
@@ -168,7 +168,7 @@ Your response must be a valid JSON object following this exact structure (no add
 
     console.log("Sending prompt to OpenAI:", prompt);
 
-    const response = await openai.chat.completions.create({
+    const responsePromise = openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -182,6 +182,13 @@ Your response must be a valid JSON object following this exact structure (no add
       ],
       temperature: 0.7,
     });
+
+    // Add timeout to the OpenAI request
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("OpenAI API request timed out after 30 seconds")), API_TIMEOUT);
+    });
+
+    const response = await Promise.race([responsePromise, timeoutPromise]) as any;
 
     const content = response.choices[0].message.content;
     if (!content) {
@@ -202,7 +209,7 @@ Your response must be a valid JSON object following this exact structure (no add
       }
 
       // Verify isStoredRecipe flag against actual stored recipes
-      parsedContent.meals = parsedContent.meals.map(meal => ({
+      parsedContent.meals = parsedContent.meals.map((meal: any) => ({
         ...meal,
         isStoredRecipe: availableStoredRecipes.some(
           recipe => recipe.name.toLowerCase() === meal.name.toLowerCase()

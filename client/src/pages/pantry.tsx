@@ -76,12 +76,23 @@ export default function PantryPage() {
 
   const mutation = useMutation({
     mutationFn: async (data: PantryInput) => {
-      const response = await apiRequest(
-        "POST",
-        "/api/pantry-suggestions",
-        data
-      );
-      return response.json();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+
+      try {
+        const response = await apiRequest(
+          "POST",
+          "/api/pantry-suggestions",
+          data,
+          { signal: controller.signal }
+        );
+        const responseData = await response.json();
+        clearTimeout(timeoutId);
+        return responseData;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       console.log("Received response:", data);
@@ -102,16 +113,22 @@ export default function PantryPage() {
     },
     onError: (error: Error) => {
       console.error("Mutation error:", error);
+      let errorMessage = error.message;
+      if (error.name === "AbortError") {
+        errorMessage = "Request timed out. Please try again.";
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to get meal suggestions",
+        description: errorMessage || "Failed to get meal suggestions",
         variant: "destructive",
       });
+      setSuggestions(null);
     },
   });
 
   const onSubmit = (data: PantryInput) => {
     console.log("Submitting form data:", data);
+    setSuggestions(null);
     mutation.mutate(data);
   };
 
@@ -141,6 +158,7 @@ export default function PantryPage() {
                     {...form.register("carbSource")}
                     error={!!form.formState.errors.carbSource}
                     helperText={form.formState.errors.carbSource?.message}
+                    disabled={mutation.isPending}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -152,6 +170,7 @@ export default function PantryPage() {
                     {...form.register("proteinSource")}
                     error={!!form.formState.errors.proteinSource}
                     helperText={form.formState.errors.proteinSource?.message}
+                    disabled={mutation.isPending}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -163,6 +182,7 @@ export default function PantryPage() {
                     {...form.register("fatSource")}
                     error={!!form.formState.errors.fatSource}
                     helperText={form.formState.errors.fatSource?.message}
+                    disabled={mutation.isPending}
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -171,6 +191,7 @@ export default function PantryPage() {
                     <Select
                       {...form.register("mealType")}
                       defaultValue="dinner"
+                      disabled={mutation.isPending}
                     >
                       {mealTypeOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
@@ -191,6 +212,7 @@ export default function PantryPage() {
                     <Select
                       {...form.register("dietaryPreference")}
                       defaultValue="none"
+                      disabled={mutation.isPending}
                     >
                       {dietaryOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
@@ -206,6 +228,7 @@ export default function PantryPage() {
                       <Checkbox
                         {...form.register("includeUserRecipes")}
                         defaultChecked={false}
+                        disabled={mutation.isPending}
                       />
                     }
                     label="Include My Recipes"
@@ -230,7 +253,7 @@ export default function PantryPage() {
                   >
                     {mutation.isPending ? (
                       <>
-                        <CircularProgress size={24} sx={{ mr: 1 }} />
+                        <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
                         Generating Suggestions...
                       </>
                     ) : (
@@ -243,8 +266,11 @@ export default function PantryPage() {
           </CardContent>
         </Card>
 
-        {mutation.isPending && !suggestions && (
+        {mutation.isPending && (
           <Box sx={{ width: "100%", mt: 4 }}>
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+              Please wait while we generate your personalized recipe suggestions...
+            </Typography>
             <LinearProgress />
           </Box>
         )}
