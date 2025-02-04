@@ -30,7 +30,7 @@ import { useState } from "react";
 
 const features = [
   {
-    title: "Daily Meal Finder",
+    title: "Macro Meal Planner",
     description:
       "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
     icon: <Restaurant sx={{ fontSize: 40 }} />,

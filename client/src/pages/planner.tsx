@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { macroInputSchema, type MacroInput, mealTypeEnum } from "@shared/schema";
+import {
+  macroInputSchema,
+  type MacroInput,
+  mealTypeEnum,
+} from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -69,8 +73,9 @@ export default function Planner() {
 
   const queryClient = useQueryClient();
   const { data: favorites } = useQuery<Recipe[]>({
-    queryKey: ['/api/favorites'],
-    queryFn: () => apiRequest("GET", "/api/favorites").then(res => res.json())
+    queryKey: ["/api/favorites"],
+    queryFn: () =>
+      apiRequest("GET", "/api/favorites").then((res) => res.json()),
   });
 
   const form = useForm<MacroInput>({
@@ -81,20 +86,25 @@ export default function Planner() {
       targetFats: 0,
       mealTypes: [],
       dietaryPreference: "none",
-      mealCount: 1
-    }
+      mealCount: 1,
+    },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
       const requestData = {
         ...data,
-        excludeRecipes: data.appendResults && suggestions?.meals
-          ? suggestions.meals.map((meal: any) => meal.name)
-          : []
+        excludeRecipes:
+          data.appendResults && suggestions?.meals
+            ? suggestions.meals.map((meal: any) => meal.name)
+            : [],
       };
 
-      const res = await apiRequest("POST", "/api/meal-suggestions", requestData);
+      const res = await apiRequest(
+        "POST",
+        "/api/meal-suggestions",
+        requestData,
+      );
       return { response: await res.json(), appendResults: data.appendResults };
     },
     onSuccess: (data) => {
@@ -104,7 +114,7 @@ export default function Planner() {
         toast({
           title: "Error",
           description: "No meal suggestions received",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -112,7 +122,7 @@ export default function Planner() {
       if (appendResults && suggestions?.meals) {
         setSuggestions({
           ...response.suggestions,
-          meals: [...suggestions.meals, ...response.suggestions.meals]
+          meals: [...suggestions.meals, ...response.suggestions.meals],
         });
       } else {
         setSuggestions(response.suggestions);
@@ -121,22 +131,25 @@ export default function Planner() {
       setShowingMore(false);
       toast({
         title: "Success!",
-        description: appendResults ? "More meal suggestions added" : "Here are your meal suggestions"
+        description: appendResults
+          ? "More meal suggestions added"
+          : "Here are your meal suggestions",
       });
     },
     onError: (error: Error) => {
       setShowingMore(false);
       let description = error.message;
       if (description.includes("Rate limit exceeded")) {
-        const waitTime = description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
+        const waitTime =
+          description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
         description = `You've made too many requests. Please wait ${waitTime} before trying again.`;
       }
       toast({
         title: "Error",
         description,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const addToCalendarMutation = useMutation({
@@ -147,9 +160,9 @@ export default function Planner() {
         meal: {
           name: meal.name,
           description: meal.description,
-          macros: meal.macros
+          macros: meal.macros,
         },
-        mealType
+        mealType,
       };
       const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
       return res.json();
@@ -157,16 +170,16 @@ export default function Planner() {
     onSuccess: () => {
       toast({
         title: "Success!",
-        description: "Meal added to today's calendar"
+        description: "Meal added to today's calendar",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const favoriteMutation = useMutation({
@@ -178,7 +191,7 @@ export default function Planner() {
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
-        dietaryRestriction: form.getValues("dietaryPreference")
+        dietaryRestriction: form.getValues("dietaryPreference"),
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
       return res.json();
@@ -187,16 +200,16 @@ export default function Planner() {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
         title: "Success!",
-        description: "Recipe saved to favorites"
+        description: "Recipe saved to favorites",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const onSubmit = (data: MacroInput) => {
@@ -204,7 +217,7 @@ export default function Planner() {
       toast({
         title: "Error",
         description: "Please select at least one meal type",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -218,7 +231,10 @@ export default function Planner() {
     mutation.mutate({ ...currentData, appendResults: true });
   };
 
-  const handleShareClick = (event: React.MouseEvent<HTMLElement>, meal: any) => {
+  const handleShareClick = (
+    event: React.MouseEvent<HTMLElement>,
+    meal: any,
+  ) => {
     setShareAnchorEl(event.currentTarget);
     setSharingMeal(meal);
   };
@@ -234,15 +250,15 @@ export default function Planner() {
     const shareText = `Check out this healthy recipe from Smart Meal Planner!\n\nRecipe: ${sharingMeal.name}\n${sharingMeal.description}\n\nNutritional Info:\n• Carbs: ${sharingMeal.macros.carbs}g\n• Protein: ${sharingMeal.macros.protein}g\n• Fats: ${sharingMeal.macros.fats}g\n\nDiscover more recipes at: ${window.location.origin}`;
     const baseUrl = window.location.origin;
 
-    let platformUrl = '';
+    let platformUrl = "";
     switch (platform) {
-      case 'twitter':
+      case "twitter":
         platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
         break;
-      case 'facebook':
+      case "facebook":
         platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
         break;
-      case 'linkedin':
+      case "linkedin":
         platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
         break;
       default:
@@ -251,14 +267,14 @@ export default function Planner() {
             await navigator.share({
               title: `${sharingMeal.name} - Smart Meal Planner`,
               text: shareText,
-              url: baseUrl
+              url: baseUrl,
             });
             toast({
               title: "Success!",
-              description: "Recipe shared successfully"
+              description: "Recipe shared successfully",
             });
           } catch (error) {
-            console.error('Error sharing:', error);
+            console.error("Error sharing:", error);
           }
           handleShareClose();
           return;
@@ -266,30 +282,32 @@ export default function Planner() {
     }
 
     if (platformUrl) {
-      window.open(platformUrl, '_blank', 'noopener,noreferrer');
+      window.open(platformUrl, "_blank", "noopener,noreferrer");
     }
     handleShareClose();
   };
 
-  const handleMealTypeChange = (checked: boolean, value: keyof typeof mealTypeEnum) => {
+  const handleMealTypeChange = (
+    checked: boolean,
+    value: keyof typeof mealTypeEnum,
+  ) => {
     const currentValues = form.watch("mealTypes") || [];
     if (checked) {
       form.setValue("mealTypes", [...currentValues, value]);
     } else {
       form.setValue(
         "mealTypes",
-        currentValues.filter((type) => type !== value)
+        currentValues.filter((type) => type !== value),
       );
     }
   };
-
 
   return (
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: "center", mb: 6 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            AI Meal Planner
+            Macro Meal Planner
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your remaining macros and get AI-powered meal suggestions
@@ -334,15 +352,22 @@ export default function Planner() {
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <FormLabel>Meal Types</FormLabel>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
                       {mealTypeOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form.watch("mealTypes")?.includes(option.value as keyof typeof mealTypeEnum)}
+                              checked={form
+                                .watch("mealTypes")
+                                ?.includes(
+                                  option.value as keyof typeof mealTypeEnum,
+                                )}
                               onChange={(e) => {
-                                handleMealTypeChange(e.target.checked, option.value as keyof typeof mealTypeEnum);
+                                handleMealTypeChange(
+                                  e.target.checked,
+                                  option.value as keyof typeof mealTypeEnum,
+                                );
                               }}
                             />
                           }
@@ -380,11 +405,13 @@ export default function Planner() {
                     disabled={mutation.isPending}
                     sx={{
                       py: 1.5,
-                      background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                      background:
+                        "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                       color: "white",
                       "&:hover": {
-                        background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-                      }
+                        background:
+                          "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                      },
                     }}
                   >
                     {mutation.isPending ? (
@@ -431,10 +458,15 @@ export default function Planner() {
                             <Select
                               size="small"
                               value={selectedMealType}
-                              onChange={(e) => setSelectedMealType(e.target.value)}
+                              onChange={(e) =>
+                                setSelectedMealType(e.target.value)
+                              }
                             >
-                              {mealTypeOptions.map(option => (
-                                <MenuItem key={option.value} value={option.value}>
+                              {mealTypeOptions.map((option) => (
+                                <MenuItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
                                   {option.label}
                                 </MenuItem>
                               ))}
@@ -444,19 +476,37 @@ export default function Planner() {
                             variant="outlined"
                             size="small"
                             startIcon={<CalendarIcon />}
-                            onClick={() => addToCalendarMutation.mutate({ meal, mealType: selectedMealType })}
+                            onClick={() =>
+                              addToCalendarMutation.mutate({
+                                meal,
+                                mealType: selectedMealType,
+                              })
+                            }
                             disabled={addToCalendarMutation.isPending}
                           >
-                            {addToCalendarMutation.isPending ? "Adding..." : "Add to Calendar"}
+                            {addToCalendarMutation.isPending
+                              ? "Adding..."
+                              : "Add to Calendar"}
                           </Button>
                           <IconButton
-                            color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
+                            color={
+                              favorites?.some((f) => f.name === meal.name)
+                                ? "primary"
+                                : "default"
+                            }
                             onClick={() => {
-                              if (!meal.isStoredRecipe && !favorites?.some((f) => f.name === meal.name)) {
+                              if (
+                                !meal.isStoredRecipe &&
+                                !favorites?.some((f) => f.name === meal.name)
+                              ) {
                                 favoriteMutation.mutate(meal);
                               }
                             }}
-                            disabled={favoriteMutation.isPending || meal.isStoredRecipe || favorites?.some((f) => f.name === meal.name)}
+                            disabled={
+                              favoriteMutation.isPending ||
+                              meal.isStoredRecipe ||
+                              favorites?.some((f) => f.name === meal.name)
+                            }
                           >
                             <Favorite />
                           </IconButton>
@@ -474,7 +524,13 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={form.getValues("targetCarbs") > 0 ? (meal.macros.carbs / form.getValues("targetCarbs")) * 100 : 0}
+                            value={
+                              form.getValues("targetCarbs") > 0
+                                ? (meal.macros.carbs /
+                                    form.getValues("targetCarbs")) *
+                                  100
+                                : 0
+                            }
                             sx={{ mb: 2, height: 8, borderRadius: 4 }}
                           />
                         </Grid>
@@ -484,7 +540,13 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={form.getValues("targetProtein") > 0 ? (meal.macros.protein / form.getValues("targetProtein")) * 100 : 0}
+                            value={
+                              form.getValues("targetProtein") > 0
+                                ? (meal.macros.protein /
+                                    form.getValues("targetProtein")) *
+                                  100
+                                : 0
+                            }
                             sx={{ mb: 2, height: 8, borderRadius: 4 }}
                           />
                         </Grid>
@@ -494,7 +556,13 @@ export default function Planner() {
                           </Typography>
                           <LinearProgress
                             variant="determinate"
-                            value={form.getValues("targetFats") > 0 ? (meal.macros.fats / form.getValues("targetFats")) * 100 : 0}
+                            value={
+                              form.getValues("targetFats") > 0
+                                ? (meal.macros.fats /
+                                    form.getValues("targetFats")) *
+                                  100
+                                : 0
+                            }
                             sx={{ mb: 2, height: 8, borderRadius: 4 }}
                           />
                         </Grid>
@@ -510,17 +578,17 @@ export default function Planner() {
               open={Boolean(shareAnchorEl)}
               onClose={handleShareClose}
             >
-              <MenuItem onClick={() => shareRecipe('twitter')}>
+              <MenuItem onClick={() => shareRecipe("twitter")}>
                 <TwitterIcon sx={{ mr: 1 }} /> Share on Twitter
               </MenuItem>
-              <MenuItem onClick={() => shareRecipe('facebook')}>
+              <MenuItem onClick={() => shareRecipe("facebook")}>
                 <FacebookIcon sx={{ mr: 1 }} /> Share on Facebook
               </MenuItem>
-              <MenuItem onClick={() => shareRecipe('linkedin')}>
+              <MenuItem onClick={() => shareRecipe("linkedin")}>
                 <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
               </MenuItem>
               {navigator.share && (
-                <MenuItem onClick={() => shareRecipe('native')}>
+                <MenuItem onClick={() => shareRecipe("native")}>
                   <ShareIcon sx={{ mr: 1 }} /> Share via...
                 </MenuItem>
               )}
@@ -531,7 +599,9 @@ export default function Planner() {
                 variant="outlined"
                 onClick={handleShowMore}
                 disabled={mutation.isPending || showingMore}
-                startIcon={showingMore ? <CircularProgress size={20} /> : <PlusCircle />}
+                startIcon={
+                  showingMore ? <CircularProgress size={20} /> : <PlusCircle />
+                }
               >
                 {showingMore ? "Loading more..." : "Show More Options"}
               </Button>

@@ -18,6 +18,7 @@ import {
   Favorite,
   AccountCircle
 } from '@mui/icons-material';
+import { Logo } from './logo';
 
 export default function Navigation() {
   const { user, logoutMutation } = useAuth();
@@ -43,14 +44,24 @@ export default function Navigation() {
     <AppBar position="static" color="default" elevation={1}>
       <Container maxWidth="lg">
         <Toolbar>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexGrow: 1,
+              cursor: 'pointer'
+            }}
             onClick={() => setLocation('/')}
           >
-            Meal Planner
-          </Typography>
+            <Logo sx={{ fontSize: 32 }} />
+            <Typography
+              variant="h6"
+              component="div"
+            >
+              Meal Planner
+            </Typography>
+          </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button
