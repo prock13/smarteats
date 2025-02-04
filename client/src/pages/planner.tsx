@@ -231,8 +231,8 @@ export default function Planner() {
   const shareRecipe = async (platform: string) => {
     if (!sharingMeal) return;
 
-    const shareText = `Check out this recipe: ${sharingMeal.name}\n\n${sharingMeal.description}\n\nMacros:\nCarbs: ${sharingMeal.macros.carbs}g\nProtein: ${sharingMeal.macros.protein}g\nFats: ${sharingMeal.macros.fats}g`;
-    const baseUrl = `${window.location.origin}/recipes/share/${encodeURIComponent(sharingMeal.name)}`;
+    const shareText = `Check out this healthy recipe from Smart Meal Planner!\n\nRecipe: ${sharingMeal.name}\n${sharingMeal.description}\n\nNutritional Info:\n• Carbs: ${sharingMeal.macros.carbs}g\n• Protein: ${sharingMeal.macros.protein}g\n• Fats: ${sharingMeal.macros.fats}g\n\nDiscover more recipes at: ${window.location.origin}`;
+    const baseUrl = window.location.origin;
 
     let platformUrl = '';
     switch (platform) {
@@ -249,7 +249,7 @@ export default function Planner() {
         if (navigator.share) {
           try {
             await navigator.share({
-              title: sharingMeal.name,
+              title: `${sharingMeal.name} - Smart Meal Planner`,
               text: shareText,
               url: baseUrl
             });

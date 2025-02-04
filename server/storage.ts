@@ -12,6 +12,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>; // Add password update method
 
   // Meal suggestion operations
   getMealSuggestions(input: MacroInput): Promise<MealSuggestion | undefined>;
@@ -206,6 +207,13 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return !!favorite;
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: newPassword })
+      .where(eq(users.id, userId));
   }
 }
 

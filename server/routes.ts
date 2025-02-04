@@ -268,6 +268,38 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.post("/api/user/password", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Both current and new passwords are required" });
+      }
+
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isValid = await comparePasswords(currentPassword, user.password);
+      if (!isValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      const hashedNewPassword = await hashPassword(newPassword);
+      await storage.updateUserPassword(user.id, hashedNewPassword);
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -12,27 +12,28 @@ import Favorites from "@/pages/favorites";
 import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Menu, 
-  MenuItem, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
   Avatar,
   Box,
   Container,
   useTheme
 } from '@mui/material';
-import { 
-  CalendarMonth, 
-  Restaurant, 
+import {
+  CalendarMonth,
+  Restaurant,
   Favorite,
   AccountCircle
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import Profile from "@/pages/profile";
 
 function Navigation() {
   const { user, logoutMutation } = useAuth();
@@ -132,6 +133,7 @@ function Router() {
       <ProtectedRoute path="/calendar" component={Calendar} />
       <ProtectedRoute path="/recipes" component={Recipes} />
       <ProtectedRoute path="/favorites" component={Favorites} />
+      <ProtectedRoute path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
