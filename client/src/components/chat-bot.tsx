@@ -7,7 +7,6 @@ import { getChatbotResponse } from "@/lib/chatbot-service";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -75,8 +74,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   return (
     <Drawer open={open} onClose={onClose} shouldScaleBackground={false}>
       <DrawerContent className="h-[80vh]" sx={{ 
-        backgroundColor: theme => theme.palette.mode === 'dark' ? '#333' : 'var(--background)', // Lighter background for dark mode
-        color: theme => theme.palette.mode === 'dark' ? '#eee' : 'var(--foreground)' //Improved contrast for dark mode
+        backgroundColor: theme => theme.palette.mode === 'dark' ? '#4f4f4f' : 'var(--background)',
+        color: theme => theme.palette.mode === 'dark' ? '#eee' : 'var(--foreground)'
       }}>
         <DrawerHeader className="border-b relative">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pr: 8 }}>
@@ -108,7 +107,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex", 
           flexDirection: "column", 
           gap: 2,
-          bgcolor: theme => theme.palette.mode === 'dark' ? '#222' : 'background.default', //Darker background for dark mode
+          bgcolor: theme => theme.palette.mode === 'dark' ? '#4f4f4f' : 'background.default',
           color: 'text.primary'
         }}>
           {messages.map((message, index) => (
