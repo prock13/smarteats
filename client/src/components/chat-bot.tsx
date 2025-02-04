@@ -72,11 +72,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
 
   return (
     <Drawer open={open} onClose={onClose}>
-      <DrawerContent className="h-[80vh]" style={{ 
-        backgroundColor: 'var(--theme-dark, #1a1a1a)',
-        color: 'var(--theme-light, #ffffff)'
-      }}>
-        <DrawerHeader className="border-b bg-background">
+      <DrawerContent className="h-[80vh]">
+        <DrawerHeader className="border-b">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               src="/chef-avatar.png"
@@ -85,7 +82,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
             />
             <DrawerTitle>Chat with Chef Nina</DrawerTitle>
           </Box>
-          <IconButton onClick={onClose} edge="end" color="inherit">
+          <IconButton onClick={onClose} edge="end">
             <CloseIcon />
           </IconButton>
         </DrawerHeader>
@@ -97,8 +94,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex", 
           flexDirection: "column", 
           gap: 2,
-          bgcolor: 'var(--theme-dark, #1a1a1a)',
-          color: 'var(--theme-light, #ffffff)'
+          bgcolor: 'background.paper',
+          color: 'text.primary'
         }}>
           {messages.map((message, index) => (
             <Box
@@ -112,7 +109,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
                 sx={{
                   p: 2,
                   maxWidth: "70%",
-                  bgcolor: message.role === "user" ? "primary.main" : "background.paper",
+                  bgcolor: message.role === "user" ? "primary.main" : "background.default",
                   color: message.role === "user" ? "primary.contrastText" : "text.primary",
                 }}
               >
@@ -133,7 +130,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           <div ref={messagesEndRef} />
         </Box>
 
-        <DrawerFooter className="border-t" style={{ backgroundColor: 'var(--theme-dark, #1a1a1a)' }}>
+        <DrawerFooter className="border-t">
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               fullWidth
@@ -144,11 +141,11 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
               size="small"
               sx={{
                 '& .MuiInputBase-input': {
-                  color: 'var(--theme-light, #ffffff)',
+                  color: 'text.primary',
                 },
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.23)',
+                    borderColor: 'divider',
                   },
                   '&:hover fieldset': {
                     borderColor: 'primary.main',
@@ -156,12 +153,6 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
                   '&.Mui-focused fieldset': {
                     borderColor: 'primary.main',
                   },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'rgba(255, 255, 255, 0.7)',
-                },
-                '& input::placeholder': {
-                  color: 'rgba(255, 255, 255, 0.5)',
                 },
               }}
             />
