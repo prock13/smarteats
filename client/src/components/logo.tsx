@@ -20,7 +20,8 @@ export const Logo = (props: LogoProps) => {
       style={{
         width: size,
         height: size,
-        objectFit: 'contain'
+        objectFit: 'contain',
+        display: 'block'  
       }}
     />
   );
