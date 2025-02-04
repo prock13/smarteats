@@ -93,7 +93,9 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           p: 2, 
           display: "flex", 
           flexDirection: "column", 
-          gap: 2 
+          gap: 2,
+          bgcolor: 'background.default',
+          color: 'text.primary'
         }}>
           {messages.map((message, index) => (
             <Box
@@ -129,7 +131,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
         </Box>
 
         <DrawerFooter className="border-t">
-          <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1, bgcolor: 'background.default' }}>
             <TextField
               fullWidth
               placeholder="Ask Chef Nina about meal suggestions..."
