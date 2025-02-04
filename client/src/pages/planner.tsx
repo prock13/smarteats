@@ -34,15 +34,20 @@ import {
   RestaurantMenu,
 } from "@mui/icons-material";
 
-// Rest of the code from the original home.tsx remains the same, just updating the components to use Material UI
-
-export default function Planner() {
-  // ... Copy all the existing functionality from home.tsx ...
+const Planner = () => {
   return (
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
-        {/* ... Convert the existing JSX to use Material UI components ... */}
+        <Typography variant="h4" component="h1" gutterBottom>
+          Meal Planner
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          Plan your meals and track your macros
+        </Typography>
+        {/* Add the rest of the meal planner functionality here */}
       </Container>
     </Box>
   );
-}
+};
+
+export default Planner;
