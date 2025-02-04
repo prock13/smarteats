@@ -34,10 +34,28 @@ function createCustomTheme(settings: ThemeSettings): Theme {
       primary: {
         main: settings.primary,
       },
+      background: {
+        default: mode === 'dark' ? '#121212' : '#ffffff',
+        paper: mode === 'dark' ? '#1e1e1e' : '#ffffff',
+      },
+      text: {
+        primary: mode === 'dark' ? '#ffffff' : '#000000',
+        secondary: mode === 'dark' ? '#b3b3b3' : '#666666',
+      }
     },
     shape: {
       borderRadius: settings.borderRadius,
     },
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            backgroundColor: mode === 'dark' ? '#121212' : '#ffffff',
+            color: mode === 'dark' ? '#ffffff' : '#000000',
+          }
+        }
+      }
+    }
   });
 }
 
