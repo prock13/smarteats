@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  FormControl,
+  InputLabel,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+  MenuItem,
+  IconButton
+} from "@mui/material";
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { type InsertMealPlan } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
@@ -49,17 +52,10 @@ export default function CalendarPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
-      toast({
-        title: "Success",
-        description: "Meal plan added successfully",
-      });
+      toast("Meal plan added successfully", { severity: "success" });
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast(error.message, { severity: "error" });
     },
   });
 
@@ -69,17 +65,10 @@ export default function CalendarPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
-      toast({
-        title: "Success",
-        description: "Meal plan deleted successfully",
-      });
+      toast("Meal plan deleted successfully", { severity: "success" });
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast(error.message, { severity: "error" });
     },
   });
 
@@ -91,105 +80,99 @@ export default function CalendarPage() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Meal Planning Calendar
-          </h1>
-          <p className="text-muted-foreground">
-            Plan your meals and track your nutrition goals
-          </p>
-        </div>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h3" component="h1" 
+          sx={{ 
+            background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1
+          }}>
+          Meal Planning Calendar
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          Plan your meals and track your nutrition goals
+        </Typography>
+      </Box>
 
-        <div className="grid gap-8 md:grid-cols-[300px_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Calendar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border"
-                modifiers={{
-                  booked: (date) => {
-                    const dateStr = format(date, "yyyy-MM-dd");
-                    return !!mealsByDate?.[dateStr]?.length;
-                  },
-                }}
-                modifiersStyles={{
-                  booked: { backgroundColor: "hsl(var(--primary) / 0.1)" },
-                }}
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={2} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>Calendar</Typography>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DateCalendar 
+                value={date}
+                onChange={(newDate) => setDate(newDate)}
               />
-              {date && (
-                <div className="mt-4 space-y-4">
+            </LocalizationProvider>
+            {date && (
+              <Box sx={{ mt: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Meal Type</InputLabel>
                   <Select
                     value={selectedMealType}
-                    onValueChange={setSelectedMealType}
+                    onChange={(e) => setSelectedMealType(e.target.value)}
+                    label="Meal Type"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select meal type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="breakfast">Breakfast</SelectItem>
-                      <SelectItem value="lunch">Lunch</SelectItem>
-                      <SelectItem value="dinner">Dinner</SelectItem>
-                      <SelectItem value="snack">Snack</SelectItem>
-                    </SelectContent>
+                    <MenuItem value="breakfast">Breakfast</MenuItem>
+                    <MenuItem value="lunch">Lunch</MenuItem>
+                    <MenuItem value="dinner">Dinner</MenuItem>
+                    <MenuItem value="snack">Snack</MenuItem>
                   </Select>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                </FormControl>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {date ? format(date, "MMMM d, yyyy") : "Select a date"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div>Loading...</div>
-              ) : date ? (
-                <div className="space-y-4">
-                  {mealsByDate?.[format(date, "yyyy-MM-dd")]?.map((plan: any) => (
-                    <Card key={plan.id} className="bg-muted/50">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          {plan.mealType.charAt(0).toUpperCase() + plan.mealType.slice(1)}
-                        </CardTitle>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+        <Grid item xs={12} md={8}>
+          <Paper elevation={2} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              {date ? format(date, "MMMM d, yyyy") : "Select a date"}
+            </Typography>
+
+            {isLoading ? (
+              <Typography>Loading...</Typography>
+            ) : date ? (
+              <Box sx={{ mt: 2 }}>
+                {mealsByDate?.[format(date, "yyyy-MM-dd")]?.map((plan: any) => (
+                  <Card key={plan.id} sx={{ mb: 2, bgcolor: 'background.paper' }}>
+                    <CardHeader
+                      title={plan.mealType.charAt(0).toUpperCase() + plan.mealType.slice(1)}
+                      action={
+                        <IconButton 
                           onClick={() => deleteMealPlan.mutate(plan.id)}
+                          size="small"
                         >
-                          Remove
-                        </Button>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-1">
-                          <div className="font-medium">{plan.meal.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {plan.meal.description}
-                          </div>
-                          <div className="text-sm">
-                            Macros: {plan.meal.macros.carbs}g carbs, {plan.meal.macros.protein}g protein, {plan.meal.macros.fats}g fats
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )) || <div className="text-muted-foreground">No meals planned for this date</div>}
-                </div>
-              ) : (
-                <div className="text-muted-foreground">Select a date to view or plan meals</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    />
+                    <CardContent>
+                      <Typography variant="h6">{plan.meal.name}</Typography>
+                      <Typography color="text.secondary" sx={{ mt: 1 }}>
+                        {plan.meal.description}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        Macros: {plan.meal.macros.carbs}g carbs, {plan.meal.macros.protein}g protein, {plan.meal.macros.fats}g fats
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )) || (
+                  <Typography color="text.secondary">
+                    No meals planned for this date
+                  </Typography>
+                )}
+              </Box>
+            ) : (
+              <Typography color="text.secondary">
+                Select a date to view or plan meals
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
