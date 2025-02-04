@@ -38,6 +38,11 @@ export async function generateMealSuggestions(
   recipeLimit?: number,
   excludeRecipes: string[] = [],
   includeUserRecipes: boolean = true,
+  pantryItems?: {
+    carbSource?: string;
+    proteinSource?: string;
+    fatSource?: string;
+  }
 ) {
   try {
     checkRateLimit();
@@ -46,23 +51,18 @@ export async function generateMealSuggestions(
 
     // Filter out recipes that should be excluded and don't match dietary preference
     const availableStoredRecipes = storedRecipes.filter(recipe => {
-      // If user doesn't want to include their recipes, return false
       if (!includeUserRecipes) {
         return false;
       }
 
-      // Exclude recipes that were already suggested
       if (excludeRecipes.includes(recipe.name)) {
         return false;
       }
 
-      // If user requests a specific dietary preference
       if (dietaryPreference !== "none") {
-        // Only include recipes that exactly match the preference
         return recipe.dietaryRestriction === dietaryPreference;
       }
 
-      // If no preference specified, include all recipes
       return true;
     });
 
@@ -91,10 +91,24 @@ export async function generateMealSuggestions(
       ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.`
       : '';
 
-    const prompt = `You are a nutrition expert. Given the following macro nutrient targets:
+    const pantryPrompt = pantryItems
+      ? `\nPlease create recipes using these available ingredients:
+- Carbohydrate Source: ${pantryItems.carbSource}
+- Protein Source: ${pantryItems.proteinSource}
+- Fat Source: ${pantryItems.fatSource}
+
+IMPORTANT: Focus on creating recipes that primarily use these ingredients. You may suggest additional common ingredients (spices, vegetables, etc) to complete the recipe, but the main components should use the provided ingredients.`
+      : '';
+
+    const basePrompt = pantryItems
+      ? `You are a creative chef. Given the following ingredients and preferences:`
+      : `You are a nutrition expert. Given the following macro nutrient targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
-- Fats: ${fats}g
+- Fats: ${fats}g`;
+
+    const prompt = `${basePrompt}
+${pantryPrompt}
 ${dietaryRestrictionPrompt}
 ${mealTypesPrompt}
 ${recipeLimitPrompt}
@@ -103,13 +117,13 @@ ${excludeRecipesPrompt}
 ${storedRecipesPrompt}
 
 Please suggest ${mealTypes.length} meal(s) that will help meet these targets. For your suggestions:
-1. If a stored recipe matches the macro requirements closely (within 20%), suggest it exactly as-is
+1. If a stored recipe matches the requirements closely, suggest it exactly as-is
 2. Otherwise, create completely new recipe suggestions
 3. IMPORTANT: Never combine or modify stored recipes - either suggest them exactly as-is or create entirely new recipes
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
 6. Provide detailed nutritional information and step-by-step cooking instructions
-7. IMPORTANT: The macros (carbs, protein, fats) in your suggestions should be close to the target values. Do not exceed the targets by more than 10%.
+7. IMPORTANT: If using pantry ingredients, ensure the suggested recipes primarily use the provided ingredients
 
 IMPORTANT: You must respond with ONLY a JSON object, no other text. The response must strictly follow this structure:
 {
@@ -119,9 +133,9 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
       "description": "Brief description of the meal",
       "instructions": "Detailed step-by-step cooking instructions",
       "macros": {
-        "carbs": number (should closely match target carbs),
-        "protein": number (should closely match target protein),
-        "fats": number (should closely match target fats),
+        "carbs": number,
+        "protein": number,
+        "fats": number,
         "calories": number,
         "fiber": number,
         "sugar": number

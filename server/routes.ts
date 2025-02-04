@@ -6,7 +6,6 @@ import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/sc
 import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { insertFavoriteSchema } from "@shared/schema";
 
-
 export function registerRoutes(app: Express): Server {
   // Set up authentication routes and middleware
   setupAuth(app);
@@ -296,6 +295,56 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: "Password updated successfully" });
     } catch (error) {
       console.error("Error updating password:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.post("/api/pantry-suggestions", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { carbSource, proteinSource, fatSource, mealType, dietaryPreference, includeUserRecipes } = req.body;
+
+      // Validate required fields
+      if (!carbSource || !proteinSource || !fatSource || !mealType) {
+        return res.status(400).json({
+          message: "All ingredient sources and meal type are required"
+        });
+      }
+
+      const excludeRecipes: string[] = [];
+
+      console.log("Generating suggestions for pantry items:", {
+        carbSource,
+        proteinSource,
+        fatSource,
+        mealType,
+        dietaryPreference
+      });
+
+      const suggestions = await generateMealSuggestions(
+        0, // Not using specific macro targets for pantry suggestions
+        0,
+        0,
+        [mealType],
+        dietaryPreference,
+        1,
+        excludeRecipes,
+        includeUserRecipes,
+        { // Add pantry items as additional context
+          carbSource,
+          proteinSource,
+          fatSource
+        }
+      );
+
+      console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Error in pantry suggestions:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }

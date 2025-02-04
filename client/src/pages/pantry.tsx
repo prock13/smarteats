@@ -28,9 +28,9 @@ import {
 import { mealTypeEnum } from "@shared/schema";
 
 const pantryInputSchema = z.object({
-  carbSource: z.string().min(1, "Please enter a carbohydrate source"),
-  proteinSource: z.string().min(1, "Please enter a protein source"),
-  fatSource: z.string().min(1, "Please enter a fat source"),
+  carbSource: z.string().min(1, "Carbohydrate source is required"),
+  proteinSource: z.string().min(1, "Protein source is required"),
+  fatSource: z.string().min(1, "Fat source is required"),
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
   dietaryPreference: z.string(),
   includeUserRecipes: z.boolean().default(false),
@@ -132,6 +132,7 @@ export default function PantryPage() {
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
+                    required
                     label="Carbohydrate Source"
                     placeholder="e.g., Rice, Potatoes, Pasta"
                     {...form.register("carbSource")}
@@ -142,6 +143,7 @@ export default function PantryPage() {
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
+                    required
                     label="Protein Source"
                     placeholder="e.g., Chicken, Tofu, Fish"
                     {...form.register("proteinSource")}
@@ -152,6 +154,7 @@ export default function PantryPage() {
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
+                    required
                     label="Fat Source"
                     placeholder="e.g., Olive Oil, Avocado, Nuts"
                     {...form.register("fatSource")}
