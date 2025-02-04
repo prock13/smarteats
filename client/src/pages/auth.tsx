@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Logo } from "@/components/logo";
+import { Box, Container } from "@mui/material";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
 
@@ -37,9 +39,12 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <Container component="main" maxWidth="sm" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <Card className="w-full">
         <CardHeader className="space-y-1">
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <Logo sx={{ fontSize: 64 }} />
+          </Box>
           <CardTitle className="text-2xl text-center">
             Welcome to Macro Meal Planner
           </CardTitle>
@@ -137,6 +142,6 @@ export default function AuthPage() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+    </Container>
   );
 }
