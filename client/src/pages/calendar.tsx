@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import {
   Container,
   Grid,
   Paper,
   Typography,
   Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
+  IconButton,
+  TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
-  TextField
+  Card,
+  CardContent,
+  CardHeader,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -25,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function CalendarPage() {
   const { toast } = useToast();
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(startOfDay(new Date()));
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
 
   const startOfMonth = new Date(date?.getFullYear() || 2024, date?.getMonth() || 0, 1);
@@ -70,6 +69,12 @@ export default function CalendarPage() {
     },
   });
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Create date at start of day in local timezone to avoid timezone issues
+    const selectedDate = new Date(e.target.value);
+    setDate(startOfDay(selectedDate));
+  };
+
   const mealsByDate = mealPlans?.reduce((acc: Record<string, any[]>, plan: any) => {
     const dateStr = format(new Date(plan.date), "yyyy-MM-dd");
     if (!acc[dateStr]) acc[dateStr] = [];
@@ -101,7 +106,7 @@ export default function CalendarPage() {
             <TextField
               type="date"
               value={date ? format(date, "yyyy-MM-dd") : ""}
-              onChange={(e) => setDate(new Date(e.target.value))}
+              onChange={handleDateChange}
               fullWidth
               sx={{ mb: 2 }}
             />
