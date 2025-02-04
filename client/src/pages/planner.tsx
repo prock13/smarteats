@@ -586,22 +586,6 @@ export default function Planner() {
                         >
                           {meal.name}
                         </Typography>
-                        {meal.isStoredRecipe && (
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: 'primary.main',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                              fontSize: '0.75rem',
-                              fontWeight: 500
-                            }}
-                          >
-                            <PersonIcon fontSize="inherit" />
-                            My Recipe
-                          </Typography>
-                        )}
                       </Box>
 
                       <Typography
