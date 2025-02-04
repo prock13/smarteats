@@ -30,14 +30,14 @@ import { useState } from "react";
 
 const features = [
   {
-    title: "Daily Macro Planning",
+    title: "Daily Meal Finder",
     description:
       "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
     icon: <Restaurant sx={{ fontSize: 40 }} />,
     route: "/planner",
     details: [
       "Get personalized meal suggestions based on your remaining macros",
-      "AI-powered recipe generation tailored to your preferences",
+      "AI-powered recipe generation tailored to your dietary preferences",
       "Easy-to-follow recipes with detailed instructions",
       "Quick macro calculation and portion adjustments",
     ],
@@ -57,11 +57,11 @@ const features = [
   },
   {
     title: "Recipe Collection",
-    description: "Browse and save your favorite recipes for quick access.",
+    description: "Organize all your favorite recipes for quick access.",
     icon: <Favorite sx={{ fontSize: 40 }} />,
     route: "/recipes",
     details: [
-      "Extensive collection of healthy recipes",
+      "Save your favorite recipes for use in the Meal Finder.",
       "Filter by dietary preferences and restrictions",
       "Save and organize your favorite meals",
       "Share recipes with friends and family",

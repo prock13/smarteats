@@ -37,6 +37,14 @@ function ThemedApp() {
             <Route component={NotFound} />
           </Switch>
         </Container>
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          autoHideDuration={6000}
+        >
+          <Alert severity="info" variant="filled">
+            Message
+          </Alert>
+        </Snackbar>
       </Box>
     </MuiThemeProvider>
   );
@@ -48,14 +56,6 @@ function App() {
       <AuthProvider>
         <CustomThemeProvider>
           <ThemedApp />
-          <Snackbar
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            autoHideDuration={6000}
-          >
-            <Alert severity="info" variant="filled">
-              Message
-            </Alert>
-          </Snackbar>
         </CustomThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
