@@ -8,7 +8,14 @@ import {
   Card,
   CardContent,
   CardActions,
-  CardMedia,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   Restaurant,
@@ -16,8 +23,10 @@ import {
   Favorite,
   BarChart,
   LocalDining,
-  Tune
+  Tune,
+  Check,
 } from "@mui/icons-material";
+import { useState } from "react";
 
 const features = [
   {
@@ -25,41 +34,95 @@ const features = [
     description: "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
     icon: <Restaurant sx={{ fontSize: 40 }} />,
     route: "/planner",
+    details: [
+      "Get personalized meal suggestions based on your remaining macros",
+      "AI-powered recipe generation tailored to your preferences",
+      "Easy-to-follow recipes with detailed instructions",
+      "Quick macro calculation and portion adjustments"
+    ]
   },
   {
     title: "Calendar View",
     description: "Organize your meals throughout the week with an intuitive calendar interface.",
     icon: <CalendarMonth sx={{ fontSize: 40 }} />,
     route: "/calendar",
+    details: [
+      "Weekly and monthly meal planning views",
+      "Drag and drop meal organization",
+      "Quick meal rotation and scheduling",
+      "Meal prep planning assistance"
+    ]
   },
   {
     title: "Recipe Collection",
     description: "Browse and save your favorite recipes for quick access.",
     icon: <Favorite sx={{ fontSize: 40 }} />,
     route: "/recipes",
+    details: [
+      "Extensive collection of healthy recipes",
+      "Filter by dietary preferences and restrictions",
+      "Save and organize your favorite meals",
+      "Share recipes with friends and family"
+    ]
   },
   {
     title: "Macro Tracking",
     description: "Keep track of your daily macronutrient intake with visual progress indicators.",
     icon: <BarChart sx={{ fontSize: 40 }} />,
     route: "/planner",
+    details: [
+      "Real-time macro tracking and visualization",
+      "Daily, weekly, and monthly progress reports",
+      "Custom macro goal setting",
+      "Nutritional insights and recommendations"
+    ]
   },
   {
     title: "Dietary Preferences",
     description: "Customize meal suggestions based on your dietary restrictions and preferences.",
     icon: <LocalDining sx={{ fontSize: 40 }} />,
     route: "/planner",
+    details: [
+      "Support for various dietary restrictions",
+      "Allergen filtering and alerts",
+      "Customizable ingredient preferences",
+      "Smart substitution recommendations"
+    ]
   },
   {
     title: "Smart Recommendations",
     description: "Get personalized meal recommendations powered by advanced AI algorithms.",
     icon: <Tune sx={{ fontSize: 40 }} />,
     route: "/planner",
+    details: [
+      "AI-powered meal suggestions",
+      "Learning from your preferences over time",
+      "Seasonal recipe recommendations",
+      "Nutrition optimization suggestions"
+    ]
   },
 ];
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [selectedFeature, setSelectedFeature] = useState<typeof features[0] | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleLearnMore = (feature: typeof features[0]) => {
+    setSelectedFeature(feature);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const handleNavigate = () => {
+    if (selectedFeature) {
+      setOpenDialog(false);
+      setLocation(selectedFeature.route);
+    }
+  };
 
   return (
     <Box sx={{ flexGrow: 1, py: 8 }}>
@@ -131,7 +194,7 @@ export default function Home() {
                 <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
                   <Button 
                     size="small" 
-                    onClick={() => setLocation(feature.route)}
+                    onClick={() => handleLearnMore(feature)}
                     sx={{ textTransform: 'none' }}
                   >
                     Learn More
@@ -141,6 +204,63 @@ export default function Home() {
             </Grid>
           ))}
         </Grid>
+
+        {/* Feature Details Dialog */}
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          {selectedFeature && (
+            <>
+              <DialogTitle sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 2,
+                background: 'linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)',
+                color: 'white'
+              }}>
+                {selectedFeature.icon}
+                {selectedFeature.title}
+              </DialogTitle>
+              <DialogContent sx={{ mt: 2 }}>
+                <Typography variant="body1" paragraph>
+                  {selectedFeature.description}
+                </Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Key Features:
+                </Typography>
+                <List>
+                  {selectedFeature.details.map((detail, index) => (
+                    <ListItem key={index}>
+                      <ListItemIcon>
+                        <Check sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <ListItemText primary={detail} />
+                    </ListItem>
+                  ))}
+                </List>
+              </DialogContent>
+              <DialogActions sx={{ p: 3 }}>
+                <Button onClick={handleCloseDialog}>Close</Button>
+                <Button
+                  variant="contained"
+                  onClick={handleNavigate}
+                  sx={{
+                    background: 'linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)',
+                    color: 'white',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)',
+                    }
+                  }}
+                >
+                  Try Now
+                </Button>
+              </DialogActions>
+            </>
+          )}
+        </Dialog>
       </Container>
     </Box>
   );
