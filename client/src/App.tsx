@@ -15,9 +15,7 @@ import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
 import Navigation from "@/components/navigation";
-import { Box, Container } from "@mui/material";
-import { Toaster } from "@/components/ui/toaster";
-
+import { Box, Container, Snackbar, Alert } from "@mui/material";
 
 function ThemedApp() {
   const { theme } = useTheme();
@@ -50,7 +48,14 @@ function App() {
       <AuthProvider>
         <CustomThemeProvider>
           <ThemedApp />
-          <Toaster/>
+          <Snackbar
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            autoHideDuration={6000}
+          >
+            <Alert severity="info" variant="filled">
+              Message
+            </Alert>
+          </Snackbar>
         </CustomThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
