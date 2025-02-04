@@ -66,7 +66,7 @@ const features = [
       "Save and organize your favorite meals",
       "Share recipes with friends and family",
     ],
-  },
+  } /*
   {
     title: "Macro Tracking",
     description:
@@ -105,7 +105,7 @@ const features = [
       "Seasonal recipe recommendations",
       "Nutrition optimization suggestions",
     ],
-  },
+  },*/,
 ];
 
 export default function Home() {
