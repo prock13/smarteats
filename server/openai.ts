@@ -48,17 +48,16 @@ export async function generateMealSuggestions(
   try {
     checkRateLimit();
 
-    console.log("Starting meal suggestions generation with:", {
-      pantryItems,
-      mealTypes,
-      dietaryPreference
-    });
+    // Based on whether pantry items are provided, we'll use different prompt strategies
+    let prompt: string;
+    let systemRole: string;
 
-    // Simplified prompt for faster response
-    const prompt = `Create a recipe using these ingredients:
-- Main carb: ${pantryItems?.carbSource}
-- Main protein: ${pantryItems?.proteinSource}
-- Main fat: ${pantryItems?.fatSource}
+    if (pantryItems) {
+      // Pantry-based recipe suggestion
+      prompt = `Create a recipe using these ingredients:
+- Main carb: ${pantryItems.carbSource}
+- Main protein: ${pantryItems.proteinSource}
+- Main fat: ${pantryItems.fatSource}
 
 The recipe should be suitable for: ${mealTypes[0]}
 Dietary preference: ${dietaryPreference}
@@ -84,7 +83,71 @@ Respond with a JSON object in this exact format:
     }
   ]
 }`;
+      systemRole = "You are a chef. Always respond with valid JSON only. Keep recipes simple and focused on the main ingredients provided.";
+    } else {
+      // Macro-based meal planning
+      const storedRecipes = await storage.getRecipes();
+      const availableStoredRecipes = storedRecipes.filter(recipe => {
+        if (!includeUserRecipes) return false;
+        if (excludeRecipes.includes(recipe.name)) return false;
+        if (dietaryPreference !== "none") return recipe.dietaryRestriction === dietaryPreference;
+        return true;
+      });
 
+      const storedRecipesPrompt = availableStoredRecipes.length > 0
+        ? `Here are some stored recipes that you can suggest. IMPORTANT: Do not modify or combine these recipes, suggest them exactly as-is:\n${availableStoredRecipes.map(recipe => `
+- ${recipe.name}
+  Description: ${recipe.description}
+  Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
+  Dietary Restriction: ${recipe.dietaryRestriction}
+`).join('\n')}`
+        : '';
+
+      prompt = `You are a nutrition expert. Given the following macro nutrient targets:
+- Carbohydrates: ${carbs}g
+- Protein: ${protein}g
+- Fats: ${fats}g
+
+${storedRecipesPrompt}
+${excludeRecipes.length > 0 ? `\nPlease do NOT suggest any of these previously suggested recipes: ${excludeRecipes.join(', ')}` : ''}
+${dietaryPreference !== "none" ? `\nDietary Preference: ${dietaryPreference}. Please ensure all suggestions comply with ${dietaryPreference} dietary requirements.` : ''}
+${recipeLimit ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.` : '\nPlease suggest multiple meal options that meet these criteria.'}
+${mealTypes.length > 0 ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.` : ''}
+
+Please suggest meals that will help meet these targets. For your suggestions:
+1. If a stored recipe matches the requirements closely, suggest it exactly as-is
+2. Otherwise, create completely new recipe suggestions
+3. IMPORTANT: Never combine or modify stored recipes
+4. Ensure all suggestions comply with the dietary preferences
+5. Consider the specified meal types
+6. Provide detailed nutritional information and instructions
+
+Respond with a JSON object in this exact format:
+{
+  "meals": [
+    {
+      "name": "Meal name",
+      "description": "Brief description",
+      "instructions": "Detailed step-by-step cooking instructions",
+      "macros": {
+        "carbs": number,
+        "protein": number,
+        "fats": number,
+        "calories": number
+      },
+      "cookingTime": {
+        "prep": number,
+        "cook": number,
+        "total": number
+      },
+      "isStoredRecipe": boolean
+    }
+  ]
+}`;
+      systemRole = "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text. Never modify or combine existing recipes - suggest them exactly as-is or create entirely new recipes.";
+    }
+
+    console.log("Starting generation with mode:", pantryItems ? "pantry-based" : "macro-based");
     console.log("Sending prompt to OpenAI");
 
     const responsePromise = openai.chat.completions.create({
@@ -92,7 +155,7 @@ Respond with a JSON object in this exact format:
       messages: [
         {
           role: "system",
-          content: "You are a chef. Always respond with valid JSON only. Keep recipes simple and focused on the main ingredients provided."
+          content: systemRole
         },
         {
           role: "user",
@@ -126,6 +189,17 @@ Respond with a JSON object in this exact format:
       if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
         console.error("Invalid response format:", parsedContent);
         throw new Error("Invalid response format: missing or invalid meals array");
+      }
+
+      // If this was a macro-based request, verify stored recipes
+      if (!pantryItems) {
+        const storedRecipes = await storage.getRecipes();
+        parsedContent.meals = parsedContent.meals.map(meal => ({
+          ...meal,
+          isStoredRecipe: storedRecipes.some(
+            recipe => recipe.name.toLowerCase() === meal.name.toLowerCase()
+          )
+        }));
       }
 
       return parsedContent;
