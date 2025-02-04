@@ -42,8 +42,8 @@ export default function AuthPage() {
     <Container component="main" maxWidth="sm" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
       <Card className="w-full">
         <CardHeader className="space-y-1">
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <Logo sx={{ fontSize: 64 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Logo sx={{ fontSize: 128 }} />
           </Box>
           <CardTitle className="text-2xl text-center">
             Welcome to Macro Meal Planner
