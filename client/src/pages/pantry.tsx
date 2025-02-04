@@ -26,6 +26,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { mealTypeEnum } from "@shared/schema";
+import { RecipeCard } from "@/components/ui/RecipeCard";
 
 const pantryInputSchema = z.object({
   carbSource: z.string().min(1, "Carbohydrate source is required"),
@@ -283,25 +284,11 @@ export default function PantryPage() {
             <Grid container spacing={3}>
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
-                  <Card>
-                    <CardHeader title={meal.name} />
-                    <CardContent>
-                      <Typography variant="body1" paragraph>
-                        {meal.description}
-                      </Typography>
-                      <Typography variant="h6" gutterBottom>
-                        Instructions
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" paragraph>
-                        {meal.instructions}
-                      </Typography>
-                      {meal.cookingTime && (
-                        <Typography variant="body2" color="text.secondary">
-                          Cooking Time: {meal.cookingTime.total} minutes (Prep: {meal.cookingTime.prep}, Cook: {meal.cookingTime.cook})
-                        </Typography>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <RecipeCard
+                    meal={meal}
+                    onShare={() => {}}
+                    showAddToCalendar={false}
+                  />
                 </Grid>
               ))}
             </Grid>

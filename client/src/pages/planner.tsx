@@ -50,6 +50,7 @@ import {
 import { styled } from "@mui/material/styles";
 import type { Recipe } from "@shared/schema";
 import type { IconButtonProps } from "@mui/material/IconButton";
+import { RecipeCard } from "@/components/ui/RecipeCard";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -58,13 +59,13 @@ interface ExpandMoreProps extends IconButtonProps {
 const ExpandMore = styled((props: ExpandMoreProps) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: expand ? 'rotate(180deg)' : 'rotate(0deg)',
+})({
+  transform: (props: ExpandMoreProps) => (props.expand ? 'rotate(180deg)' : 'rotate(0deg)'),
   marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
+  transition: (theme) => theme.transitions.create('transform', {
     duration: theme.transitions.duration.shortest,
   }),
-}));
+});
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
@@ -485,372 +486,33 @@ export default function Planner() {
             <Grid container spacing={3}>
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
-                  <Card sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: (theme) => theme.shadows[8]
-                    },
-                    ...(meal.isStoredRecipe && {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === 'light'
-                          ? 'rgba(25, 118, 210, 0.02)'
-                          : 'rgba(25, 118, 210, 0.05)'
-                    })
-                  }}>
-                    <CardHeader
-                      sx={{
-                        backgroundColor: 'background.paper',
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
-                        pb: 1
-                      }}
-                      action={
-                        <Box sx={{
-                          display: "flex",
-                          gap: 1.5,
-                          alignItems: 'center',
-                          pr: 1
-                        }}>
-                          <IconButton
-                            onClick={(e) => handleShareClick(e, meal)}
-                            color="primary"
-                            size="small"
-                          >
-                            <ShareIcon />
-                          </IconButton>
-                          <FormControl sx={{ minWidth: 120 }}>
-                            <Select
-                              size="small"
-                              value={selectedMealType}
-                              onChange={(e) => setSelectedMealType(e.target.value)}
-                              sx={{
-                                backgroundColor: 'background.paper',
-                                '& .MuiSelect-select': { py: 1 }
-                              }}
-                            >
-                              {mealTypeOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CalendarIcon />}
-                            onClick={() =>
-                              addToCalendarMutation.mutate({
-                                meal,
-                                mealType: selectedMealType,
-                              })
-                            }
-                            disabled={addToCalendarMutation.isPending}
-                            sx={{
-                              minWidth: 'auto',
-                              whiteSpace: 'nowrap',
-                              px: 2
-                            }}
-                          >
-                            {addToCalendarMutation.isPending
-                              ? "Adding..."
-                              : "Add to Calendar"}
-                          </Button>
-                          {!meal.isStoredRecipe ? (
-                            <IconButton
-                              color={
-                                favorites?.some((f) => f.name === meal.name)
-                                  ? "primary"
-                                  : "default"
-                              }
-                              onClick={() => {
-                                if (!favorites?.some((f) => f.name === meal.name)) {
-                                  favoriteMutation.mutate(meal);
-                                }
-                              }}
-                              disabled={
-                                favoriteMutation.isPending ||
-                                favorites?.some((f) => f.name === meal.name)
-                              }
-                              size="small"
-                            >
-                              {favorites?.some((f) => f.name === meal.name) ? (
-                                <Favorite />
-                              ) : (
-                                <FavoriteBorder />
-                              )}
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              color="primary"
-                              size="small"
-                              disabled
-                            >
-                              <PersonIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </Box>
-                      }
-                    />
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
-                        pb: 1.5,
-                        mb: 2,
-                      }}>
-                        <Typography
-                          variant="h6"
-                          component="h2"
-                          sx={{
-                            fontWeight: 600,
-                            flexGrow: 1
-                          }}
-                        >
-                          {meal.name}
-                        </Typography>
-                      </Box>
-
-                      <Typography
-                        variant="body1"
-                        paragraph
-                        sx={{
-                          color: 'text.secondary',
-                          lineHeight: 1.6,
-                          mb: 3
-                        }}
-                      >
-                        {meal.description}
-                      </Typography>
-                      <Grid container spacing={2.5}>
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="subtitle2"
-                            gutterBottom
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              mb: 1
-                            }}
-                          >
-                            <span>Carbs</span>
-                            <span>{meal.macros.carbs}g</span>
-                          </Typography>
-                          <LinearProgress
-                            variant="determinate"
-                            value={Math.min(
-                              form.getValues("targetCarbs") > 0
-                                ? (meal.macros.carbs /
-                                  form.getValues("targetCarbs")) *
-                                  100
-                                : 0,
-                              100
-                            )}
-                            sx={{
-                              mb: 2.5,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: 'action.hover',
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 4,
-                                backgroundColor: 'primary.main',
-                                transition: 'transform 0.4s linear'
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="subtitle2"
-                            gutterBottom
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              mb: 1
-                            }}
-                          >
-                            <span>Protein</span>
-                            <span>{meal.macros.protein}g</span>
-                          </Typography>
-                          <LinearProgress
-                            variant="determinate"
-                            value={Math.min(
-                              form.getValues("targetProtein") > 0
-                                ? (meal.macros.protein /
-                                  form.getValues("targetProtein")) *
-                                  100
-                                : 0,
-                              100
-                            )}
-                            sx={{
-                              mb: 2.5,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: 'action.hover',
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 4,
-                                backgroundColor: 'success.main',
-                                transition: 'transform 0.4s linear'
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="subtitle2"
-                            gutterBottom
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              mb: 1
-                            }}
-                          >
-                            <span>Fats</span>
-                            <span>{meal.macros.fats}g</span>
-                          </Typography>
-                          <LinearProgress
-                            variant="determinate"
-                            value={Math.min(
-                              form.getValues("targetFats") > 0
-                                ? (meal.macros.fats /
-                                  form.getValues("targetFats")) *
-                                  100
-                                : 0,
-                              100
-                            )}
-                            sx={{
-                              mb: 2.5,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: 'action.hover',
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 4,
-                                backgroundColor: 'warning.main',
-                                transition: 'transform 0.4s linear'
-                              }
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-
-                      {!meal.isStoredRecipe && (
-                        <>
-                          <Box sx={{ mt: 2 }}>
-                            <Button
-                              onClick={() => handleExpandClick(index)}
-                              endIcon={<ExpandMoreIcon
-                                sx={{
-                                  transform: expandedCards[index] ? 'rotate(180deg)' : 'rotate(0deg)',
-                                  transition: 'transform 0.2s'
-                                }}
-                              />}
-                              sx={{ width: '100%', justifyContent: 'space-between' }}
-                            >
-                              {expandedCards[index] ? 'Show Less' : 'Show More Details'}
-                            </Button>
-                          </Box>
-
-                          <Collapse in={expandedCards[index]} timeout="auto" unmountOnExit>
-                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                              {meal.cookingTime && (
-                                <Box sx={{ mb: 3 }}>
-                                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <AccessTimeIcon fontSize="small" />
-                                    Cooking Time
-                                  </Typography>
-                                  <Grid container spacing={2}>
-                                    <Grid item xs={4}>
-                                      <Typography variant="body2" color="text.secondary">Prep: {meal.cookingTime.prep}min</Typography>
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                      <Typography variant="body2" color="text.secondary">Cook: {meal.cookingTime.cook}min</Typography>
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                      <Typography variant="body2" color="text.secondary">Total: {meal.cookingTime.total}min</Typography>
-                                    </Grid>
-                                  </Grid>
-                                </Box>
-                              )}
-
-                              <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <RestaurantIcon fontSize="small" />
-                                  Instructions
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                                  {meal.instructions}
-                                </Typography>
-                              </Box>
-
-                              <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" gutterBottom>Detailed Nutrition</Typography>
-                                <Grid container spacing={2}>
-                                  {meal.macros.calories && (
-                                    <Grid item xs={6}>
-                                      <Typography variant="body2" color="text.secondary">
-                                        Calories: {meal.macros.calories}kcal
-                                      </Typography>
-                                    </Grid>
-                                  )}
-                                  {meal.macros.fiber && (
-                                    <Grid item xs={6}>
-                                      <Typography variant="body2" color="text.secondary">
-                                        Fiber: {meal.macros.fiber}g
-                                      </Typography>
-                                    </Grid>
-                                  )}
-                                  {meal.macros.sugar && (
-                                    <Grid item xs={6}>
-                                      <Typography variant="body2" color="text.secondary">
-                                        Sugar: {meal.macros.sugar}g
-                                      </Typography>
-                                    </Grid>
-                                  )}
-                                </Grid>
-                              </Box>
-
-                              {(meal.nutrients?.vitamins || meal.nutrients?.minerals) && (
-                                <Box>
-                                  <Typography variant="h6" gutterBottom>Nutrients</Typography>
-                                  <Grid container spacing={2}>
-                                    {meal.nutrients.vitamins && (
-                                      <Grid item xs={12} sm={6}>
-                                        <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                          {meal.nutrients.vitamins.join(', ')}
-                                        </Typography>
-                                      </Grid>
-                                    )}
-                                    {meal.nutrients.minerals && (
-                                      <Grid item xs={12} sm={6}>
-                                        <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                          {meal.nutrients.minerals.join(', ')}
-                                        </Typography>
-                                      </Grid>
-                                    )}
-                                  </Grid>
-                                </Box>
-                              )}
-                            </Box>
-                          </Collapse>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <RecipeCard
+                    meal={meal}
+                    onShare={handleShareClick}
+                    targetMacros={{
+                      carbs: form.getValues("targetCarbs"),
+                      protein: form.getValues("targetProtein"),
+                      fats: form.getValues("targetFats"),
+                    }}
+                    favorites={favorites}
+                    showAddToCalendar={true}
+                  />
                 </Grid>
               ))}
             </Grid>
+
+            {!showingMore && suggestions.meals.length > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Button
+                  onClick={handleShowMore}
+                  variant="outlined"
+                  disabled={mutation.isPending}
+                  startIcon={mutation.isPending ? <CircularProgress size={20} /> : <PlusCircle />}
+                >
+                  {mutation.isPending ? "Loading..." : "Show More Options"}
+                </Button>
+              </Box>
+            )}
 
             <Menu
               anchorEl={shareAnchorEl}
@@ -866,25 +528,7 @@ export default function Planner() {
               <MenuItem onClick={() => shareRecipe("linkedin")}>
                 <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
               </MenuItem>
-              {navigator.share && (
-                <MenuItem onClick={() => shareRecipe("native")}>
-                  <ShareIcon sx={{ mr: 1 }} /> Share via...
-                </MenuItem>
-              )}
             </Menu>
-
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <Button
-                variant="outlined"
-                onClick={handleShowMore}
-                disabled={mutation.isPending || showingMore}
-                startIcon={
-                  showingMore ? <CircularProgress size={20} /> : <PlusCircle />
-                }
-              >
-                {showingMore ? "Loading more..." : "Show More Options"}
-              </Button>
-            </Box>
           </Box>
         )}
       </Container>
