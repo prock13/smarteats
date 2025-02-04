@@ -109,17 +109,31 @@ Please suggest ${mealTypes.length} meal(s) that will help meet these targets. Fo
 3. Always suggest new creative meals even if there are perfect matches in stored recipes
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
+6. Provide detailed nutritional information and step-by-step cooking instructions
 
 IMPORTANT: You must respond with ONLY a JSON object, no other text. The response must strictly follow this structure:
 {
   "meals": [
     {
       "name": "Meal name",
-      "description": "Brief description with cooking instructions",
+      "description": "Brief description of the meal",
+      "instructions": "Detailed step-by-step cooking instructions",
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number
+        "fats": number,
+        "calories": number,
+        "fiber": number,
+        "sugar": number
+      },
+      "nutrients": {
+        "vitamins": ["Vitamin A", "Vitamin C", etc],
+        "minerals": ["Iron", "Calcium", etc]
+      },
+      "cookingTime": {
+        "prep": number,
+        "cook": number,
+        "total": number
       },
       "isStoredRecipe": boolean
     }

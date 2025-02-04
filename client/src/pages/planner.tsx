@@ -31,6 +31,7 @@ import {
   FormHelperText,
   LinearProgress,
   Menu,
+  Collapse,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -42,7 +43,11 @@ import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
   Person as PersonIcon,
+  ExpandMore as ExpandMoreIcon,
+  AccessTime as AccessTimeIcon,
+  Restaurant as RestaurantIcon,
 } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
 import type { Recipe } from "@shared/schema";
 
 const mealTypeOptions = [
@@ -65,6 +70,17 @@ const dietaryOptions = [
   { value: "kosher", label: "Kosher" },
 ];
 
+const ExpandMore = styled((props) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+  marginLeft: 'auto',
+  transition: theme.transitions.create('transform', {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
+
 export default function Planner() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
@@ -72,6 +88,7 @@ export default function Planner() {
   const [showingMore, setShowingMore] = useState(false);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
+  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
 
   const queryClient = useQueryClient();
   const { data: favorites } = useQuery<Recipe[]>({
@@ -303,6 +320,13 @@ export default function Planner() {
         currentValues.filter((type) => type !== value),
       );
     }
+  };
+
+  const handleExpandClick = (index: number) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   return (
@@ -712,6 +736,106 @@ export default function Planner() {
                           />
                         </Grid>
                       </Grid>
+
+                      <Box sx={{ mt: 2 }}>
+                        <Button
+                          onClick={() => handleExpandClick(index)}
+                          endIcon={<ExpandMore
+                            sx={{
+                              transform: expandedCards[index] ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s'
+                            }}
+                          />}
+                          sx={{ width: '100%', justifyContent: 'space-between' }}
+                        >
+                          {expandedCards[index] ? 'Show Less' : 'Show More Details'}
+                        </Button>
+                      </Box>
+
+                      <Collapse in={expandedCards[index]} timeout="auto" unmountOnExit>
+                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                          {meal.cookingTime && (
+                            <Box sx={{ mb: 3 }}>
+                              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <AccessTimeIcon fontSize="small" />
+                                Cooking Time
+                              </Typography>
+                              <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                  <Typography variant="body2" color="text.secondary">Prep: {meal.cookingTime.prep}min</Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                  <Typography variant="body2" color="text.secondary">Cook: {meal.cookingTime.cook}min</Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                  <Typography variant="body2" color="text.secondary">Total: {meal.cookingTime.total}min</Typography>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          )}
+
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <RestaurantIcon fontSize="small" />
+                              Instructions
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                              {meal.instructions}
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="h6" gutterBottom>Detailed Nutrition</Typography>
+                            <Grid container spacing={2}>
+                              {meal.macros.calories && (
+                                <Grid item xs={6}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Calories: {meal.macros.calories}kcal
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {meal.macros.fiber && (
+                                <Grid item xs={6}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Fiber: {meal.macros.fiber}g
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {meal.macros.sugar && (
+                                <Grid item xs={6}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Sugar: {meal.macros.sugar}g
+                                  </Typography>
+                                </Grid>
+                              )}
+                            </Grid>
+                          </Box>
+
+                          {(meal.nutrients?.vitamins || meal.nutrients?.minerals) && (
+                            <Box>
+                              <Typography variant="h6" gutterBottom>Nutrients</Typography>
+                              <Grid container spacing={2}>
+                                {meal.nutrients.vitamins && (
+                                  <Grid item xs={12} sm={6}>
+                                    <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {meal.nutrients.vitamins.join(', ')}
+                                    </Typography>
+                                  </Grid>
+                                )}
+                                {meal.nutrients.minerals && (
+                                  <Grid item xs={12} sm={6}>
+                                    <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {meal.nutrients.minerals.join(', ')}
+                                    </Typography>
+                                  </Grid>
+                                )}
+                              </Grid>
+                            </Box>
+                          )}
+                        </Box>
+                      </Collapse>
                     </CardContent>
                   </Card>
                 </Grid>
