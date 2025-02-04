@@ -132,6 +132,12 @@ export default function Planner() {
         "/api/meal-suggestions",
         requestData,
       );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to get meal suggestions');
+      }
+
       return { response: await res.json(), appendResults: data.appendResults };
     },
     onSuccess: (data) => {
@@ -166,16 +172,17 @@ export default function Planner() {
     onError: (error: Error) => {
       setShowingMore(false);
       let description = error.message;
-      if (description.includes("Rate limit exceeded")) {
-        const waitTime =
-          description.match(/wait (\d+) seconds/)?.[1] || "a few minutes";
-        description = `You've made too many requests. Please wait ${waitTime} before trying again.`;
+      if (error.message.includes("Rate limit exceeded")) {
+        const waitTimeMatch = error.message.match(/wait (\d+) seconds/);
+        const waitTime = waitTimeMatch ? waitTimeMatch[1] : "a few";
+        description = `You've made too many requests. Please wait ${waitTime} seconds before trying again.`;
       }
       toast({
         title: "Error",
         description,
         variant: "destructive",
       });
+      setSuggestions(null);
     },
   });
 

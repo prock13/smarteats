@@ -161,6 +161,12 @@ export default function PantryPage() {
           data,
           { signal: controller.signal }
         );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to get pantry suggestions');
+        }
+
         const responseData = await response.json();
         clearTimeout(timeoutId);
         return responseData;
@@ -189,12 +195,18 @@ export default function PantryPage() {
     onError: (error: Error) => {
       console.error("Mutation error:", error);
       let errorMessage = error.message;
+
       if (error.name === "AbortError") {
         errorMessage = "Request timed out. Please try again.";
+      } else if (error.message.includes("Rate limit exceeded")) {
+        const waitTimeMatch = error.message.match(/wait (\d+) seconds/);
+        const waitTime = waitTimeMatch ? waitTimeMatch[1] : "a few";
+        errorMessage = `You've made too many requests. Please wait ${waitTime} seconds before trying again.`;
       }
+
       toast({
         title: "Error",
-        description: errorMessage || "Failed to get meal suggestions",
+        description: errorMessage,
         variant: "destructive",
       });
       setSuggestions(null);
