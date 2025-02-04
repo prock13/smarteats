@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { ProtectedRoute } from "@/lib/protected-route";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -143,13 +144,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-          <Navigation />
-          <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Router />
-          </Container>
-        </Box>
-        <Toaster />
+        <ThemeProvider>
+          <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+            <Navigation />
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+              <Router />
+            </Container>
+          </Box>
+          <Toaster />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

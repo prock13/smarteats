@@ -10,14 +10,9 @@ import {
   Box,
   Container,
   Typography,
-  Card,
-  CardContent,
-  CardHeader,
-  TextField,
-  Button,
   Grid,
-  Divider,
-} from "@mui/material";
+} from '@mui/material';
+import { ThemeSettings } from "@/components/theme-settings";
 
 const passwordUpdateSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -33,7 +28,7 @@ type PasswordUpdateForm = z.infer<typeof passwordUpdateSchema>;
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   const form = useForm<PasswordUpdateForm>({
     resolver: zodResolver(passwordUpdateSchema),
     defaultValues: {
@@ -77,23 +72,12 @@ export default function Profile() {
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
         <Typography variant="h4" component="h1" gutterBottom>
-          Profile
+          Profile Settings
         </Typography>
 
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Card>
-              <CardHeader title="Account Information" />
-              <CardContent>
-                <Typography variant="body1" gutterBottom>
-                  <strong>Username:</strong> {user.username}
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  <strong>Member since:</strong>{" "}
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </Typography>
-              </CardContent>
-            </Card>
+            <ThemeSettings />
           </Grid>
 
           <Grid item xs={12} md={6}>
