@@ -1,96 +1,75 @@
 import { useTheme } from "@/hooks/use-theme";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
+  Card,
+  CardContent,
+  CardHeader,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
+  MenuItem,
+  FormControl,
+  InputLabel,
+  TextField,
+  Typography,
+  Slider,
+  Box,
+} from "@mui/material";
 
 export function ThemeSettings() {
-  const { theme, updateTheme } = useTheme();
+  const { settings, updateTheme } = useTheme();
 
   return (
     <Card>
-      <CardHeader>
-        <h2 className="text-xl font-semibold">Theme Settings</h2>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="appearance">Appearance</Label>
-          <Select
-            value={theme.appearance}
-            onValueChange={(value) =>
-              updateTheme({ appearance: value as 'light' | 'dark' | 'system' })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select appearance" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <CardHeader title="Theme Settings" />
+      <CardContent>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <FormControl fullWidth>
+            <InputLabel>Appearance</InputLabel>
+            <Select
+              value={settings.mode}
+              label="Appearance"
+              onChange={(e) => updateTheme({ mode: e.target.value as 'light' | 'dark' | 'system' })}
+            >
+              <MenuItem value="light">Light</MenuItem>
+              <MenuItem value="dark">Dark</MenuItem>
+              <MenuItem value="system">System</MenuItem>
+            </Select>
+          </FormControl>
 
-        <div className="space-y-2">
-          <Label htmlFor="variant">Style Variant</Label>
-          <Select
-            value={theme.variant}
-            onValueChange={(value) =>
-              updateTheme({ variant: value as 'professional' | 'tint' | 'vibrant' })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select style variant" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="professional">Professional</SelectItem>
-              <SelectItem value="tint">Tint</SelectItem>
-              <SelectItem value="vibrant">Vibrant</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <Box>
+            <Typography gutterBottom>Primary Color</Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                type="color"
+                value={settings.primary}
+                onChange={(e) => updateTheme({ primary: e.target.value })}
+                sx={{ width: 100 }}
+              />
+              <TextField
+                fullWidth
+                value={settings.primary}
+                onChange={(e) => updateTheme({ primary: e.target.value })}
+                placeholder="#000000"
+              />
+            </Box>
+          </Box>
 
-        <div className="space-y-2">
-          <Label htmlFor="primary-color">Primary Color</Label>
-          <div className="flex gap-2">
-            <Input
-              type="color"
-              value={theme.primary}
-              onChange={(e) => updateTheme({ primary: e.target.value })}
-              className="w-[100px]"
-            />
-            <Input
-              type="text"
-              value={theme.primary}
-              onChange={(e) => updateTheme({ primary: e.target.value })}
-              placeholder="#000000"
-              className="flex-1"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="radius">Border Radius</Label>
-          <div className="flex gap-4 items-center">
-            <Slider
-              value={[theme.radius]}
-              onValueChange={([value]) => updateTheme({ radius: value })}
-              min={0}
-              max={2}
-              step={0.1}
-              className="flex-1"
-            />
-            <span className="w-12 text-right">{theme.radius}rem</span>
-          </div>
-        </div>
+          <Box>
+            <Typography gutterBottom>Border Radius</Typography>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Slider
+                value={settings.borderRadius}
+                onChange={(_, value) => updateTheme({ borderRadius: value as number })}
+                min={0}
+                max={16}
+                step={1}
+                valueLabelDisplay="auto"
+                sx={{ flex: 1 }}
+              />
+              <Typography sx={{ minWidth: 50 }} align="right">
+                {settings.borderRadius}px
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

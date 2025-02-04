@@ -1,53 +1,73 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { useLocalStorage } from "./use-local-storage";
-
-type ThemeVariant = 'professional' | 'tint' | 'vibrant';
-type ThemeAppearance = 'light' | 'dark' | 'system';
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { createTheme, Theme } from "@mui/material";
 
 interface ThemeSettings {
+  mode: 'light' | 'dark' | 'system';
   primary: string;
-  variant: ThemeVariant;
-  appearance: ThemeAppearance;
-  radius: number;
+  borderRadius: number;
 }
 
 interface ThemeContextType {
-  theme: ThemeSettings;
+  theme: Theme;
+  settings: ThemeSettings;
   updateTheme: (settings: Partial<ThemeSettings>) => void;
 }
 
-const defaultTheme: ThemeSettings = {
-  primary: "#2E7D32",
-  variant: "professional",
-  appearance: "system",
-  radius: 0.5
+const defaultSettings: ThemeSettings = {
+  mode: 'system',
+  primary: '#2E7D32',
+  borderRadius: 4
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function createCustomTheme(settings: ThemeSettings): Theme {
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const mode = settings.mode === 'system' 
+    ? (systemPrefersDark ? 'dark' : 'light')
+    : settings.mode;
+
+  return createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: settings.primary,
+      },
+    },
+    shape: {
+      borderRadius: settings.borderRadius,
+    },
+  });
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [persistedTheme, setPersistedTheme] = useLocalStorage<ThemeSettings>(
+  const [persistedSettings, setPersistedSettings] = useLocalStorage<ThemeSettings>(
     "app-theme",
-    defaultTheme
+    defaultSettings
   );
-  const [theme, setTheme] = useState<ThemeSettings>(persistedTheme);
+  const [settings, setSettings] = useState<ThemeSettings>(persistedSettings);
+  const [theme, setTheme] = useState(() => createCustomTheme(settings));
 
   useEffect(() => {
-    // Update CSS variables and theme.json when theme changes
-    document.documentElement.style.setProperty('--primary', theme.primary);
-    document.documentElement.style.setProperty('--radius', `${theme.radius}rem`);
-    document.documentElement.setAttribute('data-theme', theme.appearance);
-    
-    // Persist theme changes
-    setPersistedTheme(theme);
-  }, [theme, setPersistedTheme]);
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateTheme = () => setTheme(createCustomTheme(settings));
 
-  const updateTheme = (settings: Partial<ThemeSettings>) => {
-    setTheme(current => ({ ...current, ...settings }));
+    systemPrefersDark.addEventListener('change', updateTheme);
+    return () => systemPrefersDark.removeEventListener('change', updateTheme);
+  }, [settings]);
+
+  useEffect(() => {
+    setTheme(createCustomTheme(settings));
+    setPersistedSettings(settings);
+  }, [settings, setPersistedSettings]);
+
+  const updateTheme = (newSettings: Partial<ThemeSettings>) => {
+    setSettings(current => ({ ...current, ...newSettings }));
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, updateTheme }}>
+    <ThemeContext.Provider value={{ theme, settings, updateTheme }}>
       {children}
     </ThemeContext.Provider>
   );

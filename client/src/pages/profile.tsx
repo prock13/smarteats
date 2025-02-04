@@ -6,13 +6,18 @@ import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { ThemeSettings } from "@/components/theme-settings";
 import {
   Box,
   Container,
   Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  TextField,
+  Button,
   Grid,
 } from '@mui/material';
-import { ThemeSettings } from "@/components/theme-settings";
 
 const passwordUpdateSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -25,7 +30,7 @@ const passwordUpdateSchema = z.object({
 
 type PasswordUpdateForm = z.infer<typeof passwordUpdateSchema>;
 
-export default function Profile() {
+export default function Profile(): JSX.Element {
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -66,7 +71,18 @@ export default function Profile() {
     updatePasswordMutation.mutate(data);
   };
 
-  if (!user) return null;
+  // Return login redirect instead of null
+  if (!user) {
+    return (
+      <Box sx={{ py: 4 }}>
+        <Container maxWidth="lg">
+          <Typography variant="h4" component="h1" gutterBottom>
+            Please log in to access your profile
+          </Typography>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 4 }}>
@@ -122,14 +138,6 @@ export default function Profile() {
                         type="submit"
                         variant="contained"
                         disabled={updatePasswordMutation.isPending}
-                        sx={{
-                          py: 1.5,
-                          background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                          color: "white",
-                          "&:hover": {
-                            background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-                          }
-                        }}
                       >
                         {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
                       </Button>
