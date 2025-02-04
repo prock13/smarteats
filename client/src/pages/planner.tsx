@@ -49,6 +49,22 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import type { Recipe } from "@shared/schema";
+import type { IconButtonProps } from "@mui/material/IconButton";
+
+interface ExpandMoreProps extends IconButtonProps {
+  expand: boolean;
+}
+
+const ExpandMore = styled((props: ExpandMoreProps) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: expand ? 'rotate(180deg)' : 'rotate(0deg)',
+  marginLeft: 'auto',
+  transition: theme.transitions.create('transform', {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
@@ -70,16 +86,6 @@ const dietaryOptions = [
   { value: "kosher", label: "Kosher" },
 ];
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
 
 export default function Planner() {
   const { toast } = useToast();
@@ -740,7 +746,7 @@ export default function Planner() {
                       <Box sx={{ mt: 2 }}>
                         <Button
                           onClick={() => handleExpandClick(index)}
-                          endIcon={<ExpandMore
+                          endIcon={<ExpandMoreIcon
                             sx={{
                               transform: expandedCards[index] ? 'rotate(180deg)' : 'rotate(0deg)',
                               transition: 'transform 0.2s'
