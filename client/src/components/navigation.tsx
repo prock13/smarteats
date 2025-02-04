@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useTutorial } from "./tutorial/TutorialProvider";
 import {
   AppBar,
   Toolbar,
@@ -17,11 +18,13 @@ import {
   Restaurant,
   Favorite,
   AccountCircle,
+  Help,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 
 export default function Navigation() {
   const { user, logoutMutation } = useAuth();
+  const { startTutorial } = useTutorial();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [, setLocation] = useLocation();
 
@@ -55,12 +58,6 @@ export default function Navigation() {
             onClick={() => setLocation("/")}
           >
             <Logo sx={{ fontSize: 50 }} />
-            {/*<Typography
-              variant="h6"
-              component="div"
-            >
-              Meal Planner
-            </Typography> */}
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -68,6 +65,7 @@ export default function Navigation() {
               color="inherit"
               startIcon={<CalendarMonth />}
               onClick={() => setLocation("/calendar")}
+              data-tutorial="calendar-link"
             >
               Calendar
             </Button>
@@ -75,6 +73,7 @@ export default function Navigation() {
               color="inherit"
               startIcon={<Restaurant />}
               onClick={() => setLocation("/recipes")}
+              data-tutorial="recipes-link"
             >
               My Recipes
             </Button>
@@ -82,11 +81,17 @@ export default function Navigation() {
               color="inherit"
               startIcon={<Favorite />}
               onClick={() => setLocation("/favorites")}
+              data-tutorial="favorites-link"
             >
               Favorites
             </Button>
 
-            <IconButton size="large" onClick={handleMenu} color="inherit">
+            <IconButton
+              size="large"
+              onClick={handleMenu}
+              color="inherit"
+              data-tutorial="profile-button"
+            >
               <AccountCircle />
             </IconButton>
             <Menu
@@ -104,6 +109,12 @@ export default function Navigation() {
             >
               <MenuItem onClick={() => handleNavigate("/profile")}>
                 Profile
+              </MenuItem>
+              <MenuItem onClick={() => {
+                handleClose();
+                startTutorial();
+              }}>
+                <Help sx={{ mr: 1 }} /> Tutorial
               </MenuItem>
               <MenuItem onClick={() => logoutMutation.mutate()}>
                 {logoutMutation.isPending ? "Logging out..." : "Logout"}
