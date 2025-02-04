@@ -386,21 +386,23 @@ export default function Planner() {
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <FormLabel>Dietary Preference</FormLabel>
-                    <Select
-                      {...form.register("dietaryPreference")}
-                      defaultValue="none"
-                    >
-                      {dietaryOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    <FormControlLabel
-                      control={<Checkbox {...form.register("includeUserRecipes")} defaultChecked={true} />}
-                      label="Include My Recipes"
-                      sx={{ mt: 1 }}
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Select
+                        {...form.register("dietaryPreference")}
+                        defaultValue="none"
+                        sx={{ flexGrow: 1 }}
+                      >
+                        {dietaryOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormControlLabel
+                        control={<Checkbox {...form.register("includeUserRecipes")} defaultChecked={true} />}
+                        label="Include My Recipes"
+                      />
+                    </Box>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
