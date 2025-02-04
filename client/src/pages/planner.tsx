@@ -36,6 +36,7 @@ import {
   CalendarToday as CalendarIcon,
   Add as PlusCircle,
   Favorite,
+  FavoriteBorder,
   Share as ShareIcon,
   Twitter as TwitterIcon,
   Facebook as FacebookIcon,
@@ -480,7 +481,7 @@ export default function Planner() {
                           {meal.isStoredRecipe && (
                             <Badge 
                               color="secondary" 
-                              badgeContent="Saved"
+                              badgeContent="My Recipe"
                               sx={{ '& .MuiBadge-badge': { fontSize: '0.75rem' } }}
                             />
                           )}
@@ -529,29 +530,40 @@ export default function Planner() {
                               ? "Adding..."
                               : "Add to Calendar"}
                           </Button>
-                          <IconButton
-                            color={
-                              favorites?.some((f) => f.name === meal.name)
-                                ? "primary"
-                                : "default"
-                            }
-                            onClick={() => {
-                              if (
-                                !meal.isStoredRecipe &&
-                                !favorites?.some((f) => f.name === meal.name)
-                              ) {
-                                favoriteMutation.mutate(meal);
+                          {!meal.isStoredRecipe ? (
+                            <IconButton
+                              color={
+                                favorites?.some((f) => f.name === meal.name)
+                                  ? "primary"
+                                  : "default"
                               }
-                            }}
-                            disabled={
-                              favoriteMutation.isPending ||
-                              meal.isStoredRecipe ||
-                              favorites?.some((f) => f.name === meal.name)
-                            }
-                            size="small"
-                          >
-                            <Favorite />
-                          </IconButton>
+                              onClick={() => {
+                                if (!favorites?.some((f) => f.name === meal.name)) {
+                                  favoriteMutation.mutate(meal);
+                                }
+                              }}
+                              disabled={
+                                favoriteMutation.isPending ||
+                                favorites?.some((f) => f.name === meal.name)
+                              }
+                              size="small"
+                            >
+                              {favorites?.some((f) => f.name === meal.name) ? (
+                                <Favorite />
+                              ) : (
+                                <FavoriteBorder />
+                              )}
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              disabled
+                            >
+                              <Favorite />
+                            </IconButton>
+                          )}
+
                         </Box>
                       }
                     />
