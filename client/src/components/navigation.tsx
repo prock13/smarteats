@@ -17,13 +17,16 @@ import {
   Restaurant,
   Favorite,
   AccountCircle,
+  Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
+import { ChatBot } from "./chat-bot";
 
 export default function Navigation() {
   const { user, logoutMutation } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [, setLocation] = useLocation();
+  const [chatOpen, setChatOpen] = useState(false);
 
   if (!user) return null;
 
@@ -41,75 +44,87 @@ export default function Navigation() {
   };
 
   return (
-    <AppBar position="static" color="default" elevation={1}>
-      <Container maxWidth="lg">
-        <Toolbar>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              flexGrow: 1,
-              cursor: "pointer",
-            }}
-            onClick={() => setLocation("/")}
-          >
-            <Logo sx={{ fontSize: 50 }} />
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button
-              color="inherit"
-              startIcon={<CalendarMonth />}
-              onClick={() => setLocation("/calendar")}
-            >
-              Calendar
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<Restaurant />}
-              onClick={() => setLocation("/recipes")}
-            >
-              My Recipes
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<Favorite />}
-              onClick={() => setLocation("/favorites")}
-            >
-              Favorites
-            </Button>
-
-            <IconButton
-              size="large"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
+    <>
+      <AppBar position="static" color="default" elevation={1}>
+        <Container maxWidth="lg">
+          <Toolbar>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexGrow: 1,
+                cursor: "pointer",
               }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
+              onClick={() => setLocation("/")}
             >
-              <MenuItem onClick={() => handleNavigate("/profile")}>
-                Profile
-              </MenuItem>
-              <MenuItem onClick={() => logoutMutation.mutate()}>
-                {logoutMutation.isPending ? "Logging out..." : "Logout"}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+              <Logo sx={{ fontSize: 50 }} />
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Button
+                color="inherit"
+                startIcon={<CalendarMonth />}
+                onClick={() => setLocation("/calendar")}
+              >
+                Calendar
+              </Button>
+              <Button
+                color="inherit"
+                startIcon={<Restaurant />}
+                onClick={() => setLocation("/recipes")}
+              >
+                My Recipes
+              </Button>
+              <Button
+                color="inherit"
+                startIcon={<Favorite />}
+                onClick={() => setLocation("/favorites")}
+              >
+                Favorites
+              </Button>
+
+              <IconButton
+                color="inherit"
+                onClick={() => setChatOpen(true)}
+                sx={{ ml: 1 }}
+              >
+                <ChatIcon />
+              </IconButton>
+
+              <IconButton
+                size="large"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <MenuItem onClick={() => handleNavigate("/profile")}>
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={() => logoutMutation.mutate()}>
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </MenuItem>
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
+    </>
   );
 }
