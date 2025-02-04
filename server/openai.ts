@@ -67,8 +67,7 @@ export async function generateMealSuggestions(
     });
 
     const storedRecipesPrompt = availableStoredRecipes.length > 0
-      ? `Here are some stored recipes that you can consider along with suggesting new recipes:
-${availableStoredRecipes.map(recipe => `
+      ? `Here are some stored recipes that you can suggest. IMPORTANT: Do not modify or combine these recipes, suggest them exactly as they are:\n${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
@@ -104,9 +103,9 @@ ${excludeRecipesPrompt}
 ${storedRecipesPrompt}
 
 Please suggest ${mealTypes.length} meal(s) that will help meet these targets. For your suggestions:
-1. Include a mix of both stored recipes and new creative meal ideas
-2. Aim to include at least one stored recipe if it reasonably fits the macro requirements
-3. Always suggest new creative meals even if there are perfect matches in stored recipes
+1. If a stored recipe matches the macro requirements closely (within 20%), suggest it exactly as-is
+2. Otherwise, create completely new recipe suggestions
+3. IMPORTANT: Never combine or modify stored recipes - either suggest them exactly as-is or create entirely new recipes
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
 6. Provide detailed nutritional information and step-by-step cooking instructions
@@ -148,7 +147,7 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
       messages: [
         {
           role: "system",
-          content: "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text."
+          content: "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text. Never modify or combine existing recipes - suggest them exactly as-is or create entirely new recipes."
         },
         {
           role: "user",
