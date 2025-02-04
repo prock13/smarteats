@@ -25,10 +25,24 @@ import {
   LocalDining,
   Tune,
   Check,
+  Chat as ChatIcon,
 } from "@mui/icons-material";
 import { useState } from "react";
 
 const features = [
+  {
+    title: "Chef Nina - AI Assistant",
+    description:
+      "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
+    icon: <ChatIcon sx={{ fontSize: 40 }} />,
+    route: "/",
+    details: [
+      "Get personalized meal suggestions based on your preferences",
+      "Real-time nutritional guidance and recipe modifications",
+      "Interactive meal planning assistance",
+      "24/7 availability for all your culinary questions",
+    ],
+  },
   {
     title: "Macro Meal Planner",
     description:
@@ -66,46 +80,7 @@ const features = [
       "Save and organize your favorite meals",
       "Share recipes with friends and family",
     ],
-  } /*
-  {
-    title: "Macro Tracking",
-    description:
-      "Keep track of your daily macronutrient intake with visual progress indicators.",
-    icon: <BarChart sx={{ fontSize: 40 }} />,
-    route: "/planner",
-    details: [
-      "Real-time macro tracking and visualization",
-      "Daily, weekly, and monthly progress reports",
-      "Custom macro goal setting",
-      "Nutritional insights and recommendations",
-    ],
   },
-  {
-    title: "Dietary Preferences",
-    description:
-      "Customize meal suggestions based on your dietary restrictions and preferences.",
-    icon: <LocalDining sx={{ fontSize: 40 }} />,
-    route: "/planner",
-    details: [
-      "Support for various dietary restrictions",
-      "Allergen filtering and alerts",
-      "Customizable ingredient preferences",
-      "Smart substitution recommendations",
-    ],
-  },
-  {
-    title: "Smart Recommendations",
-    description:
-      "Get personalized meal recommendations powered by advanced AI algorithms.",
-    icon: <Tune sx={{ fontSize: 40 }} />,
-    route: "/planner",
-    details: [
-      "AI-powered meal suggestions",
-      "Learning from your preferences over time",
-      "Seasonal recipe recommendations",
-      "Nutrition optimization suggestions",
-    ],
-  },*/,
 ];
 
 export default function Home() {
