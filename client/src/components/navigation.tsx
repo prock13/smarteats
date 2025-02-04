@@ -14,6 +14,7 @@ import {
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
@@ -76,14 +77,14 @@ export default function Navigation() {
       </Box>
       <List>
         {navigationItems.map((item) => (
-          <ListItem
-            button
-            key={item.text}
-            onClick={() => handleNavigate(item.path)}
-            sx={{ color: "text.primary" }}
-          >
-            <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigate(item.path)}
+              sx={{ color: "text.primary" }}
+            >
+              <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
           </ListItem>
         ))}
       </List>
