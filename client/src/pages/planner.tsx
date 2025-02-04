@@ -453,16 +453,41 @@ export default function Planner() {
             <Grid container spacing={3}>
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
-                  <Card>
+                  <Card sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: (theme) => theme.shadows[8]
+                    }
+                  }}>
                     <CardHeader
+                      sx={{
+                        backgroundColor: 'background.paper',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        pb: 1
+                      }}
                       action={
-                        <Box sx={{ display: "flex", gap: 1 }}>
+                        <Box sx={{ 
+                          display: "flex", 
+                          gap: 1.5,
+                          alignItems: 'center',
+                          pr: 1 
+                        }}>
                           {meal.isStoredRecipe && (
-                            <Badge color="secondary" badgeContent="Saved" />
+                            <Badge 
+                              color="secondary" 
+                              badgeContent="Saved"
+                              sx={{ '& .MuiBadge-badge': { fontSize: '0.75rem' } }}
+                            />
                           )}
                           <IconButton
                             onClick={(e) => handleShareClick(e, meal)}
                             color="primary"
+                            size="small"
                           >
                             <ShareIcon />
                           </IconButton>
@@ -470,15 +495,14 @@ export default function Planner() {
                             <Select
                               size="small"
                               value={selectedMealType}
-                              onChange={(e) =>
-                                setSelectedMealType(e.target.value)
-                              }
+                              onChange={(e) => setSelectedMealType(e.target.value)}
+                              sx={{ 
+                                backgroundColor: 'background.paper',
+                                '& .MuiSelect-select': { py: 1 }
+                              }}
                             >
                               {mealTypeOptions.map((option) => (
-                                <MenuItem
-                                  key={option.value}
-                                  value={option.value}
-                                >
+                                <MenuItem key={option.value} value={option.value}>
                                   {option.label}
                                 </MenuItem>
                               ))}
@@ -495,6 +519,11 @@ export default function Planner() {
                               })
                             }
                             disabled={addToCalendarMutation.isPending}
+                            sx={{ 
+                              minWidth: 'auto',
+                              whiteSpace: 'nowrap',
+                              px: 2
+                            }}
                           >
                             {addToCalendarMutation.isPending
                               ? "Adding..."
@@ -519,13 +548,14 @@ export default function Planner() {
                               meal.isStoredRecipe ||
                               favorites?.some((f) => f.name === meal.name)
                             }
+                            size="small"
                           >
                             <Favorite />
                           </IconButton>
                         </Box>
                       }
                     />
-                    <CardContent>
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
                       <Typography 
                         variant="h6" 
                         component="h2" 
@@ -533,19 +563,38 @@ export default function Planner() {
                         sx={{ 
                           borderBottom: '1px solid',
                           borderColor: 'divider',
-                          pb: 1,
-                          mb: 2
+                          pb: 1.5,
+                          mb: 2,
+                          fontWeight: 600
                         }}
                       >
                         {meal.name}
                       </Typography>
-                      <Typography variant="body1" paragraph>
+                      <Typography 
+                        variant="body1" 
+                        paragraph
+                        sx={{ 
+                          color: 'text.secondary',
+                          lineHeight: 1.6,
+                          mb: 3
+                        }}
+                      >
                         {meal.description}
                       </Typography>
-                      <Grid container spacing={2}>
+                      <Grid container spacing={2.5}>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Carbs: {meal.macros.carbs}g
+                          <Typography 
+                            variant="subtitle2" 
+                            gutterBottom
+                            sx={{ 
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              mb: 1
+                            }}
+                          >
+                            <span>Carbs</span>
+                            <span>{meal.macros.carbs}g</span>
                           </Typography>
                           <LinearProgress
                             variant="determinate"
@@ -556,12 +605,31 @@ export default function Planner() {
                                   100
                                 : 0
                             }
-                            sx={{ mb: 2, height: 8, borderRadius: 4 }}
+                            sx={{ 
+                              mb: 2.5, 
+                              height: 8, 
+                              borderRadius: 4,
+                              backgroundColor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 4,
+                                backgroundColor: 'primary.main'
+                              }
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Protein: {meal.macros.protein}g
+                          <Typography 
+                            variant="subtitle2" 
+                            gutterBottom
+                            sx={{ 
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              mb: 1
+                            }}
+                          >
+                            <span>Protein</span>
+                            <span>{meal.macros.protein}g</span>
                           </Typography>
                           <LinearProgress
                             variant="determinate"
@@ -572,12 +640,31 @@ export default function Planner() {
                                   100
                                 : 0
                             }
-                            sx={{ mb: 2, height: 8, borderRadius: 4 }}
+                            sx={{ 
+                              mb: 2.5, 
+                              height: 8, 
+                              borderRadius: 4,
+                              backgroundColor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 4,
+                                backgroundColor: 'success.main'
+                              }
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Fats: {meal.macros.fats}g
+                          <Typography 
+                            variant="subtitle2" 
+                            gutterBottom
+                            sx={{ 
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              mb: 1
+                            }}
+                          >
+                            <span>Fats</span>
+                            <span>{meal.macros.fats}g</span>
                           </Typography>
                           <LinearProgress
                             variant="determinate"
@@ -588,7 +675,16 @@ export default function Planner() {
                                   100
                                 : 0
                             }
-                            sx={{ mb: 2, height: 8, borderRadius: 4 }}
+                            sx={{ 
+                              mb: 2.5, 
+                              height: 8, 
+                              borderRadius: 4,
+                              backgroundColor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 4,
+                                backgroundColor: 'warning.main'
+                              }
+                            }}
                           />
                         </Grid>
                       </Grid>
