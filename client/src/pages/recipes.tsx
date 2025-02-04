@@ -5,15 +5,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRecipeSchema, type InsertRecipe, type Recipe } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Pencil, Trash2 } from "lucide-react";
-import { AutoSelectInput } from "@/components/ui/auto-select-input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {Badge} from "@/components/ui/badge";
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  TextField,
+  Grid,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Chip,
+  CircularProgress
+} from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+
 
 export default function Recipes() {
   const { toast } = useToast();
@@ -43,19 +52,12 @@ export default function Recipes() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-      toast({
-        title: "Success!",
-        description: "Recipe saved successfully"
-      });
+      toast("Recipe saved successfully", { severity: "success" });
       form.reset();
       setEditingRecipe(null);
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast(error.message, { severity: "error" });
     }
   });
 
@@ -67,19 +69,12 @@ export default function Recipes() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-      toast({
-        title: "Success!",
-        description: "Recipe updated successfully"
-      });
+      toast("Recipe updated successfully", { severity: "success" });
       form.reset();
       setEditingRecipe(null);
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast(error.message, { severity: "error" });
     }
   });
 
@@ -89,17 +84,10 @@ export default function Recipes() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-      toast({
-        title: "Success!",
-        description: "Recipe deleted successfully"
-      });
+      toast("Recipe deleted successfully", { severity: "success" });
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast(error.message, { severity: "error" });
     }
   });
 
@@ -125,215 +113,200 @@ export default function Recipes() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ maxWidth: '6xl', mx: 'auto', mb: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h3" component="h1" 
+            sx={{ 
+              background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1
+            }}>
             Recipe Management
-          </h1>
-          <p className="text-muted-foreground">
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             Create and manage your custom recipes with macro nutrient information
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="grid gap-8 md:grid-cols-[1fr_400px]">
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Recipes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div>Loading recipes...</div>
-                ) : recipes?.length > 0 ? (
-                  <div className="space-y-4">
-                    {recipes.map((recipe: Recipe) => (
-                      <Card key={recipe.id} className="bg-muted/50">
-                        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                          <div>
-                            <CardTitle className="text-lg font-medium">
-                              {recipe.name}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {recipe.description}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(recipe)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                if (confirm('Are you sure you want to delete this recipe?')) {
-                                  deleteMutation.mutate(recipe.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Carbs:</span>{" "}
-                              {recipe.carbs}g
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Protein:</span>{" "}
-                              {recipe.protein}g
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Fats:</span>{" "}
-                              {recipe.fats}g
-                            </div>
-                          </div>
-                          {recipe.dietaryRestriction !== "none" && (
-                            <Badge className="mt-2" variant="secondary">
-                              {recipe.dietaryRestriction}
-                            </Badge>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={8}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>Your Recipes</Typography>
+              {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : recipes?.length > 0 ? (
+                <Box sx={{ mt: 2 }}>
+                  {recipes.map((recipe: Recipe) => (
+                    <Paper 
+                      key={recipe.id} 
+                      elevation={1} 
+                      sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Box>
+                          <Typography variant="h6">{recipe.name}</Typography>
+                          <Typography color="text.secondary" sx={{ mt: 1 }}>
+                            {recipe.description}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleEdit(recipe)}
+                            sx={{ mr: 1 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton 
+                            size="small"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this recipe?')) {
+                                deleteMutation.mutate(recipe.id);
+                              }
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+
+                      <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={4}>
+                          <Typography variant="body2" color="text.secondary">
+                            Carbs: {recipe.carbs}g
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Typography variant="body2" color="text.secondary">
+                            Protein: {recipe.protein}g
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Typography variant="body2" color="text.secondary">
+                            Fats: {recipe.fats}g
+                          </Typography>
+                        </Grid>
+                      </Grid>
+
+                      {recipe.dietaryRestriction !== "none" && (
+                        <Chip
+                          label={recipe.dietaryRestriction}
+                          size="small"
+                          sx={{ mt: 2 }}
+                        />
+                      )}
+                    </Paper>
+                  ))}
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography color="text.secondary">
                     No recipes yet. Create your first recipe using the form.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
+          <Grid item xs={12} md={4}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
                 {editingRecipe ? 'Edit Recipe' : 'Create Recipe'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Recipe Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
+              </Typography>
+
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    label="Recipe Name"
+                    {...form.register("name")}
+                    error={!!form.formState.errors.name}
+                    helperText={form.formState.errors.name?.message}
+                    fullWidth
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Short Description</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                  <TextField
+                    label="Short Description"
+                    {...form.register("description")}
+                    error={!!form.formState.errors.description}
+                    helperText={form.formState.errors.description?.message}
+                    multiline
+                    rows={2}
+                    fullWidth
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="instructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cooking Instructions</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="min-h-[100px]" />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                  <TextField
+                    label="Cooking Instructions"
+                    {...form.register("instructions")}
+                    error={!!form.formState.errors.instructions}
+                    helperText={form.formState.errors.instructions?.message}
+                    multiline
+                    rows={4}
+                    fullWidth
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="dietaryRestriction"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dietary Restriction</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select dietary restriction" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">No Restrictions</SelectItem>
-                            <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                            <SelectItem value="vegan">Vegan</SelectItem>
-                            <SelectItem value="pescatarian">Pescatarian</SelectItem>
-                            <SelectItem value="keto">Keto</SelectItem>
-                            <SelectItem value="paleo">Paleo</SelectItem>
-                            <SelectItem value="gluten-free">Gluten-Free</SelectItem>
-                            <SelectItem value="dairy-free">Dairy-Free</SelectItem>
-                            <SelectItem value="halal">Halal</SelectItem>
-                            <SelectItem value="kosher">Kosher</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Dietary Restriction</InputLabel>
+                    <Select
+                      {...form.register("dietaryRestriction")}
+                      error={!!form.formState.errors.dietaryRestriction}
+                      label="Dietary Restriction"
+                      defaultValue="none"
+                    >
+                      <MenuItem value="none">No Restrictions</MenuItem>
+                      <MenuItem value="vegetarian">Vegetarian</MenuItem>
+                      <MenuItem value="vegan">Vegan</MenuItem>
+                      <MenuItem value="pescatarian">Pescatarian</MenuItem>
+                      <MenuItem value="keto">Keto</MenuItem>
+                      <MenuItem value="paleo">Paleo</MenuItem>
+                      <MenuItem value="gluten-free">Gluten-Free</MenuItem>
+                      <MenuItem value="dairy-free">Dairy-Free</MenuItem>
+                      <MenuItem value="halal">Halal</MenuItem>
+                      <MenuItem value="kosher">Kosher</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="carbs"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Carbs (g)</FormLabel>
-                          <FormControl>
-                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Carbs (g)"
+                        type="number"
+                        {...form.register("carbs", { valueAsNumber: true })}
+                        error={!!form.formState.errors.carbs}
+                        helperText={form.formState.errors.carbs?.message}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Protein (g)"
+                        type="number"
+                        {...form.register("protein", { valueAsNumber: true })}
+                        error={!!form.formState.errors.protein}
+                        helperText={form.formState.errors.protein?.message}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Fats (g)"
+                        type="number"
+                        {...form.register("fats", { valueAsNumber: true })}
+                        error={!!form.formState.errors.fats}
+                        helperText={form.formState.errors.fats?.message}
+                        fullWidth
+                      />
+                    </Grid>
+                  </Grid>
 
-                    <FormField
-                      control={form.control}
-                      name="protein"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Protein (g)</FormLabel>
-                          <FormControl>
-                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="fats"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fats (g)</FormLabel>
-                          <FormControl>
-                            <AutoSelectInput type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                     <Button 
                       type="submit" 
-                      className="flex-1" 
+                      variant="contained" 
+                      fullWidth
                       disabled={createMutation.isPending || updateMutation.isPending}
                     >
                       {createMutation.isPending || updateMutation.isPending
@@ -342,8 +315,7 @@ export default function Recipes() {
                     </Button>
                     {editingRecipe && (
                       <Button 
-                        type="button" 
-                        variant="outline" 
+                        variant="outlined" 
                         onClick={() => {
                           setEditingRecipe(null);
                           form.reset({
@@ -360,13 +332,13 @@ export default function Recipes() {
                         Cancel
                       </Button>
                     )}
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+                  </Box>
+                </Box>
+              </form>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
 }
