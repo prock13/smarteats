@@ -41,6 +41,7 @@ import {
   Twitter as TwitterIcon,
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import type { Recipe } from "@shared/schema";
 
@@ -462,7 +463,13 @@ export default function Planner() {
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: (theme) => theme.shadows[8]
-                    }
+                    },
+                    ...(meal.isStoredRecipe && {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === 'light'
+                          ? 'rgba(25, 118, 210, 0.02)'
+                          : 'rgba(25, 118, 210, 0.05)'
+                    })
                   }}>
                     <CardHeader
                       sx={{
@@ -472,19 +479,12 @@ export default function Planner() {
                         pb: 1
                       }}
                       action={
-                        <Box sx={{ 
-                          display: "flex", 
+                        <Box sx={{
+                          display: "flex",
                           gap: 1.5,
                           alignItems: 'center',
-                          pr: 1 
+                          pr: 1
                         }}>
-                          {meal.isStoredRecipe && (
-                            <Badge 
-                              color="secondary" 
-                              badgeContent="My Recipe"
-                              sx={{ '& .MuiBadge-badge': { fontSize: '0.75rem' } }}
-                            />
-                          )}
                           <IconButton
                             onClick={(e) => handleShareClick(e, meal)}
                             color="primary"
@@ -497,7 +497,7 @@ export default function Planner() {
                               size="small"
                               value={selectedMealType}
                               onChange={(e) => setSelectedMealType(e.target.value)}
-                              sx={{ 
+                              sx={{
                                 backgroundColor: 'background.paper',
                                 '& .MuiSelect-select': { py: 1 }
                               }}
@@ -520,7 +520,7 @@ export default function Planner() {
                               })
                             }
                             disabled={addToCalendarMutation.isPending}
-                            sx={{ 
+                            sx={{
                               minWidth: 'auto',
                               whiteSpace: 'nowrap',
                               px: 2
@@ -560,32 +560,54 @@ export default function Planner() {
                               size="small"
                               disabled
                             >
-                              <Favorite />
+                              <PersonIcon fontSize="small" />
                             </IconButton>
                           )}
-
                         </Box>
                       }
                     />
                     <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Typography 
-                        variant="h6" 
-                        component="h2" 
-                        gutterBottom 
-                        sx={{ 
-                          borderBottom: '1px solid',
-                          borderColor: 'divider',
-                          pb: 1.5,
-                          mb: 2,
-                          fontWeight: 600
-                        }}
-                      >
-                        {meal.name}
-                      </Typography>
-                      <Typography 
-                        variant="body1" 
+                      <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        pb: 1.5,
+                        mb: 2,
+                      }}>
+                        <Typography
+                          variant="h6"
+                          component="h2"
+                          sx={{
+                            fontWeight: 600,
+                            flexGrow: 1
+                          }}
+                        >
+                          {meal.name}
+                        </Typography>
+                        {meal.isStoredRecipe && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'primary.main',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              fontSize: '0.75rem',
+                              fontWeight: 500
+                            }}
+                          >
+                            <PersonIcon fontSize="inherit" />
+                            My Recipe
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Typography
+                        variant="body1"
                         paragraph
-                        sx={{ 
+                        sx={{
                           color: 'text.secondary',
                           lineHeight: 1.6,
                           mb: 3
@@ -595,10 +617,10 @@ export default function Planner() {
                       </Typography>
                       <Grid container spacing={2.5}>
                         <Grid item xs={12}>
-                          <Typography 
-                            variant="subtitle2" 
+                          <Typography
+                            variant="subtitle2"
                             gutterBottom
-                            sx={{ 
+                            sx={{
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
@@ -613,13 +635,13 @@ export default function Planner() {
                             value={
                               form.getValues("targetCarbs") > 0
                                 ? (meal.macros.carbs /
-                                    form.getValues("targetCarbs")) *
+                                  form.getValues("targetCarbs")) *
                                   100
                                 : 0
                             }
-                            sx={{ 
-                              mb: 2.5, 
-                              height: 8, 
+                            sx={{
+                              mb: 2.5,
+                              height: 8,
                               borderRadius: 4,
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
@@ -630,10 +652,10 @@ export default function Planner() {
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography 
-                            variant="subtitle2" 
+                          <Typography
+                            variant="subtitle2"
                             gutterBottom
-                            sx={{ 
+                            sx={{
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
@@ -648,13 +670,13 @@ export default function Planner() {
                             value={
                               form.getValues("targetProtein") > 0
                                 ? (meal.macros.protein /
-                                    form.getValues("targetProtein")) *
+                                  form.getValues("targetProtein")) *
                                   100
                                 : 0
                             }
-                            sx={{ 
-                              mb: 2.5, 
-                              height: 8, 
+                            sx={{
+                              mb: 2.5,
+                              height: 8,
                               borderRadius: 4,
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
@@ -665,10 +687,10 @@ export default function Planner() {
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography 
-                            variant="subtitle2" 
+                          <Typography
+                            variant="subtitle2"
                             gutterBottom
-                            sx={{ 
+                            sx={{
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
@@ -683,13 +705,13 @@ export default function Planner() {
                             value={
                               form.getValues("targetFats") > 0
                                 ? (meal.macros.fats /
-                                    form.getValues("targetFats")) *
+                                  form.getValues("targetFats")) *
                                   100
                                 : 0
                             }
-                            sx={{ 
-                              mb: 2.5, 
-                              height: 8, 
+                            sx={{
+                              mb: 2.5,
+                              height: 8,
                               borderRadius: 4,
                               backgroundColor: 'action.hover',
                               '& .MuiLinearProgress-bar': {
