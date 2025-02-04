@@ -15,7 +15,7 @@ export const Logo = (props: LogoProps) => {
 
   return (
     <img 
-      src="meal-planner-logo-ai-brush-removebg-dalk75n(1)(1).png"
+      src="/logo.png"
       alt="Meal Planner Logo"
       style={{
         width: size,
