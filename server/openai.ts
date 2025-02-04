@@ -110,6 +110,7 @@ Please suggest ${mealTypes.length} meal(s) that will help meet these targets. Fo
 4. Ensure all suggestions comply with the dietary preferences specified
 5. Consider the specified meal types when making suggestions (e.g., breakfast foods for breakfast)
 6. Provide detailed nutritional information and step-by-step cooking instructions
+7. IMPORTANT: The macros (carbs, protein, fats) in your suggestions should be close to the target values. Do not exceed the targets by more than 10%.
 
 IMPORTANT: You must respond with ONLY a JSON object, no other text. The response must strictly follow this structure:
 {
@@ -119,9 +120,9 @@ IMPORTANT: You must respond with ONLY a JSON object, no other text. The response
       "description": "Brief description of the meal",
       "instructions": "Detailed step-by-step cooking instructions",
       "macros": {
-        "carbs": number,
-        "protein": number,
-        "fats": number,
+        "carbs": number (should closely match target carbs),
+        "protein": number (should closely match target protein),
+        "fats": number (should closely match target fats),
         "calories": number,
         "fiber": number,
         "sugar": number
