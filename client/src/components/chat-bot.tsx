@@ -72,7 +72,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
 
   return (
     <Drawer open={open} onClose={onClose}>
-      <DrawerContent className="h-[80vh]" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <DrawerContent className="h-[80vh]">
         <DrawerHeader>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
