@@ -26,18 +26,18 @@ import {
   FormLabel,
   FormHelperText,
   LinearProgress,
+  Menu,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
   Add as PlusCircle,
   Favorite,
-  RestaurantMenu,
+  Share as ShareIcon,
+  Twitter as TwitterIcon,
+  Facebook as FacebookIcon,
+  LinkedIn as LinkedInIcon,
 } from "@mui/icons-material";
 import type { Recipe } from "@shared/schema";
-import { Progress } from "@/components/ui/progress";
-import { AutoSelectInput } from "@/components/ui/auto-select-input";
-import { Form, FormControl as MyFormControl, FormField, FormItem, FormLabel as MyFormLabel, FormMessage } from "@/components/ui/form";
-
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
@@ -64,6 +64,8 @@ export default function Planner() {
   const [suggestions, setSuggestions] = useState<any>(null);
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
   const [showingMore, setShowingMore] = useState(false);
+  const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
+  const [sharingMeal, setSharingMeal] = useState<any>(null);
 
   const queryClient = useQueryClient();
   const { data: favorites } = useQuery<Recipe[]>({
@@ -217,6 +219,72 @@ export default function Planner() {
     mutation.mutate({ ...currentData, appendResults: true });
   };
 
+  const handleShareClick = (event: React.MouseEvent<HTMLElement>, meal: any) => {
+    setShareAnchorEl(event.currentTarget);
+    setSharingMeal(meal);
+  };
+
+  const handleShareClose = () => {
+    setShareAnchorEl(null);
+    setSharingMeal(null);
+  };
+
+  const shareRecipe = async (platform: string) => {
+    if (!sharingMeal) return;
+
+    const shareText = `Check out this recipe: ${sharingMeal.name}\n\n${sharingMeal.description}\n\nMacros:\nCarbs: ${sharingMeal.macros.carbs}g\nProtein: ${sharingMeal.macros.protein}g\nFats: ${sharingMeal.macros.fats}g`;
+    const baseUrl = `${window.location.origin}/recipes/share/${encodeURIComponent(sharingMeal.name)}`;
+
+    let platformUrl = '';
+    switch (platform) {
+      case 'twitter':
+        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
+        break;
+      case 'facebook':
+        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
+        break;
+      case 'linkedin':
+        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
+        break;
+      default:
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: sharingMeal.name,
+              text: shareText,
+              url: baseUrl
+            });
+            toast({
+              title: "Success!",
+              description: "Recipe shared successfully"
+            });
+          } catch (error) {
+            console.error('Error sharing:', error);
+          }
+          handleShareClose();
+          return;
+        }
+    }
+
+    if (platformUrl) {
+      window.open(platformUrl, '_blank', 'noopener,noreferrer');
+    }
+    handleShareClose();
+  };
+
+  const handleMealTypeChange = (checked: boolean, value: keyof typeof mealTypeEnum) => {
+    const currentValues = form.watch("mealTypes") || [];
+    if (checked) {
+      form.setValue("mealTypes", [...currentValues, value]);
+    } else {
+      form.setValue(
+        "mealTypes",
+        currentValues.filter((type) => type !== value)
+      );
+    }
+  };
+
+
   return (
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
@@ -273,17 +341,9 @@ export default function Planner() {
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form.watch("mealTypes")?.includes(option.value)}
+                              checked={form.watch("mealTypes")?.includes(option.value as keyof typeof mealTypeEnum)}
                               onChange={(e) => {
-                                const currentValues = form.watch("mealTypes") || [];
-                                if (e.target.checked) {
-                                  form.setValue("mealTypes", [...currentValues, option.value]);
-                                } else {
-                                  form.setValue(
-                                    "mealTypes",
-                                    currentValues.filter((value) => value !== option.value)
-                                  );
-                                }
+                                handleMealTypeChange(e.target.checked, option.value as keyof typeof mealTypeEnum);
                               }}
                             />
                           }
@@ -373,6 +433,12 @@ export default function Planner() {
                           {meal.isStoredRecipe && (
                             <Badge color="secondary" badgeContent="Saved" />
                           )}
+                          <IconButton
+                            onClick={(e) => handleShareClick(e, meal)}
+                            color="primary"
+                          >
+                            <ShareIcon />
+                          </IconButton>
                           <FormControl sx={{ minWidth: 120 }}>
                             <Select
                               size="small"
@@ -450,6 +516,27 @@ export default function Planner() {
                 </Grid>
               ))}
             </Grid>
+
+            <Menu
+              anchorEl={shareAnchorEl}
+              open={Boolean(shareAnchorEl)}
+              onClose={handleShareClose}
+            >
+              <MenuItem onClick={() => shareRecipe('twitter')}>
+                <TwitterIcon sx={{ mr: 1 }} /> Share on Twitter
+              </MenuItem>
+              <MenuItem onClick={() => shareRecipe('facebook')}>
+                <FacebookIcon sx={{ mr: 1 }} /> Share on Facebook
+              </MenuItem>
+              <MenuItem onClick={() => shareRecipe('linkedin')}>
+                <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
+              </MenuItem>
+              {navigator.share && (
+                <MenuItem onClick={() => shareRecipe('native')}>
+                  <ShareIcon sx={{ mr: 1 }} /> Share via...
+                </MenuItem>
+              )}
+            </Menu>
 
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Button
