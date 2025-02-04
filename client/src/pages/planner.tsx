@@ -452,7 +452,7 @@ export default function Planner() {
           <Box sx={{ mt: 4 }}>
             <Grid container spacing={3}>
               {suggestions.meals.map((meal: any, index: number) => (
-                <Grid item xs={12} key={index}>
+                <Grid item xs={12} md={6} key={index}>
                   <Card>
                     <CardHeader
                       title={meal.name}
