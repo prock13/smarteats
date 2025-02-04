@@ -73,10 +73,10 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   return (
     <Drawer open={open} onClose={onClose}>
       <DrawerContent className="h-[80vh]" style={{ 
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)'
+        backgroundColor: 'var(--theme-dark, #1a1a1a)',
+        color: 'var(--theme-light, #ffffff)'
       }}>
-        <DrawerHeader className="border-b">
+        <DrawerHeader className="border-b bg-background">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               src="/chef-avatar.png"
@@ -97,8 +97,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex", 
           flexDirection: "column", 
           gap: 2,
-          bgcolor: 'background.default',
-          color: 'text.primary'
+          bgcolor: 'var(--theme-dark, #1a1a1a)',
+          color: 'var(--theme-light, #ffffff)'
         }}>
           {messages.map((message, index) => (
             <Box
@@ -133,8 +133,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           <div ref={messagesEndRef} />
         </Box>
 
-        <DrawerFooter className="border-t">
-          <Box sx={{ display: "flex", gap: 1, bgcolor: 'background.default' }}>
+        <DrawerFooter className="border-t" style={{ backgroundColor: 'var(--theme-dark, #1a1a1a)' }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               fullWidth
               placeholder="Ask Chef Nina about meal suggestions..."
@@ -144,11 +144,11 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
               size="small"
               sx={{
                 '& .MuiInputBase-input': {
-                  color: 'text.primary',
+                  color: 'var(--theme-light, #ffffff)',
                 },
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    borderColor: 'divider',
+                    borderColor: 'rgba(255, 255, 255, 0.23)',
                   },
                   '&:hover fieldset': {
                     borderColor: 'primary.main',
@@ -158,7 +158,10 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
                   },
                 },
                 '& .MuiInputLabel-root': {
-                  color: 'text.secondary',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                },
+                '& input::placeholder': {
+                  color: 'rgba(255, 255, 255, 0.5)',
                 },
               }}
             />
