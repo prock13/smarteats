@@ -24,6 +24,7 @@ import {
   AccountCircle,
   Chat as ChatIcon,
   Menu as MenuIcon,
+  Kitchen as KitchenIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -55,6 +56,7 @@ export default function Navigation() {
     { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
+    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
   ];
 
   const mobileDrawer = (
@@ -64,9 +66,9 @@ export default function Navigation() {
       open={mobileOpen}
       onClose={() => setMobileOpen(false)}
       ModalProps={{ keepMounted: true }}
-      sx={{ 
-        display: { xs: 'block', md: 'none' },
-        '& .MuiDrawer-paper': { width: 240, bgcolor: 'background.paper' },
+      sx={{
+        display: { xs: "block", md: "none" },
+        "& .MuiDrawer-paper": { width: 240, bgcolor: "background.paper" },
       }}
     >
       <Box sx={{ p: 2 }}>
@@ -74,13 +76,13 @@ export default function Navigation() {
       </Box>
       <List>
         {navigationItems.map((item) => (
-          <ListItem 
-            button 
-            key={item.text} 
+          <ListItem
+            button
+            key={item.text}
             onClick={() => handleNavigate(item.path)}
-            sx={{ color: 'text.primary' }}
+            sx={{ color: "text.primary" }}
           >
-            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
@@ -98,7 +100,7 @@ export default function Navigation() {
               aria-label="open drawer"
               edge="start"
               onClick={() => setMobileOpen(true)}
-              sx={{ mr: 2, display: { md: 'none' } }}
+              sx={{ mr: 2, display: { md: "none" } }}
             >
               <MenuIcon />
             </IconButton>
@@ -116,7 +118,9 @@ export default function Navigation() {
               <Logo sx={{ fontSize: 50 }} />
             </Box>
 
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2 }}
+            >
               {navigationItems.map((item) => (
                 <Button
                   key={item.text}
@@ -166,7 +170,7 @@ export default function Navigation() {
             </Box>
 
             {/* Mobile-only icons */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
+            <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
               <IconButton
                 color="inherit"
                 onClick={() => setChatOpen(true)}

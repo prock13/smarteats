@@ -14,6 +14,7 @@ import Favorites from "@/pages/favorites";
 import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
+import Pantry from "@/pages/pantry";
 import Navigation from "@/components/navigation";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
 
@@ -34,6 +35,7 @@ function ThemedApp() {
             <ProtectedRoute path="/recipes" component={Recipes} />
             <ProtectedRoute path="/favorites" component={Favorites} />
             <ProtectedRoute path="/profile" component={Profile} />
+            <ProtectedRoute path="/pantry" component={Pantry} />
             <Route component={NotFound} />
           </Switch>
         </Container>
