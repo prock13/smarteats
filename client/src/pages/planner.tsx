@@ -455,7 +455,6 @@ export default function Planner() {
                 <Grid item xs={12} md={6} key={index}>
                   <Card>
                     <CardHeader
-                      title={meal.name}
                       action={
                         <Box sx={{ display: "flex", gap: 1 }}>
                           {meal.isStoredRecipe && (
@@ -527,6 +526,19 @@ export default function Planner() {
                       }
                     />
                     <CardContent>
+                      <Typography 
+                        variant="h6" 
+                        component="h2" 
+                        gutterBottom 
+                        sx={{ 
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                          pb: 1,
+                          mb: 2
+                        }}
+                      >
+                        {meal.name}
+                      </Typography>
                       <Typography variant="body1" paragraph>
                         {meal.description}
                       </Typography>
