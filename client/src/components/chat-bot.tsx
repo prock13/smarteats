@@ -82,7 +82,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
             />
             <DrawerTitle>Chat with Chef Nina</DrawerTitle>
           </Box>
-          <IconButton onClick={onClose} edge="end">
+          <IconButton onClick={onClose} edge="end" color="inherit">
             <CloseIcon />
           </IconButton>
         </DrawerHeader>
@@ -137,6 +137,25 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSend()}
               size="small"
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'text.primary',
+                },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'divider',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'text.secondary',
+                },
+              }}
             />
             <Button onClick={handleSend} disabled={!input.trim() || isTyping}>
               <SendIcon />
