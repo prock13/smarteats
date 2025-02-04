@@ -81,7 +81,6 @@ export default function Planner() {
       targetFats: 0,
       mealTypes: [],
       dietaryPreference: "none",
-      recipeLimit: undefined,
       mealCount: 1
     }
   });
@@ -372,17 +371,6 @@ export default function Planner() {
                       ))}
                     </Select>
                   </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Maximum Recipe Suggestions"
-                    type="number"
-                    placeholder="Unlimited"
-                    {...form.register("recipeLimit", { valueAsNumber: true })}
-                    error={!!form.formState.errors.recipeLimit}
-                    helperText={form.formState.errors.recipeLimit?.message}
-                  />
                 </Grid>
                 <Grid item xs={12}>
                   <Button
