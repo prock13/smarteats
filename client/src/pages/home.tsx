@@ -36,33 +36,33 @@ const features = [
   {
     title: "Macro Match",
     description:
-      "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
+      "Get personalized meal suggestions based on your remaining macros for the day.",
     icon: <Restaurant sx={{ fontSize: 40 }} />,
     route: "/planner",
     details: [
-      "Get personalized meal suggestions based on your remaining macros",
+      "Plan your meals with AI-powered suggestions based on your macronutrient goals",
       "AI-powered recipe generation tailored to your dietary preferences",
-      "Easy-to-follow recipes with detailed instructions",
-      "Quick macro calculation and portion adjustments",
+      "Easy-to-follow recipes with detailed instructions and nutrients",
+      "Quick macro calculation and portion adjustments (Coming Soon)",
     ],
   },
   {
     title: "Pantry Pal",
     description:
-      "Keep track of your ingredients and get recipe suggestions based on what you have.",
+      "Get recipe suggestions based on food items that you have on hand.",
     icon: <KitchenIcon sx={{ fontSize: 40 }} />,
     route: "/pantry",
     details: [
-      "Track available ingredients",
-      "Get recipe suggestions based on your pantry",
-      "Smart shopping list generation",
-      "Ingredient expiration tracking",
+      "Get recipe suggestions based on your available pantry items.",
+      "Track available ingredients (Coming Soon)",
+      "Smart shopping list generation (Coming Soon)",
+      "Ingredient expiration tracking (Coming Soon)",
     ],
   },
   {
-    title: "Chef Nina - AI Assistant",
+    title: "Chef Nina – Your AI Sous Chef",
     description:
-      "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
+      "Say hello to Nina, your AI-powered sous-chef, ready to help you plan meals, find recipes, and whip up delicious dishes with ease!",
     icon: <ChatIcon sx={{ fontSize: 40 }} />,
     isNina: true,
     details: [
@@ -73,28 +73,28 @@ const features = [
     ],
   },
   {
-    title: "Calendar View",
+    title: "Smart Calendar",
     description:
       "Organize your meals throughout the week with an intuitive calendar interface.",
     icon: <CalendarMonth sx={{ fontSize: 40 }} />,
     route: "/calendar",
     details: [
-      "Weekly and monthly meal planning views",
-      "Drag and drop meal organization",
-      "Quick meal rotation and scheduling",
-      "Meal prep planning assistance",
+      "Weekly and monthly meal planning views (Coming Soon)",
+      "Drag and drop meal organization (Coming Soon)",
+      "Quick meal rotation and scheduling (Coming Soon)",
+      "Meal prep planning assistance (Coming Soon)",
     ],
   },
   {
-    title: "Recipe Collection",
-    description: "Organize all your favorite recipes for quick access.",
+    title: "My Recipe Collection",
+    description:
+      "Save all your personal recipes for quick access and use in Macro Match and Pantry Pal.",
     icon: <Favorite sx={{ fontSize: 40 }} />,
     route: "/recipes",
     details: [
-      "Save your favorite recipes for use in the meal planners",
-      "Filter by dietary preferences and restrictions",
       "Save and organize your favorite meals",
-      "Share recipes with friends and family",
+      "Filter by dietary preferences and restrictions (Coming Soon)",
+      "Share recipes with friends and family (Coming Soon)",
     ],
   },
   {
@@ -149,7 +149,7 @@ export default function Home() {
         {/* Hero Section */}
         <Box sx={{ textAlign: "center", mb: 8 }}>
           <Typography
-            variant="h2"
+            variant="h3"
             component="h1"
             sx={{
               mb: 2,
@@ -159,10 +159,10 @@ export default function Home() {
               fontWeight: "bold",
             }}
           >
-            SmartEats
+            Smarter Eating, Made Simple
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-            Your personal AI-powered nutrition assistant
+            AI-driven meal planning tailored just for you.
           </Typography>
           <Button
             variant="contained"
