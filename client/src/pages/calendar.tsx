@@ -9,16 +9,12 @@ import {
   Box,
   IconButton,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Card,
-  CardContent,
-  CardHeader,
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Card,
+  CardContent,
+  CardHeader,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -28,7 +24,6 @@ import { useToast } from "@/hooks/use-toast";
 export default function CalendarPage() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(startOfDay(new Date()));
-  const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
   const [selectedMealTypes, setSelectedMealTypes] = useState<Set<string>>(new Set(["breakfast", "lunch", "dinner", "snack"]));
 
   const startOfMonth = new Date(date?.getFullYear() || 2024, date?.getMonth() || 0, 1);
@@ -43,20 +38,6 @@ export default function CalendarPage() {
       );
       if (!res.ok) throw new Error("Failed to fetch meal plans");
       return res.json();
-    },
-  });
-
-  const addMealPlan = useMutation({
-    mutationFn: async (plan: InsertMealPlan) => {
-      const res = await apiRequest("POST", "/api/meal-plans", plan);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
-      toast("Meal plan added successfully", { severity: "success" });
-    },
-    onError: (error) => {
-      toast(error.message, { severity: "error" });
     },
   });
 
@@ -137,23 +118,6 @@ export default function CalendarPage() {
               fullWidth
               sx={{ mb: 2 }}
             />
-            {date && (
-              <Box sx={{ mt: 2 }}>
-                <FormControl fullWidth>
-                  <InputLabel>Meal Type</InputLabel>
-                  <Select
-                    value={selectedMealType}
-                    onChange={(e) => setSelectedMealType(e.target.value)}
-                    label="Meal Type"
-                  >
-                    <MenuItem value="breakfast">Breakfast</MenuItem>
-                    <MenuItem value="lunch">Lunch</MenuItem>
-                    <MenuItem value="dinner">Dinner</MenuItem>
-                    <MenuItem value="snack">Snack</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
 
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle1" gutterBottom>
