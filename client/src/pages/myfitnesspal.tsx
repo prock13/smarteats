@@ -58,7 +58,8 @@ export default function MyFitnessPalPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
         title: "Success",
-        description: "Connected to MyFitnessPal successfully"
+        description: "Connected to MyFitnessPal successfully",
+        variant: "default"
       });
       form.reset();
     },
@@ -75,6 +76,10 @@ export default function MyFitnessPalPage() {
   const onSubmit = async (data: InsertMfpCredentials) => {
     console.log("Form submitted with data:", data);
     await connectMutation.mutateAsync(data);
+  };
+
+  const handleButtonClick = () => {
+    console.log("Button clicked");
   };
 
   if (isLoadingConnection) {
@@ -134,6 +139,7 @@ export default function MyFitnessPalPage() {
                   type="submit"
                   variant="contained"
                   disabled={connectMutation.isPending}
+                  onClick={handleButtonClick}
                   sx={{ mt: 2 }}
                 >
                   {connectMutation.isPending ? (
