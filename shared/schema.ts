@@ -41,6 +41,11 @@ export const favorites = pgTable("favorites", {
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
+  calories: integer("calories"),
+  fiber: integer("fiber"),
+  sugar: integer("sugar"),
+  cooking_time: jsonb("cooking_time"),
+  nutrients: jsonb("nutrients"),
   dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
