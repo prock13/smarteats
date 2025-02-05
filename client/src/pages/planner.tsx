@@ -534,7 +534,8 @@ export default function Planner() {
                       fats: form.getValues("targetFats"),
                     }}
                     favorites={favorites}
-                    showAddToCalendar={true}
+                    expanded={expandedCards[index] || false}
+                    onExpandClick={() => handleExpandClick(index)}
                   />
                 </Grid>
               ))}
