@@ -55,11 +55,11 @@ export default function Navigation() {
   };
 
   const navigationItems = [
-    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <MenuBookIcon />, text: "Meal Planner", path: "/planner" },
+    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
+    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
-    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
   ];
 
   const mobileDrawer = (
@@ -122,7 +122,11 @@ export default function Navigation() {
             </Box>
 
             <Box
-              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2 }}
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                gap: 2,
+              }}
             >
               {navigationItems.map((item) => (
                 <Button
@@ -143,11 +147,7 @@ export default function Navigation() {
                 <ChatIcon />
               </IconButton>
 
-              <IconButton
-                size="large"
-                onClick={handleMenu}
-                color="inherit"
-              >
+              <IconButton size="large" onClick={handleMenu} color="inherit">
                 <AccountCircle />
               </IconButton>
               <Menu
@@ -174,17 +174,10 @@ export default function Navigation() {
 
             {/* Mobile-only icons */}
             <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
-              <IconButton
-                color="inherit"
-                onClick={() => setChatOpen(true)}
-              >
+              <IconButton color="inherit" onClick={() => setChatOpen(true)}>
                 <ChatIcon />
               </IconButton>
-              <IconButton
-                size="large"
-                onClick={handleMenu}
-                color="inherit"
-              >
+              <IconButton size="large" onClick={handleMenu} color="inherit">
                 <AccountCircle />
               </IconButton>
             </Box>
