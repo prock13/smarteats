@@ -180,6 +180,7 @@ export function RecipeCard({
       return res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
       toast({
         title: "Success",
         description: "Meal added to calendar",
