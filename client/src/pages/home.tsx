@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import {
   Box,
@@ -28,6 +28,7 @@ import {
   Chat as ChatIcon,
   Kitchen as KitchenIcon,
 } from "@mui/icons-material";
+import { ChatBot } from "@/components/chat-bot";
 
 const features = [
   {
@@ -113,6 +114,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const handleLearnMore = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
@@ -127,12 +129,8 @@ export default function Home() {
   const handleNavigate = () => {
     if (selectedFeature) {
       if (selectedFeature.isNina) {
-        // Find and trigger the chat button
-        const chatBtn = document.querySelector<HTMLElement>('[data-chat-trigger]');
-        if (chatBtn) {
-          chatBtn.click();
-          setOpenDialog(false);
-        }
+        setChatOpen(true);
+        setOpenDialog(false);
       } else if (!selectedFeature.comingSoon && selectedFeature.route) {
         setOpenDialog(false);
         setLocation(selectedFeature.route);
@@ -298,6 +296,9 @@ export default function Home() {
             </>
           )}
         </Dialog>
+
+        {/* Chat Bot Component */}
+        <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
       </Container>
     </Box>
   );
