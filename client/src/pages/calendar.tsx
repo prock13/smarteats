@@ -13,10 +13,17 @@ import {
   Checkbox,
   ToggleButtonGroup,
   ToggleButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import TodayIcon from '@mui/icons-material/Today';
+import {
+  Twitter as TwitterIcon,
+  Facebook as FacebookIcon,
+  LinkedIn as LinkedInIcon,
+} from "@mui/icons-material";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { RecipeCard } from "@/components/ui/RecipeCard";
@@ -32,6 +39,8 @@ export default function CalendarPage() {
     new Set(["breakfast", "lunch", "dinner", "snack"])
   );
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
+  const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
+  const [sharingMeal, setSharingMeal] = useState<any>(null);
   const queryClient = useQueryClient();
 
   const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -107,6 +116,44 @@ export default function CalendarPage() {
       ...prev,
       [planId]: !prev[planId]
     }));
+  };
+
+  const handleShareClick = (
+    event: React.MouseEvent<HTMLElement>,
+    meal: any,
+  ) => {
+    setShareAnchorEl(event.currentTarget);
+    setSharingMeal(meal);
+  };
+
+  const handleShareClose = () => {
+    setShareAnchorEl(null);
+    setSharingMeal(null);
+  };
+
+  const shareRecipe = async (platform: string) => {
+    if (!sharingMeal) return;
+
+    const shareText = `Check out this recipe from Smart Meal Planner!\n\nRecipe: ${sharingMeal.name}\n${sharingMeal.description}\n\nNutritional Info:\n• Carbs: ${sharingMeal.macros.carbs}g\n• Protein: ${sharingMeal.macros.protein}g\n• Fats: ${sharingMeal.macros.fats}g\n\nDiscover more recipes at: ${window.location.origin}`;
+    const baseUrl = window.location.origin;
+
+    let platformUrl = "";
+    switch (platform) {
+      case "twitter":
+        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
+        break;
+      case "facebook":
+        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
+        break;
+      case "linkedin":
+        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
+        break;
+    }
+
+    if (platformUrl) {
+      window.open(platformUrl, "_blank", "noopener,noreferrer");
+    }
+    handleShareClose();
   };
 
   const mealTypeOptions = [
@@ -254,6 +301,7 @@ export default function CalendarPage() {
                         favorites={favorites}
                         expanded={expandedCards[plan.id] || false}
                         onExpandClick={() => handleExpandClick(plan.id)}
+                        onShare={handleShareClick}
                         onDelete={() => deleteMealPlan.mutate(plan.id)}
                       />
                     </Grid>
@@ -267,6 +315,22 @@ export default function CalendarPage() {
             ) : null
           })
         )}
+
+        <Menu
+          anchorEl={shareAnchorEl}
+          open={Boolean(shareAnchorEl)}
+          onClose={handleShareClose}
+        >
+          <MenuItem onClick={() => shareRecipe("twitter")}>
+            <TwitterIcon sx={{ mr: 1 }} /> Share on Twitter
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("facebook")}>
+            <FacebookIcon sx={{ mr: 1 }} /> Share on Facebook
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("linkedin")}>
+            <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
+          </MenuItem>
+        </Menu>
       </Container>
     </Box>
   );
