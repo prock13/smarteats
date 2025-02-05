@@ -1,81 +1,47 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Box, Container, Typography, Paper, Grid, Button, CircularProgress } from "@mui/material";
-import { apiRequest } from "@/lib/queryClient";
+import { Box, Container, Typography, Paper } from "@mui/material";
 import { useToast } from "@/hooks/use-toast";
-import type { InsertMfpCredentials } from "@shared/schema";
-import { insertMfpCredentialsSchema } from "@shared/schema";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+
+const mfpCredentialsSchema = z.object({
+  username: z.string().min(1, "MyFitnessPal username is required"),
+});
+
+type FormData = z.infer<typeof mfpCredentialsSchema>;
 
 export default function MyFitnessPalPage() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: mfpConnection, isLoading: isLoadingConnection } = useQuery({
-    queryKey: ["/api/myfitnesspal/connection"],
-    queryFn: async () => {
-      const res = await fetch("/api/myfitnesspal/connection");
-      if (!res.ok) throw new Error("Failed to fetch MFP connection status");
-      return res.json();
-    }
-  });
-
-  const { data: nutritionData, isLoading: isLoadingNutrition } = useQuery({
-    queryKey: ["/api/myfitnesspal/nutrition"],
-    queryFn: async () => {
-      const res = await fetch("/api/myfitnesspal/nutrition");
-      if (!res.ok) throw new Error("Failed to fetch nutrition data");
-      return res.json();
-    },
-    enabled: !!mfpConnection?.connected
-  });
-
-  const form = useForm<InsertMfpCredentials>({
-    resolver: zodResolver(insertMfpCredentialsSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(mfpCredentialsSchema),
     defaultValues: {
       username: "",
-      syncEnabled: true
     }
   });
 
-  const connectMutation = useMutation({
-    mutationFn: async (data: InsertMfpCredentials) => {
-      const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to connect account");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      setIsSubmitting(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
-      toast("Connected to MyFitnessPal successfully");
-      form.reset();
-    },
-    onError: (error: Error) => {
-      setIsSubmitting(false);
-      toast(error.message);
-    },
-  });
-
-  const onSubmit = async (data: InsertMfpCredentials) => {
+  const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    await connectMutation.mutateAsync(data);
+    try {
+      // TODO: Implement actual connection logic
+      console.log("Form submitted:", data);
+      toast({
+        description: "Successfully submitted form",
+      });
+    } catch (error) {
+      toast({
+        description: "Failed to submit form",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  if (isLoadingConnection) {
-    return (
-      <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ py: 4 }}>
@@ -95,99 +61,38 @@ export default function MyFitnessPalPage() {
           MyFitnessPal Integration
         </Typography>
 
-        {!mfpConnection?.connected && (
-          <Paper elevation={2} sx={{ p: 4, mb: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              Connect Your Account
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              Link your MyFitnessPal account to sync nutrition data and track your progress.
-            </Typography>
+        <Paper elevation={2} sx={{ p: 4, mb: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Connect Your Account
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            Link your MyFitnessPal account to sync nutrition data and track your progress.
+          </Typography>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>MyFitnessPal Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your MyFitnessPal username" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Enter your MyFitnessPal username to connect your account
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  component="button"
-                  type="submit"
-                  variant="contained"
-                  disabled={connectMutation.isPending || isSubmitting}
-                  sx={{ mt: 2 }}
-                >
-                  {(connectMutation.isPending || isSubmitting) && (
-                    <CircularProgress size={24} sx={{ mr: 1 }} />
-                  )}
-                  Connect Account
-                </Button>
-              </form>
-            </Form>
-          </Paper>
-        )}
-        {mfpConnection?.connected && nutritionData && (
-          <>
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Connected Account</CardTitle>
-                <CardDescription>
-                  You're connected as {mfpConnection?.username}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Typography>
-                  Your MyFitnessPal account is connected. View your nutrition data below.
-                </Typography>
-              </CardContent>
-            </Card>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Today's Progress</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Typography>
-                      Calories: {nutritionData.total_calories} / {nutritionData.goals.calories}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Macronutrients</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Typography>
-                      Protein: {nutritionData.total_macros.protein}g
-                    </Typography>
-                    <Typography>
-                      Carbs: {nutritionData.total_macros.carbohydrates}g
-                    </Typography>
-                    <Typography>
-                      Fat: {nutritionData.total_macros.fat}g
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </>
-        )}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>MyFitnessPal Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your MyFitnessPal username" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Enter your MyFitnessPal username to connect your account
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isSubmitting}>
+                Connect Account
+              </Button>
+            </form>
+          </Form>
+        </Paper>
       </Container>
     </Box>
   );
