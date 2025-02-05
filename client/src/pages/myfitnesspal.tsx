@@ -44,36 +44,32 @@ export default function MyFitnessPalPage() {
 
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
-      console.log("Making API request with data:", data);
       try {
         const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
-        console.log("API Response:", res);
         if (!res.ok) {
           const error = await res.json();
           throw new Error(error.message || "Failed to connect account");
         }
-        const responseData = await res.json();
-        console.log("API Response data:", responseData);
-        return responseData;
+        return await res.json();
       } catch (error) {
         console.error("API request failed:", error);
         throw error;
       }
     },
     onSuccess: () => {
-      console.log("Successfully connected MFP account");
       setIsSubmitting(false);
-      // Force refetch the connection status
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
-        description: "Connected to MyFitnessPal successfully"
+        title: "Success",
+        description: "Connected to MyFitnessPal successfully",
+        variant: "default"
       });
       form.reset();
     },
     onError: (error: Error) => {
-      console.error("Failed to connect MFP account:", error);
       setIsSubmitting(false);
       toast({
+        title: "Error",
         description: error.message,
         variant: "destructive"
       });
@@ -81,20 +77,8 @@ export default function MyFitnessPalPage() {
   });
 
   const onSubmit = async (data: InsertMfpCredentials) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form state:", form.formState);
-
-    if (Object.keys(form.formState.errors).length > 0) {
-      console.error("Form validation errors:", form.formState.errors);
-      return;
-    }
-
     setIsSubmitting(true);
-    try {
-      await connectMutation.mutateAsync(data);
-    } catch (error) {
-      console.error("Error in form submission:", error);
-    }
+    await connectMutation.mutateAsync(data);
   };
 
   if (isLoadingConnection) {
@@ -123,7 +107,7 @@ export default function MyFitnessPalPage() {
           MyFitnessPal Integration
         </Typography>
 
-        {!mfpConnection?.connected && !isSubmitting ? (
+        {!mfpConnection?.connected && (
           <Paper elevation={2} sx={{ p: 4, mb: 4 }}>
             <Typography variant="h5" gutterBottom>
               Connect Your Account
@@ -133,15 +117,7 @@ export default function MyFitnessPalPage() {
             </Typography>
 
             <Form {...form}>
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  console.log("Form onSubmit triggered");
-                  console.log("Current form values:", form.getValues());
-                  form.handleSubmit(onSubmit)(e);
-                }} 
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="username"
@@ -149,7 +125,7 @@ export default function MyFitnessPalPage() {
                     <FormItem>
                       <FormLabel>MyFitnessPal Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="username" {...field} />
+                        <Input placeholder="Enter your MyFitnessPal username" {...field} />
                       </FormControl>
                       <FormDescription>
                         Enter your MyFitnessPal username to connect your account
@@ -172,7 +148,8 @@ export default function MyFitnessPalPage() {
               </form>
             </Form>
           </Paper>
-        ) : (
+        )}
+        {mfpConnection?.connected && (
           <>
             <Card className="mb-8">
               <CardHeader>
@@ -197,7 +174,7 @@ export default function MyFitnessPalPage() {
                     </CardHeader>
                     <CardContent>
                       <Typography>
-                        Calories: {nutritionData.calories} / {nutritionData.goals.calories}
+                        Calories: {nutritionData.total_calories} / {nutritionData.goals.calories}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -209,13 +186,13 @@ export default function MyFitnessPalPage() {
                     </CardHeader>
                     <CardContent>
                       <Typography>
-                        Protein: {nutritionData.macros.protein}g
+                        Protein: {nutritionData.total_macros.protein}g
                       </Typography>
                       <Typography>
-                        Carbs: {nutritionData.macros.carbs}g
+                        Carbs: {nutritionData.total_macros.carbohydrates}g
                       </Typography>
                       <Typography>
-                        Fat: {nutritionData.macros.fat}g
+                        Fat: {nutritionData.total_macros.fat}g
                       </Typography>
                     </CardContent>
                   </Card>

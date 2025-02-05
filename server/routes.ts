@@ -6,6 +6,8 @@ import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/sc
 import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { insertFavoriteSchema } from "@shared/schema";
 import { insertMfpCredentialsSchema } from "@shared/schema";
+import { mfpService } from "./services/myfitnesspal";
+import crypto from "crypto";
 
 export function registerRoutes(app: Express): Server {
   // Set up authentication routes and middleware
@@ -417,7 +419,17 @@ export function registerRoutes(app: Express): Server {
       }
 
       const credentials = insertMfpCredentialsSchema.parse(req.body);
-      await storage.saveMfpCredentials(req.user!.id, credentials);
+
+      // Verify the credentials work before saving
+      const isValid = await mfpService.verifyCredentials(credentials.username);
+      if (!isValid) {
+        return res.status(400).json({ message: "Invalid MyFitnessPal username" });
+      }
+
+      await storage.saveMfpCredentials(req.user!.id, {
+        ...credentials,
+        userId: req.user!.id
+      });
 
       res.json({ message: "Successfully connected MyFitnessPal account" });
     } catch (error) {
@@ -438,26 +450,18 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "MyFitnessPal account not connected" });
       }
 
-      // Mock data for now - will be replaced with actual MFP API integration
-      const mockData = {
-        calories: 1800,
-        goals: {
-          calories: 2000
-        },
-        macros: {
-          protein: 120,
-          carbs: 200,
-          fat: 60
-        }
-      };
+      // Get today's diary entries
+      const today = new Date().toISOString().split('T')[0];
+      const diaryData = await mfpService.getDiaryEntries(credentials.username, today);
 
-      res.json(mockData);
+      res.json(diaryData);
     } catch (error) {
       console.error("Error fetching nutrition data:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
   });
+
 
   app.post("/api/myfitnesspal/refresh", async (req, res) => {
     try {

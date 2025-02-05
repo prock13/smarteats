@@ -82,10 +82,8 @@ export const myFitnessPalCredentials = pgTable("myfitnesspal_credentials", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   username: text("mfp_username").notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  lastSync: timestamp("last_sync"),
   syncEnabled: boolean("sync_enabled").default(true).notNull(),
+  lastSync: timestamp("last_sync"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
