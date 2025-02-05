@@ -83,10 +83,17 @@ export default function MyFitnessPalPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/nutrition"] });
-      toast("Nutrition data refreshed successfully");
+      toast({
+        title: "Success",
+        description: "Nutrition data refreshed successfully"
+      });
     },
     onError: (error: Error) => {
-      toast(`Error: ${error.message}`);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
@@ -131,7 +138,7 @@ export default function MyFitnessPalPage() {
             </Typography>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="username"
