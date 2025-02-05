@@ -60,7 +60,7 @@ export async function generateMealSuggestions(
 The recipe should be suitable for: ${mealTypes[0]}
 Dietary preference: ${dietaryPreference}
 
-Respond with a JSON object in this exact format:
+Format your response as a JSON object with this exact structure:
 {
   "meals": [
     {
@@ -75,7 +75,7 @@ Respond with a JSON object in this exact format:
     }
   ]
 }`;
-      systemRole = "You are a chef. Always respond with valid JSON only. Keep recipes simple and focused on the main ingredients provided.";
+      systemRole = "You are a professional chef. Provide response only in valid JSON format. Keep recipes simple and focused on the main ingredients provided.";
     } else {
       const storedRecipes = await storage.getRecipes();
       const availableStoredRecipes = storedRecipes.filter(recipe => {
@@ -94,7 +94,7 @@ Respond with a JSON object in this exact format:
 `).join('\n')}`
         : '';
 
-      prompt = `Given the following macro nutrient targets:
+      prompt = `Given these macro nutrient targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
@@ -105,13 +105,13 @@ ${dietaryPreference !== "none" ? `\nDietary Preference: ${dietaryPreference}. Pl
 ${recipeLimit ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.` : '\nPlease suggest multiple meal options that meet these criteria.'}
 ${mealTypes.length > 0 ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.` : ''}
 
-Respond with a JSON object in this exact format:
+Format your response as a JSON object with this exact structure:
 {
   "meals": [
     {
       "name": "Recipe name",
       "description": "Brief description",
-      "instructions": "Detailed step-by-step cooking instructions",
+      "instructions": "Step-by-step instructions",
       "macros": {
         "carbs": number,
         "protein": number,
@@ -121,7 +121,7 @@ Respond with a JSON object in this exact format:
     }
   ]
 }`;
-      systemRole = "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text.";
+      systemRole = "You are a nutrition expert. Provide response only in valid JSON format. Include accurate macro calculations for each meal.";
     }
 
     console.log("Starting generation with mode:", pantryItems ? "pantry-based" : "macro-based");
@@ -138,8 +138,7 @@ Respond with a JSON object in this exact format:
           role: "user",
           content: prompt
         }
-      ],
-      response_format: { type: "json_object" }
+      ]
     });
 
     // Add timeout to the OpenAI request
