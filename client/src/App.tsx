@@ -19,20 +19,23 @@ import Terms from "@/pages/terms";
 import Navigation from "@/components/navigation";
 import { Footer } from "@/components/Footer";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
+import { useLocation } from "wouter";
 
 function ThemedApp() {
   const { theme } = useTheme();
+  const [location] = useLocation();
+  const isAuthPage = location === "/auth";
 
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ 
         minHeight: '100vh', 
-        bgcolor: 'background.default',
+        bgcolor: isAuthPage ? 'grey.100' : 'background.default',
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <Navigation />
+        {!isAuthPage && <Navigation />}
         <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
           <Switch>
             <Route path="/auth" component={Auth} />
@@ -47,7 +50,7 @@ function ThemedApp() {
             <Route component={NotFound} />
           </Switch>
         </Container>
-        <Footer />
+        {!isAuthPage && <Footer />}
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           autoHideDuration={6000}
