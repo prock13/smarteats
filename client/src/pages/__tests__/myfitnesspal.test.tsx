@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,19 +6,19 @@ import MyFitnessPalPage from '../myfitnesspal';
 import { useToast } from "@/hooks/use-toast";
 
 // Mock the useToast hook
-vi.mock('@/hooks/use-toast', () => ({
-  useToast: vi.fn(() => ({
-    toast: vi.fn()
+jest.mock('@/hooks/use-toast', () => ({
+  useToast: jest.fn(() => ({
+    toast: jest.fn()
   }))
 }));
 
 // Mock fetch for API calls
-const mockFetch = vi.fn();
+const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 describe('MyFitnessPalPage', () => {
   let queryClient: QueryClient;
-  let mockToast: ReturnType<typeof vi.fn>;
+  let mockToast: jest.Mock;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -29,8 +29,8 @@ describe('MyFitnessPalPage', () => {
       },
     });
     mockFetch.mockClear();
-    mockToast = vi.fn();
-    (useToast as any).mockImplementation(() => ({
+    mockToast = jest.fn();
+    (useToast as jest.Mock).mockImplementation(() => ({
       toast: mockToast
     }));
   });
@@ -76,15 +76,16 @@ describe('MyFitnessPalPage', () => {
         })
       );
 
+    const user = userEvent.setup();
     renderComponent();
 
     // Fill in the form
     const usernameInput = await screen.findByPlaceholderText(/Enter your MyFitnessPal username/i);
-    await userEvent.type(usernameInput, 'testuser');
+    await user.type(usernameInput, 'testuser');
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Connect Account/i });
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     // Verify API call
     await waitFor(() => {
@@ -115,15 +116,16 @@ describe('MyFitnessPalPage', () => {
         })
       );
 
+    const user = userEvent.setup();
     renderComponent();
 
     // Fill in the form
     const usernameInput = await screen.findByPlaceholderText(/Enter your MyFitnessPal username/i);
-    await userEvent.type(usernameInput, 'invaliduser');
+    await user.type(usernameInput, 'invaliduser');
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Connect Account/i });
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     // Verify error toast was called
     await waitFor(() => {
