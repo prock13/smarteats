@@ -15,7 +15,9 @@ import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
 import Pantry from "@/pages/pantry";
+import Terms from "@/pages/terms";
 import Navigation from "@/components/navigation";
+import { Footer } from "@/components/Footer";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
 
 function ThemedApp() {
@@ -24,11 +26,17 @@ function ThemedApp() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Box sx={{ 
+        minHeight: '100vh', 
+        bgcolor: 'background.default',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <Navigation />
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
           <Switch>
             <Route path="/auth" component={Auth} />
+            <Route path="/terms" component={Terms} />
             <ProtectedRoute path="/" component={Home} />
             <ProtectedRoute path="/planner" component={Planner} />
             <ProtectedRoute path="/calendar" component={Calendar} />
@@ -39,6 +47,7 @@ function ThemedApp() {
             <Route component={NotFound} />
           </Switch>
         </Container>
+        <Footer />
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           autoHideDuration={6000}
