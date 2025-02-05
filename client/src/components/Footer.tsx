@@ -11,9 +11,9 @@ export function Footer() {
       sx={{
         py: 3,
         px: 2,
-        mt: 'auto',
+        mt: "auto",
         backgroundColor: (theme) =>
-          theme.palette.mode === 'light'
+          theme.palette.mode === "light"
             ? theme.palette.grey[200]
             : theme.palette.grey[800],
       }}
@@ -21,22 +21,22 @@ export function Footer() {
       <Container maxWidth="lg">
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 2
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
           }}
         >
           <Typography variant="body2" color="text.secondary">
             © {currentYear} Smart Meal Planner. All rights reserved.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 3 }}>
+          <Box sx={{ display: "flex", gap: 3 }}>
             <Link
               component="button"
               variant="body2"
               onClick={() => setLocation("/about")}
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: "pointer" }}
             >
               About Us
             </Link>
@@ -44,14 +44,14 @@ export function Footer() {
               component="button"
               variant="body2"
               onClick={() => setLocation("/terms")}
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: "pointer" }}
             >
               Terms of Service
             </Link>
             <Link
-              href="mailto:support@smartmealplanner.com"
+              href="mailto:pabloarocha+smarteats@gmail.com"
               variant="body2"
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: "pointer" }}
             >
               Contact Support
             </Link>
