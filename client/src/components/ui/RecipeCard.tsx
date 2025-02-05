@@ -158,8 +158,17 @@ export function RecipeCard({
 
   const addToCalendarMutation = useMutation({
     mutationFn: async ({ meal, mealType, date }: { meal: Meal; mealType: string; date: string }) => {
+      // Construct the date in local timezone
+      const localDate = new Date(date);
+      const localISOString = new Date(
+        localDate.getFullYear(),
+        localDate.getMonth(),
+        localDate.getDate(),
+        0, 0, 0
+      ).toISOString();
+
       const mealPlan = {
-        date,
+        date: localISOString,
         meal: {
           name: meal.name,
           description: meal.description,
