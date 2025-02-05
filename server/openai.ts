@@ -30,6 +30,97 @@ function checkRateLimit() {
   requestTimestamps.push(now);
 }
 
+export async function generateRecipe({
+  targetCarbs,
+  targetProtein,
+  targetFats,
+  dietaryPreference
+}: {
+  targetCarbs: number;
+  targetProtein: number;
+  targetFats: number;
+  dietaryPreference: string;
+}) {
+  try {
+    checkRateLimit();
+
+    const prompt = `Create a recipe that matches these macro targets:
+- Carbohydrates: ${targetCarbs}g
+- Protein: ${targetProtein}g
+- Fats: ${targetFats}g
+${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
+
+Format your response as a JSON object with this exact structure:
+{
+  "name": "Recipe name",
+  "description": "Brief description",
+  "instructions": "Step-by-step instructions",
+  "macros": {
+    "carbs": number,
+    "protein": number,
+    "fats": number,
+    "calories": number,
+    "fiber": number,
+    "sugar": number,
+    "cholesterol": number,
+    "sodium": number
+  },
+  "cookingTime": {
+    "prep": number,
+    "cook": number,
+    "total": number
+  },
+  "nutrients": {
+    "vitamins": string[],
+    "minerals": string[]
+  }
+}
+
+Include detailed nutritional information and cooking time. If you're unsure about any value, use null.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content received from OpenAI");
+    }
+
+    const parsedContent = JSON.parse(content);
+    return {
+      name: parsedContent.name,
+      description: parsedContent.description,
+      instructions: parsedContent.instructions,
+      carbs: parsedContent.macros.carbs,
+      protein: parsedContent.macros.protein,
+      fats: parsedContent.macros.fats,
+      calories: parsedContent.macros.calories,
+      fiber: parsedContent.macros.fiber,
+      sugar: parsedContent.macros.sugar,
+      cholesterol: parsedContent.macros.cholesterol,
+      sodium: parsedContent.macros.sodium,
+      cookingTime: parsedContent.cookingTime,
+      nutrients: parsedContent.nutrients,
+      dietaryRestriction: dietaryPreference
+    };
+  } catch (error: any) {
+    console.error("Error in generateRecipe:", error);
+    throw error;
+  }
+}
+
 export async function generateMealSuggestions(
   carbs: number,
   protein: number,
@@ -70,12 +161,26 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number
+        "fats": number,
+        "calories": number,
+        "fiber": number,
+        "sugar": number,
+        "cholesterol": number,
+        "sodium": number
+      },
+      "cookingTime": {
+        "prep": number,
+        "cook": number,
+        "total": number
+      },
+      "nutrients": {
+        "vitamins": string[],
+        "minerals": string[]
       }
     }
   ]
 }`;
-      systemRole = "You are a professional chef. Create recipes that match the given ingredients. Keep your response in valid JSON format.";
+      systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format.";
     } else {
       const storedRecipes = await storage.getRecipes();
       const availableStoredRecipes = storedRecipes.filter(recipe => {
@@ -114,19 +219,30 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number
+        "fats": number,
+        "calories": number,
+        "fiber": number,
+        "sugar": number,
+        "cholesterol": number,
+        "sodium": number
+      },
+      "cookingTime": {
+        "prep": number,
+        "cook": number,
+        "total": number
+      },
+      "nutrients": {
+        "vitamins": string[],
+        "minerals": string[]
       },
       "isStoredRecipe": boolean
     }
   ]
 }`;
-      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios. Always respond with valid JSON format.";
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format.";
     }
 
-    console.log("Generating suggestions for mode:", pantryItems ? "pantry-based" : "macro-based");
-    console.log("Prompt:", prompt);
-
-    const responsePromise = openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -141,49 +257,20 @@ Format your response as a JSON object with this exact structure:
       response_format: { type: "json_object" }
     });
 
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("OpenAI API request timed out")), API_TIMEOUT);
-    });
-
-    console.log("Awaiting OpenAI response...");
-    const response = await Promise.race([responsePromise, timeoutPromise]) as any;
-    console.log("Received OpenAI response");
-
     const content = response.choices[0].message.content;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
 
-    console.log("Parsing response:", content);
     const parsedContent = JSON.parse(content);
 
     if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
       throw new Error("Invalid response format: missing or invalid meals array");
     }
 
-    if (!pantryItems) {
-      const storedRecipes = await storage.getRecipes();
-      parsedContent.meals = parsedContent.meals.map(meal => ({
-        name: meal.name,
-        description: meal.description,
-        instructions: meal.instructions,
-        macros: {
-          carbs: meal.macros.carbs,
-          protein: meal.macros.protein,
-          fats: meal.macros.fats
-        },
-        isStoredRecipe: storedRecipes.some(recipe =>
-          recipe.name.toLowerCase() === meal.name.toLowerCase()
-        )
-      }));
-    }
-
     return parsedContent;
   } catch (error: any) {
     console.error("Error in generateMealSuggestions:", error);
-    if (error?.status === 429) {
-      throw new Error("Rate limit exceeded. Please try again in a few minutes.");
-    }
     throw error;
   }
 }

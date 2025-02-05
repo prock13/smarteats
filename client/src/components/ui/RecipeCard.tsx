@@ -13,6 +13,7 @@ import {
   Grid,
   LinearProgress,
   Collapse,
+  Badge,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -32,6 +33,22 @@ interface Macros {
   carbs: number;
   protein: number;
   fats: number;
+  calories?: number | null;
+  fiber?: number | null;
+  sugar?: number | null;
+  cholesterol?: number | null;
+  sodium?: number | null;
+}
+
+interface CookingTime {
+  prep: number | null;
+  cook: number | null;
+  total: number | null;
+}
+
+interface Nutrients {
+  vitamins: string[] | null;
+  minerals: string[] | null;
 }
 
 interface Meal {
@@ -39,13 +56,15 @@ interface Meal {
   description: string;
   instructions: string;
   macros: Macros;
+  cookingTime?: CookingTime | null;
+  nutrients?: Nutrients | null;
   isStoredRecipe?: boolean;
   dietaryRestriction?: string;
 }
 
 interface RecipeCardProps {
   meal: Meal;
-  onShare: (event: React.MouseEvent<HTMLElement>, meal: Meal) => void;
+  onShare?: (event: React.MouseEvent<HTMLElement>, meal: Meal) => void;
   targetMacros?: {
     carbs: number;
     protein: number;
@@ -109,6 +128,13 @@ export function RecipeCard({
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
+        calories: meal.macros.calories,
+        fiber: meal.macros.fiber,
+        sugar: meal.macros.sugar,
+        cholesterol: meal.macros.cholesterol,
+        sodium: meal.macros.sodium,
+        cookingTime: meal.cookingTime,
+        nutrients: meal.nutrients,
         dietaryRestriction: meal.dietaryRestriction || "none",
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
@@ -172,13 +198,15 @@ export function RecipeCard({
             alignItems: 'center',
             pr: 1
           }}>
-            <IconButton
-              onClick={(e) => onShare(e, meal)}
-              color="primary"
-              size="small"
-            >
-              <ShareIcon />
-            </IconButton>
+            {onShare && (
+              <IconButton
+                onClick={(e) => onShare(e, meal)}
+                color="primary"
+                size="small"
+              >
+                <ShareIcon />
+              </IconButton>
+            )}
             {showAddToCalendar && (
               <>
                 <FormControl sx={{ minWidth: 120 }}>
@@ -410,7 +438,38 @@ export function RecipeCard({
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-            {/* Removed cookingTime section as it's no longer in the Meal interface */}
+            {meal.cookingTime && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon fontSize="small" />
+                  Cooking Time
+                </Typography>
+                <Grid container spacing={2}>
+                  {meal.cookingTime.prep !== null && (
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Prep: {meal.cookingTime.prep}min
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.cookingTime.cook !== null && (
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Cook: {meal.cookingTime.cook}min
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.cookingTime.total !== null && (
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Total: {meal.cookingTime.total}min
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+            )}
+
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <RestaurantIcon fontSize="small" />
@@ -421,9 +480,70 @@ export function RecipeCard({
               </Typography>
             </Box>
 
-            {/* Removed Detailed Nutrition section as those fields are no longer in the Macros interface */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>Nutritional Information</Typography>
+              <Grid container spacing={2}>
+                {meal.macros.calories !== undefined && meal.macros.calories !== null && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Calories: {meal.macros.calories}kcal
+                    </Typography>
+                  </Grid>
+                )}
+                {meal.macros.fiber !== undefined && meal.macros.fiber !== null && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Fiber: {meal.macros.fiber}g
+                    </Typography>
+                  </Grid>
+                )}
+                {meal.macros.sugar !== undefined && meal.macros.sugar !== null && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sugar: {meal.macros.sugar}g
+                    </Typography>
+                  </Grid>
+                )}
+                {meal.macros.cholesterol !== undefined && meal.macros.cholesterol !== null && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Cholesterol: {meal.macros.cholesterol}mg
+                    </Typography>
+                  </Grid>
+                )}
+                {meal.macros.sodium !== undefined && meal.macros.sodium !== null && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sodium: {meal.macros.sodium}mg
+                    </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
 
-            {/* Removed Nutrients section as those fields are no longer in the Meal interface */}
+            {meal.nutrients && (meal.nutrients.vitamins || meal.nutrients.minerals) && (
+              <Box>
+                <Typography variant="h6" gutterBottom>Additional Nutrients</Typography>
+                <Grid container spacing={2}>
+                  {meal.nutrients.vitamins && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {meal.nutrients.vitamins.join(', ')}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.nutrients.minerals && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {meal.nutrients.minerals.join(', ')}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+            )}
           </Box>
         </Collapse>
       </CardContent>

@@ -27,6 +27,13 @@ export const recipes = pgTable("recipes", {
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
+  calories: integer("calories"),
+  fiber: integer("fiber"),
+  sugar: integer("sugar"),
+  cholesterol: integer("cholesterol"),
+  sodium: integer("sodium"),
+  cookingTime: jsonb("cooking_time"),
+  nutrients: jsonb("nutrients"),
   dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   userId: integer("user_id").references(() => users.id),
@@ -41,6 +48,13 @@ export const favorites = pgTable("favorites", {
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
+  calories: integer("calories"),
+  fiber: integer("fiber"),
+  sugar: integer("sugar"),
+  cholesterol: integer("cholesterol"),
+  sodium: integer("sodium"),
+  cookingTime: jsonb("cooking_time"),
+  nutrients: jsonb("nutrients"),
   dietaryRestriction: text("dietary_restriction").default("none").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -88,6 +102,17 @@ export const macroInputSchema = z.object({
   includeUserRecipes: z.boolean().default(true)
 });
 
+export const cookingTimeSchema = z.object({
+  prep: z.number().nullable(),
+  cook: z.number().nullable(),
+  total: z.number().nullable(),
+});
+
+export const nutrientsSchema = z.object({
+  vitamins: z.array(z.string()).nullable(),
+  minerals: z.array(z.string()).nullable(),
+});
+
 export const insertRecipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
   description: z.string().min(1, "Description is required"),
@@ -95,6 +120,13 @@ export const insertRecipeSchema = z.object({
   carbs: z.number().min(0, "Carbs must be 0 or greater"),
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
+  calories: z.number().nullable(),
+  fiber: z.number().nullable(),
+  sugar: z.number().nullable(),
+  cholesterol: z.number().nullable(),
+  sodium: z.number().nullable(),
+  cookingTime: cookingTimeSchema.nullable(),
+  nutrients: nutrientsSchema.nullable(),
   dietaryRestriction: dietaryPreferenceEnum.default("none"),
 });
 
