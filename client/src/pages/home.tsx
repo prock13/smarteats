@@ -18,6 +18,7 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
+  IconButton,
 } from "@mui/material";
 import {
   Restaurant,
@@ -27,6 +28,7 @@ import {
   Check,
   Chat as ChatIcon,
   Kitchen as KitchenIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { ChatBot } from "@/components/chat-bot";
 
@@ -237,13 +239,17 @@ export default function Home() {
         >
           {selectedFeature && (
             <>
-              <DialogTitle id="feature-dialog-title" sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                color: "white",
-              }}>
+              <DialogTitle 
+                id="feature-dialog-title" 
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                  color: "white",
+                  pr: 6,
+                }}
+              >
                 {selectedFeature.icon}
                 {selectedFeature.title}
                 {selectedFeature.comingSoon && (
@@ -254,6 +260,21 @@ export default function Home() {
                     sx={{ ml: "auto", bgcolor: "white" }}
                   />
                 )}
+                <IconButton
+                  onClick={handleCloseDialog}
+                  sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
               </DialogTitle>
               <DialogContent sx={{ mt: 2 }}>
                 <Box id="feature-dialog-description">
@@ -276,7 +297,6 @@ export default function Home() {
                 </Box>
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>
-                <Button onClick={handleCloseDialog}>Close</Button>
                 {!selectedFeature.comingSoon && (selectedFeature.route || selectedFeature.isNina) && (
                   <Button
                     variant="contained"
