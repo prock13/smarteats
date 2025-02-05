@@ -15,7 +15,7 @@ interface ThemeContextType {
 }
 
 const defaultSettings: ThemeSettings = {
-  mode: 'system',
+  mode: 'light', // Changed from 'system' to 'light' as default
   primary: '#2E7D32',
   borderRadius: 4
 };
