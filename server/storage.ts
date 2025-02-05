@@ -1,4 +1,4 @@
-import { users, meals, recipes, mealSuggestions, mealPlans, favorites, myFitnessPalCredentials, type User, type InsertUser, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type Recipe, type InsertRecipe, type Favorite, type InsertFavorite, type MfpCredentials, type InsertMfpCredentials } from "@shared/schema";
+import { users, meals, recipes, mealSuggestions, mealPlans, favorites, type User, type InsertUser, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type Recipe, type InsertRecipe, type Favorite, type InsertFavorite } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import session from "express-session";
@@ -13,11 +13,6 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(userId: number, newPassword: string): Promise<void>;
-
-  // MyFitnessPal operations
-  getMfpCredentials(userId: number): Promise<MfpCredentials | undefined>;
-  saveMfpCredentials(userId: number, credentials: InsertMfpCredentials): Promise<MfpCredentials>;
-  deleteMfpCredentials(userId: number): Promise<void>;
 
   // Meal suggestion operations
   getMealSuggestions(input: MacroInput): Promise<MealSuggestion | undefined>;
@@ -56,29 +51,6 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  // MyFitnessPal methods
-  async getMfpCredentials(userId: number): Promise<MfpCredentials | undefined> {
-    const [credentials] = await db
-      .select()
-      .from(myFitnessPalCredentials)
-      .where(eq(myFitnessPalCredentials.userId, userId));
-    return credentials;
-  }
-
-  async saveMfpCredentials(userId: number, credentials: InsertMfpCredentials): Promise<MfpCredentials> {
-    const [saved] = await db
-      .insert(myFitnessPalCredentials)
-      .values({ ...credentials, userId })
-      .returning();
-    return saved;
-  }
-
-  async deleteMfpCredentials(userId: number): Promise<void> {
-    await db
-      .delete(myFitnessPalCredentials)
-      .where(eq(myFitnessPalCredentials.userId, userId));
-  }
-
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -93,6 +65,7 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db.insert(users).values(user).returning();
     return created;
   }
+
   private createKey(input: MacroInput): string {
     return `${input.targetCarbs}-${input.targetProtein}-${input.targetFats}-${input.mealTypes.join(',')}-${input.dietaryPreference}`;
   }
@@ -151,7 +124,7 @@ export class DatabaseStorage implements IStorage {
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
-        date: plan.date, // Date is already transformed by the schema
+        date: plan.date,
         meal: plan.meal,
         mealType: plan.mealType,
         userId: plan.userId
@@ -169,18 +142,7 @@ export class DatabaseStorage implements IStorage {
 
   async getRecipes(): Promise<Recipe[]> {
     const recipesData = await db.select().from(recipes);
-    return recipesData.map(recipe => ({
-      id: recipe.id,
-      name: recipe.name,
-      description: recipe.description,
-      instructions: recipe.instructions,
-      carbs: recipe.carbs,
-      protein: recipe.protein,
-      fats: recipe.fats,
-      dietaryRestriction: recipe.dietaryRestriction || 'none',
-      createdAt: recipe.createdAt,
-      userId: recipe.userId
-    }));
+    return recipesData;
   }
 
   async getRecipeById(id: number): Promise<Recipe | undefined> {
@@ -267,6 +229,7 @@ export class DatabaseStorage implements IStorage {
       .set({ password: newPassword })
       .where(eq(users.id, userId));
   }
+
   async updateFavoriteTags(userId: number, favoriteId: number, tags: string[]): Promise<void> {
     console.log("Updating tags for favorite:", favoriteId, "new tags:", tags);
     await db
