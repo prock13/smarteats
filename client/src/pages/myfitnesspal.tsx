@@ -45,6 +45,7 @@ export default function MyFitnessPalPage() {
 
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
+      console.log("Submitting MFP credentials:", data);
       const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
       if (!res.ok) {
         const error = await res.json();
@@ -53,12 +54,21 @@ export default function MyFitnessPalPage() {
       return res.json();
     },
     onSuccess: () => {
+      console.log("Successfully connected MFP account");
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
-      toast("Connected to MyFitnessPal successfully");
+      toast({
+        title: "Success",
+        description: "Connected to MyFitnessPal successfully"
+      });
       form.reset();
     },
     onError: (error: Error) => {
-      toast(`Error: ${error.message}`);
+      console.error("Failed to connect MFP account:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
@@ -81,6 +91,7 @@ export default function MyFitnessPalPage() {
   });
 
   const onSubmit = (data: InsertMfpCredentials) => {
+    console.log("Form submitted with data:", data);
     connectMutation.mutate(data);
   };
 
