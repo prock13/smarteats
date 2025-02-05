@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   Box,
@@ -24,8 +24,6 @@ import {
   CalendarMonth,
   Favorite,
   BarChart,
-  LocalDining,
-  Tune,
   Check,
   Chat as ChatIcon,
   Kitchen as KitchenIcon,
@@ -129,15 +127,13 @@ export default function Home() {
   const handleNavigate = () => {
     if (selectedFeature) {
       if (selectedFeature.isNina) {
-        // Trigger the chat modal from navigation
-        const chatBtn = document.querySelector('[data-chat-trigger="true"]') as HTMLElement;
+        // Find and trigger the chat button
+        const chatBtn = document.querySelector<HTMLElement>('[data-chat-trigger]');
         if (chatBtn) {
           chatBtn.click();
+          setOpenDialog(false);
         }
-        setOpenDialog(false);
-        return;
-      }
-      if (!selectedFeature.comingSoon && selectedFeature.route) {
+      } else if (!selectedFeature.comingSoon && selectedFeature.route) {
         setOpenDialog(false);
         setLocation(selectedFeature.route);
       }
@@ -240,20 +236,16 @@ export default function Home() {
           maxWidth="sm"
           fullWidth
           aria-labelledby="feature-dialog-title"
-          aria-describedby="feature-dialog-description"
         >
           {selectedFeature && (
             <>
-              <DialogTitle
-                id="feature-dialog-title"
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                  color: "white",
-                }}
-              >
+              <DialogTitle id="feature-dialog-title" sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                color: "white",
+              }}>
                 {selectedFeature.icon}
                 {selectedFeature.title}
                 {selectedFeature.comingSoon && (
@@ -265,23 +257,25 @@ export default function Home() {
                   />
                 )}
               </DialogTitle>
-              <DialogContent id="feature-dialog-description">
-                <Typography variant="body1" paragraph>
-                  {selectedFeature.description}
-                </Typography>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Key Features:
-                </Typography>
-                <List>
-                  {selectedFeature.details.map((detail, index) => (
-                    <ListItem key={index}>
-                      <ListItemIcon>
-                        <Check sx={{ color: "primary.main" }} />
-                      </ListItemIcon>
-                      <ListItemText primary={detail} />
-                    </ListItem>
-                  ))}
-                </List>
+              <DialogContent sx={{ mt: 2 }}>
+                <Box id="feature-dialog-description">
+                  <Typography variant="body1" paragraph>
+                    {selectedFeature.description}
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Key Features:
+                  </Typography>
+                  <List>
+                    {selectedFeature.details.map((detail, index) => (
+                      <ListItem key={index}>
+                        <ListItemIcon>
+                          <Check sx={{ color: "primary.main" }} />
+                        </ListItemIcon>
+                        <ListItemText primary={detail} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>
                 <Button onClick={handleCloseDialog}>Close</Button>
