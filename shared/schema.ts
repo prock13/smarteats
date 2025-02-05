@@ -132,7 +132,16 @@ export const insertRecipeSchema = z.object({
 });
 
 export const mealPlanSchema = z.object({
-  date: z.string().transform(str => new Date(str)),
+  date: z.string().transform(str => {
+    // Ensure consistent date handling by setting time to noon UTC
+    const date = new Date(str);
+    return new Date(Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      12, 0, 0, 0
+    ));
+  }),
   meal: z.object({
     name: z.string(),
     description: z.string(),

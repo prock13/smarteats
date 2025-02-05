@@ -100,7 +100,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]> {
-    return db
+    console.log('Getting meal plans between:', {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    });
+
+    const plans = await db
       .select()
       .from(mealPlans)
       .where(
@@ -109,6 +114,9 @@ export class DatabaseStorage implements IStorage {
           lte(mealPlans.date, endDate)
         )
       );
+
+    console.log('Retrieved meal plans:', JSON.stringify(plans, null, 2));
+    return plans;
   }
 
   async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
@@ -116,7 +124,7 @@ export class DatabaseStorage implements IStorage {
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
-        date: new Date(plan.date),
+        date: plan.date, // Date is already transformed by the schema
         meal: plan.meal,
         mealType: plan.mealType,
         userId: plan.userId

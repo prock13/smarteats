@@ -58,7 +58,13 @@ export function registerRoutes(app: Express): Server {
         throw new Error("Invalid date format");
       }
 
+      console.log('Fetching meal plans - Date range:', {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+
       const plans = await storage.getMealPlans(startDate, endDate);
+      console.log('Retrieved meal plans:', JSON.stringify(plans, null, 2));
       res.json(plans);
     } catch (error) {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
