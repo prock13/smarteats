@@ -52,7 +52,7 @@ export async function generateMealSuggestions(
     let systemRole: string;
 
     if (pantryItems) {
-      prompt = `Create a detailed recipe using these ingredients:
+      prompt = `Create a recipe using these ingredients:
 - Main carb: ${pantryItems.carbSource}
 - Main protein: ${pantryItems.proteinSource}
 - Main fat: ${pantryItems.fatSource}
@@ -70,14 +70,12 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number,
-        "fiber": number,
-        "calories": number
+        "fats": number
       }
     }
   ]
 }`;
-      systemRole = "You are a professional chef and nutritionist. Create detailed recipes with accurate nutritional information. Keep your response in valid JSON format.";
+      systemRole = "You are a professional chef. Create recipes that match the given ingredients. Keep your response in valid JSON format.";
     } else {
       const storedRecipes = await storage.getRecipes();
       const availableStoredRecipes = storedRecipes.filter(recipe => {
@@ -116,22 +114,20 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number,
-        "fiber": number,
-        "calories": number
+        "fats": number
       },
       "isStoredRecipe": boolean
     }
   ]
 }`;
-      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios. Always include complete nutritional information. Keep your response in valid JSON format.";
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios. Always respond with valid JSON format.";
     }
 
     console.log("Generating suggestions for mode:", pantryItems ? "pantry-based" : "macro-based");
     console.log("Prompt:", prompt);
 
     const responsePromise = openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -142,7 +138,7 @@ Format your response as a JSON object with this exact structure:
           content: prompt
         }
       ],
-      temperature: 0.7
+      response_format: { type: "json_object" }
     });
 
     const timeoutPromise = new Promise((_, reject) => {
@@ -165,7 +161,6 @@ Format your response as a JSON object with this exact structure:
       throw new Error("Invalid response format: missing or invalid meals array");
     }
 
-    // If this was a macro-based request, verify stored recipes
     if (!pantryItems) {
       const storedRecipes = await storage.getRecipes();
       parsedContent.meals = parsedContent.meals.map(meal => ({

@@ -138,8 +138,14 @@ export class DatabaseStorage implements IStorage {
       carbs: recipe.carbs,
       protein: recipe.protein,
       fats: recipe.fats,
+      calories: null, // Add null values for optional fields
+      fiber: null,
+      sugar: null,
+      cooking_time: null,
+      nutrients: null,
       dietaryRestriction: recipe.dietaryRestriction,
-      createdAt: recipe.createdAt
+      createdAt: recipe.createdAt,
+      userId: recipe.userId || null
     }));
   }
 
