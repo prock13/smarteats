@@ -16,6 +16,7 @@ import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
 import Pantry from "@/pages/pantry";
 import Terms from "@/pages/terms";
+import About from "@/pages/about"; // Added import for About component
 import Navigation from "@/components/navigation";
 import { Footer } from "@/components/Footer";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
@@ -40,6 +41,7 @@ function ThemedApp() {
           <Switch>
             <Route path="/auth" component={Auth} />
             <Route path="/terms" component={Terms} />
+            <Route path="/about" component={About} /> {/* Added Route for About */}
             <ProtectedRoute path="/" component={Home} />
             <ProtectedRoute path="/planner" component={Planner} />
             <ProtectedRoute path="/calendar" component={Calendar} />

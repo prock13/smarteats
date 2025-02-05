@@ -35,6 +35,14 @@ export function Footer() {
             <Link
               component="button"
               variant="body2"
+              onClick={() => setLocation("/about")}
+              sx={{ cursor: 'pointer' }}
+            >
+              About Us
+            </Link>
+            <Link
+              component="button"
+              variant="body2"
               onClick={() => setLocation("/terms")}
               sx={{ cursor: 'pointer' }}
             >
