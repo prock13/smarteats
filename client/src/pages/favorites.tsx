@@ -149,6 +149,7 @@ export default function Favorites() {
                     onExpandClick={() => handleExpandClick(index)}
                     expanded={expandedCards[index] || false}
                     showAddToCalendar={true}
+                    showDelete={true}
                     favorites={favorites}
                   />
                 </Grid>

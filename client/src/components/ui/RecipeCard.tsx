@@ -73,6 +73,7 @@ interface RecipeCardProps {
   };
   favorites?: Recipe[];
   showAddToCalendar?: boolean;
+  showDelete?: boolean;
   expanded?: boolean;
   onExpandClick?: () => void;
 }
@@ -83,6 +84,7 @@ export function RecipeCard({
   targetMacros,
   favorites,
   showAddToCalendar = true,
+  showDelete = false,
   expanded = false,
   onExpandClick = () => {},
 }: RecipeCardProps) {
@@ -182,6 +184,12 @@ export function RecipeCard({
     },
   });
 
+  const handleDeleteFavorite = (recipeId: number) => {
+    if (confirm("Are you sure you want to remove this recipe from favorites?")) {
+      deleteFavoriteMutation.mutate(recipeId);
+    }
+  };
+
   const mealTypeOptions = [
     { label: "Breakfast", value: "breakfast" },
     { label: "Lunch", value: "lunch" },
@@ -191,12 +199,6 @@ export function RecipeCard({
 
   const handleExpandClick = () => {
     onExpandClick();
-  };
-
-  const handleDeleteFavorite = (recipeId: number) => {
-    if (confirm("Are you sure you want to remove this recipe from favorites?")) {
-      deleteFavoriteMutation.mutate(recipeId);
-    }
   };
 
   return (
@@ -305,13 +307,13 @@ export function RecipeCard({
                   <FavoriteBorder />
                 )}
               </IconButton>
-            ) : favorites?.some((f) => f.name === meal.name) ? (
+            ) : showDelete && favorites?.some((f) => f.name === meal.name) ? (
                 <IconButton
                   color="error"
                   onClick={() => {
                     const favorite = favorites.find((f) => f.name === meal.name);
-                    if (favorite && favorite.id) { // Added null check for safety
-                      handleDeleteFavorite(favorite.id);
+                    if (favorite?.id) {
+                      handleDeleteFavorite(favorite?.id);
                     }
                   }}
                   disabled={deleteFavoriteMutation.isPending}
