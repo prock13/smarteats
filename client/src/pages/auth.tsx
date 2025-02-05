@@ -5,7 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
 import { Redirect } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,18 +46,30 @@ export default function AuthPage() {
   }
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        bgcolor: "grey.100", // Light gray background
+      }}
+    >
       <Card className="w-full">
         <CardHeader className="space-y-1">
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Logo sx={{ fontSize: 128 }} />
           </Box>
           <CardTitle className="text-2xl text-center">
-            Welcome to Macro Meal Planner
+            Welcome to Smart Meal Planner
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={mode} onValueChange={(v) => setMode(v as "login" | "register")}>
+          <Tabs
+            value={mode}
+            onValueChange={(v) => setMode(v as "login" | "register")}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
@@ -58,7 +77,9 @@ export default function AuthPage() {
             <TabsContent value="login">
               <Form {...loginForm}>
                 <form
-                  onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}
+                  onSubmit={loginForm.handleSubmit((data) =>
+                    loginMutation.mutate(data),
+                  )}
                   className="space-y-4"
                 >
                   <FormField
@@ -91,6 +112,10 @@ export default function AuthPage() {
                     type="submit"
                     className="w-full"
                     disabled={loginMutation.isPending}
+                    style={{
+                      background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                      color: "white",
+                    }}
                   >
                     {loginMutation.isPending ? "Logging in..." : "Login"}
                   </Button>
@@ -100,7 +125,9 @@ export default function AuthPage() {
             <TabsContent value="register">
               <Form {...registerForm}>
                 <form
-                  onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))}
+                  onSubmit={registerForm.handleSubmit((data) =>
+                    registerMutation.mutate(data),
+                  )}
                   className="space-y-4"
                 >
                   <FormField
@@ -133,8 +160,14 @@ export default function AuthPage() {
                     type="submit"
                     className="w-full"
                     disabled={registerMutation.isPending}
+                    style={{
+                      background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                      color: "white",
+                    }}
                   >
-                    {registerMutation.isPending ? "Creating account..." : "Create account"}
+                    {registerMutation.isPending
+                      ? "Creating account..."
+                      : "Create account"}
                   </Button>
                 </form>
               </Form>
