@@ -157,9 +157,9 @@ export function RecipeCard({
   });
 
   const addToCalendarMutation = useMutation({
-    mutationFn: async ({ meal, mealType, date }: { meal: Meal; mealType: string; date: Date }) => {
+    mutationFn: async ({ meal, mealType, date }: { meal: Meal; mealType: string; date: string }) => {
       const mealPlan = {
-        date: date.toISOString(),
+        date,
         meal: {
           name: meal.name,
           description: meal.description,
@@ -267,11 +267,14 @@ export function RecipeCard({
   };
 
   const handleCalendarSubmit = () => {
-    const date = new Date(selectedDate);
+    // Ensure we keep the date as selected without timezone conversion
+    // Add time component to ensure consistent timezone handling
+    const dateWithTime = `${selectedDate}T00:00:00.000Z`;
+
     addToCalendarMutation.mutate({
       meal,
       mealType: selectedMealType,
-      date,
+      date: dateWithTime,
     });
   };
 
