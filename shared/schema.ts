@@ -56,6 +56,7 @@ export const favorites = pgTable("favorites", {
   cookingTime: jsonb("cooking_time"),
   nutrients: jsonb("nutrients"),
   dietaryRestriction: text("dietary_restriction").default("none").notNull(),
+  tags: text("tags").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -158,6 +159,7 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
   dietaryRestriction: dietaryPreferenceEnum.default("none"),
+  tags: z.array(z.string()).optional().default([]),
 });
 
 export type MacroInput = z.infer<typeof macroInputSchema>;

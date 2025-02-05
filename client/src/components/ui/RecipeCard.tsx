@@ -14,6 +14,9 @@ import {
   LinearProgress,
   Collapse,
   Badge,
+  TextField,
+  Chip,
+  Stack,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -24,6 +27,7 @@ import {
   AccessTime as AccessTimeIcon,
   Restaurant as RestaurantIcon,
   Delete as DeleteIcon,
+  Add as AddIcon,
 } from "@mui/icons-material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -90,7 +94,35 @@ export function RecipeCard({
 }: RecipeCardProps) {
   const { toast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
+  const [newTag, setNewTag] = useState("");
   const queryClient = useQueryClient();
+  const favorite = favorites?.find((f) => f.name === meal.name);
+  const [tags, setTags] = useState<string[]>(favorite?.tags || []);
+
+  const updateTagsMutation = useMutation({
+    mutationFn: async ({ recipeId, tags }: { recipeId: number; tags: string[] }) => {
+      const res = await apiRequest("PATCH", `/api/favorites/${recipeId}`, { tags });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update tags");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Success",
+        description: "Tags updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const deleteFavoriteMutation = useMutation({
     mutationFn: async (recipeId: number) => {
@@ -199,6 +231,24 @@ export function RecipeCard({
 
   const handleExpandClick = () => {
     onExpandClick();
+  };
+
+  const handleAddTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && newTag.trim() && favorite?.id) {
+      event.preventDefault();
+      const updatedTags = [...tags, newTag.trim()];
+      setTags(updatedTags);
+      updateTagsMutation.mutate({ recipeId: favorite.id, tags: updatedTags });
+      setNewTag('');
+    }
+  };
+
+  const handleDeleteTag = (tagToDelete: string) => {
+    if (favorite?.id) {
+      const updatedTags = tags.filter((tag) => tag !== tagToDelete);
+      setTags(updatedTags);
+      updateTagsMutation.mutate({ recipeId: favorite.id, tags: updatedTags });
+    }
   };
 
   return (
@@ -578,6 +628,50 @@ export function RecipeCard({
                     </Grid>
                   )}
                 </Grid>
+              </Box>
+            )}
+
+            {showDelete && favorite && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Tags
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                  {tags.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      onDelete={() => handleDeleteTag(tag)}
+                      color="primary"
+                      variant="outlined"
+                    />
+                  ))}
+                </Stack>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={handleAddTag}
+                  placeholder="Add a tag (press Enter)"
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (newTag.trim() && favorite.id) {
+                            const updatedTags = [...tags, newTag.trim()];
+                            setTags(updatedTags);
+                            updateTagsMutation.mutate({ recipeId: favorite.id, tags: updatedTags });
+                            setNewTag('');
+                          }
+                        }}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    ),
+                  }}
+                />
               </Box>
             )}
           </Box>
