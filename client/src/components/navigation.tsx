@@ -1,4 +1,6 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 import {
   AppBar,
   Toolbar,
@@ -8,26 +10,37 @@ import {
   Box,
   Menu,
   MenuItem,
+  Container,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
 import {
-  Menu as MenuIcon,
   CalendarMonth,
-  Kitchen,
-  Calculate,
-  Favorite,
   Restaurant,
-  Person,
+  Favorite,
+  AccountCircle,
+  Chat as ChatIcon,
+  Menu as MenuIcon,
+  Kitchen as KitchenIcon,
+  MenuBook as MenuBookIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { Logo } from "./logo";
+import { ChatBot } from "./chat-bot";
 
 export default function Navigation() {
+  const { user, logoutMutation } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
+  const [chatOpen, setChatOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  if (!user) return null;
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -35,69 +48,145 @@ export default function Navigation() {
     setAnchorEl(null);
   };
 
+  const handleNavigate = (path: string) => {
+    setLocation(path);
+    handleClose();
+    setMobileOpen(false);
+  };
+
+  const navigationItems = [
+    { icon: <MenuBookIcon />, text: "Macro Match", path: "/planner" },
+    { icon: <KitchenIcon />, text: "Pantry Pal", path: "/pantry" },
+    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
+    { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
+    { icon: <Favorite />, text: "Favorites", path: "/favorites" },
+  ];
+
+  const mobileDrawer = (
+    <Drawer
+      variant="temporary"
+      anchor="left"
+      open={mobileOpen}
+      onClose={() => setMobileOpen(false)}
+      ModalProps={{ keepMounted: true }}
+      sx={{
+        display: { xs: "block", md: "none" },
+        "& .MuiDrawer-paper": { width: 240, bgcolor: "background.paper" },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Logo sx={{ fontSize: 40 }} />
+      </Box>
+      <List>
+        {navigationItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigate(item.path)}
+              sx={{ color: "text.primary" }}
+            >
+              <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
+  );
+
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          onClick={handleMenuClick}
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          <Link href="/">SmartEats</Link>
-        </Typography>
-        <Button color="inherit" onClick={() => logoutMutation.mutate()}>
-          Logout
-        </Button>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          onClick={handleClose}
-        >
-          <MenuItem component={Link} href="/calendar">
-            <ListItemIcon>
-              <CalendarMonth />
-            </ListItemIcon>
-            <ListItemText>Calendar</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/planner">
-            <ListItemIcon>
-              <Calculate />
-            </ListItemIcon>
-            <ListItemText>Macro Match</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/recipes">
-            <ListItemIcon>
-              <Restaurant />
-            </ListItemIcon>
-            <ListItemText>Recipes</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/favorites">
-            <ListItemIcon>
-              <Favorite />
-            </ListItemIcon>
-            <ListItemText>Favorites</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/pantry">
-            <ListItemIcon>
-              <Kitchen />
-            </ListItemIcon>
-            <ListItemText>Pantry Pal</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/profile">
-            <ListItemIcon>
-              <Person />
-            </ListItemIcon>
-            <ListItemText>Profile</ListItemText>
-          </MenuItem>
-        </Menu>
-      </Toolbar>
-    </AppBar>
+    <>
+      <AppBar position="static" color="primary" elevation={1}>
+        <Container maxWidth="lg">
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={() => setMobileOpen(true)}
+              sx={{ mr: 2, display: { md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexGrow: 1,
+                cursor: "pointer",
+              }}
+              onClick={() => setLocation("/")}
+            >
+              <Logo sx={{ fontSize: 50, color: "inherit" }} />
+            </Box>
+
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.text}
+                  color="inherit"
+                  startIcon={item.icon}
+                  onClick={() => handleNavigate(item.path)}
+                >
+                  {item.text}
+                </Button>
+              ))}
+
+              <IconButton
+                color="inherit"
+                onClick={() => setChatOpen(true)}
+                sx={{ ml: 1 }}
+              >
+                <ChatIcon />
+              </IconButton>
+
+              <IconButton size="large" onClick={handleMenu} color="inherit">
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <MenuItem onClick={() => handleNavigate("/profile")}>
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={() => logoutMutation.mutate()}>
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </MenuItem>
+              </Menu>
+            </Box>
+
+            {/* Mobile-only icons */}
+            <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
+              <IconButton color="inherit" onClick={() => setChatOpen(true)}>
+                <ChatIcon />
+              </IconButton>
+              <IconButton size="large" onClick={handleMenu} color="inherit">
+                <AccountCircle />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      {mobileDrawer}
+      <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
+    </>
   );
 }
