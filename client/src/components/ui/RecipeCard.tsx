@@ -277,51 +277,39 @@ export function RecipeCard({
                     px: 2
                   }}
                 >
-                  {addToCalendarMutation.isPending
-                    ? "Adding..."
-                    : "Add to Calendar"}
+                  {addToCalendarMutation.isPending ? "Adding..." : "Add to Calendar"}
                 </Button>
               </>
             )}
-            {!meal.isStoredRecipe && favorites ? (
+            {!meal.isStoredRecipe && favorites && !showDelete ? (
               <IconButton
-                color={
-                  favorites?.some((f) => f.name === meal.name)
-                    ? "primary"
-                    : "default"
-                }
+                color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
                 onClick={() => {
                   if (!favorites?.some((f) => f.name === meal.name)) {
                     favoriteMutation.mutate(meal);
                   }
                 }}
-                disabled={
-                  favoriteMutation.isPending ||
-                  favorites?.some((f) => f.name === meal.name)
-                }
+                disabled={favoriteMutation.isPending || favorites?.some((f) => f.name === meal.name)}
                 size="small"
               >
-                {favorites?.some((f) => f.name === meal.name) ? (
-                  <Favorite />
-                ) : (
-                  <FavoriteBorder />
-                )}
+                {favorites?.some((f) => f.name === meal.name) ? <Favorite /> : <FavoriteBorder />}
               </IconButton>
-            ) : showDelete && favorites?.some((f) => f.name === meal.name) ? (
-                <IconButton
-                  color="error"
-                  onClick={() => {
-                    const favorite = favorites.find((f) => f.name === meal.name);
-                    if (favorite?.id) {
-                      handleDeleteFavorite(favorite?.id);
-                    }
-                  }}
-                  disabled={deleteFavoriteMutation.isPending}
-                  size="small"
-                >
-                  <DeleteIcon />
-                </IconButton>
-              ) : null}
+            ) : null}
+            {showDelete && favorites && (
+              <IconButton
+                color="error"
+                onClick={() => {
+                  const favorite = favorites.find((f) => f.name === meal.name);
+                  if (favorite?.id) {
+                    handleDeleteFavorite(favorite.id);
+                  }
+                }}
+                disabled={deleteFavoriteMutation.isPending}
+                size="small"
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
           </Box>
         }
       />
