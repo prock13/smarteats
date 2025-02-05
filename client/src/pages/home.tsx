@@ -26,6 +26,7 @@ import {
   Tune,
   Check,
   Chat as ChatIcon,
+  Kitchen as KitchenIcon, // Added import for KitchenIcon
 } from "@mui/icons-material";
 import { useState } from "react";
 
@@ -44,16 +45,16 @@ const features = [
     ],
   },
   {
-    title: "Chef Nina - AI Assistant",
+    title: "Pantry Manager",
     description:
-      "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
-    icon: <ChatIcon sx={{ fontSize: 40 }} />,
-    route: "/",
+      "Keep track of your ingredients and get recipe suggestions based on what you have.",
+    icon: <KitchenIcon sx={{ fontSize: 40 }} />,
+    route: "/pantry",
     details: [
-      "Get personalized meal suggestions based on your preferences",
-      "Real-time nutritional guidance and recipe modifications",
-      "Interactive meal planning assistance",
-      "24/7 availability for all your culinary questions",
+      "Track available ingredients",
+      "Get recipe suggestions based on your pantry",
+      "Smart shopping list generation",
+      "Ingredient expiration tracking",
     ],
   },
   {
