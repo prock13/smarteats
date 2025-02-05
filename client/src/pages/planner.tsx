@@ -360,7 +360,7 @@ export default function Planner() {
               mb: 1,
             }}
           >
-            Macro Meal Planner
+            Macro Match
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your remaining macros and get AI-powered meal suggestions

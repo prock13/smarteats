@@ -34,7 +34,7 @@ import { ChatBot } from "@/components/chat-bot";
 
 const features = [
   {
-    title: "Macro Meal Planner",
+    title: "Macro Match",
     description:
       "Plan your meals with AI-powered suggestions based on your macronutrient goals.",
     icon: <Restaurant sx={{ fontSize: 40 }} />,
@@ -47,7 +47,7 @@ const features = [
     ],
   },
   {
-    title: "Pantry Manager",
+    title: "Pantry Pal",
     description:
       "Keep track of your ingredients and get recipe suggestions based on what you have.",
     icon: <KitchenIcon sx={{ fontSize: 40 }} />,
@@ -159,7 +159,7 @@ export default function Home() {
               fontWeight: "bold",
             }}
           >
-            Smart Meal Planning
+            SmartEats
           </Typography>
           <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
             Your personal AI-powered nutrition assistant

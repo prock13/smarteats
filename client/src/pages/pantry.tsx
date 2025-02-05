@@ -281,11 +281,10 @@ export default function PantryPage() {
               mb: 1,
             }}
           >
-            Pantry Recipe Finder
+            Pantry Pal
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Enter the ingredients you have on hand and get AI-powered recipe
-            suggestions
+            Enter the ingredients you have on hand and get AI-powered recipe suggestions
           </Typography>
         </Box>
 
