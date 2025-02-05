@@ -26,6 +26,7 @@ import {
   Chat as ChatIcon,
   Menu as MenuIcon,
   Kitchen as KitchenIcon,
+  MenuBook as MenuBookIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -55,6 +56,7 @@ export default function Navigation() {
 
   const navigationItems = [
     { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
+    { icon: <MenuBookIcon />, text: "Meal Planner", path: "/planner" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
     { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
