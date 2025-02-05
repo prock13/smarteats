@@ -164,8 +164,15 @@ Format your response as a JSON object with this exact structure:
     if (!pantryItems) {
       const storedRecipes = await storage.getRecipes();
       parsedContent.meals = parsedContent.meals.map(meal => ({
-        ...meal,
-        isStoredRecipe: storedRecipes.some(recipe => 
+        name: meal.name,
+        description: meal.description,
+        instructions: meal.instructions,
+        macros: {
+          carbs: meal.macros.carbs,
+          protein: meal.macros.protein,
+          fats: meal.macros.fats
+        },
+        isStoredRecipe: storedRecipes.some(recipe =>
           recipe.name.toLowerCase() === meal.name.toLowerCase()
         )
       }));
