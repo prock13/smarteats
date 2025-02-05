@@ -129,7 +129,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecipes(): Promise<Recipe[]> {
-    return db.select().from(recipes);
+    const recipes = await db.select({
+      id: recipes.id,
+      name: recipes.name,
+      description: recipes.description,
+      instructions: recipes.instructions,
+      carbs: recipes.carbs,
+      protein: recipes.protein,
+      fats: recipes.fats,
+      dietaryRestriction: recipes.dietaryRestriction
+    }).from(recipes);
+    return recipes;
   }
 
   async getRecipeById(id: number): Promise<Recipe | undefined> {

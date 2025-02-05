@@ -52,7 +52,6 @@ export async function generateMealSuggestions(
     let systemRole: string;
 
     if (pantryItems) {
-      // Pantry-based recipe suggestion
       prompt = `Create a recipe using these ingredients:
 - Main carb: ${pantryItems.carbSource}
 - Main protein: ${pantryItems.proteinSource}
@@ -72,18 +71,12 @@ Respond with a JSON object in this exact format:
         "carbs": number,
         "protein": number,
         "fats": number
-      },
-      "cookingTime": {
-        "prep": number,
-        "cook": number,
-        "total": number
       }
     }
   ]
 }`;
       systemRole = "You are a chef. Always respond with valid JSON only. Keep recipes simple and focused on the main ingredients provided.";
     } else {
-      // Macro-based meal planning
       const storedRecipes = await storage.getRecipes();
       const availableStoredRecipes = storedRecipes.filter(recipe => {
         if (!includeUserRecipes) return false;
@@ -93,7 +86,7 @@ Respond with a JSON object in this exact format:
       });
 
       const storedRecipesPrompt = availableStoredRecipes.length > 0
-        ? `Here are some stored recipes that you can suggest. IMPORTANT: Do not modify or combine these recipes, suggest them exactly as-is:\n${availableStoredRecipes.map(recipe => `
+        ? `Here are some stored recipes that you can suggest:\n${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
@@ -101,7 +94,7 @@ Respond with a JSON object in this exact format:
 `).join('\n')}`
         : '';
 
-      prompt = `You are a nutrition expert. Given the following macro nutrient targets:
+      prompt = `Given the following macro nutrient targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
@@ -112,19 +105,11 @@ ${dietaryPreference !== "none" ? `\nDietary Preference: ${dietaryPreference}. Pl
 ${recipeLimit ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.` : '\nPlease suggest multiple meal options that meet these criteria.'}
 ${mealTypes.length > 0 ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.` : ''}
 
-Please suggest meals that will help meet these targets. For your suggestions:
-1. If a stored recipe matches the requirements closely, suggest it exactly as-is
-2. Otherwise, create completely new recipe suggestions
-3. IMPORTANT: Never combine or modify stored recipes
-4. Ensure all suggestions comply with the dietary preferences
-5. Consider the specified meal types
-6. Provide detailed nutritional information and instructions
-
 Respond with a JSON object in this exact format:
 {
   "meals": [
     {
-      "name": "Meal name",
+      "name": "Recipe name",
       "description": "Brief description",
       "instructions": "Detailed step-by-step cooking instructions",
       "macros": {
@@ -132,20 +117,15 @@ Respond with a JSON object in this exact format:
         "protein": number,
         "fats": number
       },
-      "cookingTime": {
-        "prep": number,
-        "cook": number,
-        "total": number
-      },
       "isStoredRecipe": boolean
     }
   ]
 }`;
-      systemRole = "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text. Never modify or combine existing recipes - suggest them exactly as-is or create entirely new recipes.";
+      systemRole = "You are a helpful nutrition expert. Always respond with valid JSON objects only, no additional text.";
     }
 
     console.log("Starting generation with mode:", pantryItems ? "pantry-based" : "macro-based");
-    console.log("Sending prompt to OpenAI");
+    console.log("Sending prompt to OpenAI:", prompt);
 
     const responsePromise = openai.chat.completions.create({
       model: "gpt-4",
@@ -181,7 +161,7 @@ Respond with a JSON object in this exact format:
 
     try {
       const parsedContent = JSON.parse(content);
-      console.log("Successfully parsed response");
+      console.log("Successfully parsed response:", parsedContent);
 
       if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
         console.error("Invalid response format:", parsedContent);
