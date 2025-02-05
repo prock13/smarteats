@@ -78,53 +78,6 @@ export const mealPlans = pgTable("meal_plans", {
   userId: integer("user_id").references(() => users.id),
 });
 
-export const myFitnessPalCredentials = pgTable("myfitnesspal_credentials", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  username: text("mfp_username").notNull(),
-  syncEnabled: boolean("sync_enabled").default(true).notNull(),
-  lastSync: timestamp("last_sync"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const nutritionSyncLogs = pgTable("nutrition_sync_logs", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  syncDate: timestamp("sync_date").notNull(),
-  status: text("status").notNull(), // success, failed, partial
-  errorMessage: text("error_message"),
-  dataSnapshot: jsonb("data_snapshot"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const foodItemMappings = pgTable("food_item_mappings", {
-  id: serial("id").primaryKey(),
-  localFoodId: integer("local_food_id").notNull(),
-  mfpFoodId: text("mfp_food_id").notNull(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  lastSynced: timestamp("last_synced").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Schema validation
-export const insertMfpCredentialsSchema = createInsertSchema(myFitnessPalCredentials)
-  .extend({
-    username: z.string().min(1, "MyFitnessPal username is required"),
-    accessToken: z.string().optional(),
-    refreshToken: z.string().optional(),
-  })
-  .omit({ id: true, createdAt: true });
-
-export const insertNutritionSyncLogSchema = createInsertSchema(nutritionSyncLogs)
-  .extend({
-    status: z.enum(["success", "failed", "partial"]),
-    dataSnapshot: z.record(z.unknown()).optional(),
-  })
-  .omit({ id: true, createdAt: true });
-
-export const insertFoodItemMappingSchema = createInsertSchema(foodItemMappings)
-  .omit({ id: true, createdAt: true });
-
 export const dietaryPreferenceEnum = z.enum([
   "none",
   "vegetarian",
@@ -180,7 +133,6 @@ export const insertRecipeSchema = z.object({
 
 export const mealPlanSchema = z.object({
   date: z.string().transform(str => {
-    // Ensure consistent date handling by setting time to noon UTC
     const date = new Date(str);
     return new Date(Date.UTC(
       date.getFullYear(),
@@ -219,12 +171,6 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
 });
 
 // Types
-export type MfpCredentials = typeof myFitnessPalCredentials.$inferSelect;
-export type InsertMfpCredentials = z.infer<typeof insertMfpCredentialsSchema>;
-export type NutritionSyncLog = typeof nutritionSyncLogs.$inferSelect;
-export type InsertNutritionSyncLog = z.infer<typeof insertNutritionSyncLogSchema>;
-export type FoodItemMapping = typeof foodItemMappings.$inferSelect;
-export type InsertFoodItemMapping = z.infer<typeof insertFoodItemMappingSchema>;
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;

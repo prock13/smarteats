@@ -5,8 +5,6 @@ import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
 import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { insertFavoriteSchema } from "@shared/schema";
-import { insertMfpCredentialsSchema } from "@shared/schema";
-import { mfpService } from "./services/myfitnesspal";
 import crypto from "crypto";
 
 export function registerRoutes(app: Express): Server {
@@ -393,95 +391,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // MyFitnessPal Integration Routes
-  app.get("/api/myfitnesspal/connection", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const credentials = await storage.getMfpCredentials(req.user!.id);
-      res.json({
-        connected: !!credentials,
-        username: credentials?.username
-      });
-    } catch (error) {
-      console.error("Error checking MFP connection:", error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
-    }
-  });
-
-  app.post("/api/myfitnesspal/connect", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const credentials = insertMfpCredentialsSchema.parse(req.body);
-
-      // Verify the credentials work before saving
-      const isValid = await mfpService.verifyCredentials(credentials.username);
-      if (!isValid) {
-        return res.status(400).json({ message: "Invalid MyFitnessPal username" });
-      }
-
-      await storage.saveMfpCredentials(req.user!.id, {
-        ...credentials,
-        userId: req.user!.id
-      });
-
-      res.json({ message: "Successfully connected MyFitnessPal account" });
-    } catch (error) {
-      console.error("Error connecting MFP account:", error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
-    }
-  });
-
-  app.get("/api/myfitnesspal/nutrition", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const credentials = await storage.getMfpCredentials(req.user!.id);
-      if (!credentials) {
-        return res.status(400).json({ message: "MyFitnessPal account not connected" });
-      }
-
-      // Get today's diary entries
-      const today = new Date().toISOString().split('T')[0];
-      const diaryData = await mfpService.getDiaryEntries(credentials.username, today);
-
-      res.json(diaryData);
-    } catch (error) {
-      console.error("Error fetching nutrition data:", error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
-    }
-  });
-
-
-  app.post("/api/myfitnesspal/refresh", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const credentials = await storage.getMfpCredentials(req.user!.id);
-      if (!credentials) {
-        return res.status(400).json({ message: "MyFitnessPal account not connected" });
-      }
-
-      // Mock refresh for now - will be replaced with actual MFP API sync
-      res.json({ message: "Nutrition data refreshed successfully" });
-    } catch (error) {
-      console.error("Error refreshing nutrition data:", error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
