@@ -138,7 +138,7 @@ export default function Favorites() {
                       },
                       nutrients: recipe.nutrients || {},
                       dietaryRestriction: recipe.dietaryRestriction,
-                      isStoredRecipe: true
+                      isStoredRecipe: false 
                     }}
                     targetMacros={{
                       carbs: recipe.carbs,

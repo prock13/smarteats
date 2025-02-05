@@ -40,6 +40,8 @@ interface RecipeCardProps {
   };
   favorites?: Recipe[];
   showAddToCalendar?: boolean;
+  expanded?: boolean;
+  onExpandClick?: () => void;
 }
 
 export function RecipeCard({
@@ -48,9 +50,10 @@ export function RecipeCard({
   targetMacros,
   favorites,
   showAddToCalendar = true,
+  expanded = false,
+  onExpandClick = () => {},
 }: RecipeCardProps) {
   const { toast } = useToast();
-  const [expanded, setExpanded] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
   const queryClient = useQueryClient();
 
@@ -115,7 +118,7 @@ export function RecipeCard({
   });
 
   const handleExpandClick = () => {
-    setExpanded(!expanded);
+    onExpandClick();
   };
 
   const mealTypeOptions = [
