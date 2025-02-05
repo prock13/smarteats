@@ -83,6 +83,7 @@ interface RecipeCardProps {
   favorites?: Recipe[];
   showAddToCalendar?: boolean;
   showDelete?: boolean;
+  onDelete?: () => void;
   expanded?: boolean;
   onExpandClick?: () => void;
 }
@@ -94,6 +95,7 @@ export function RecipeCard({
   favorites,
   showAddToCalendar = true,
   showDelete = false,
+  onDelete,
   expanded = false,
   onExpandClick = () => {},
 }: RecipeCardProps) {
@@ -239,6 +241,14 @@ export function RecipeCard({
     }
   };
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
+    } else if (showDelete && favorite?.id) {
+      handleDeleteFavorite(favorite.id);
+    }
+  };
+
   const mealTypeOptions = [
     { label: "Breakfast", value: "breakfast" },
     { label: "Lunch", value: "lunch" },
@@ -359,15 +369,10 @@ export function RecipeCard({
                   {favorites?.some((f) => f.name === meal.name) ? <Favorite /> : <FavoriteBorder />}
                 </IconButton>
               ) : null}
-              {showDelete && favorites && (
+              {showDelete && (
                 <IconButton
                   color="error"
-                  onClick={() => {
-                    const favorite = favorites.find((f) => f.name === meal.name);
-                    if (favorite?.id) {
-                      handleDeleteFavorite(favorite.id);
-                    }
-                  }}
+                  onClick={handleDelete}
                   disabled={deleteFavoriteMutation.isPending}
                   size="small"
                 >
