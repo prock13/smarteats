@@ -159,12 +159,14 @@ export default function PantryPage() {
           "POST",
           "/api/pantry-suggestions",
           data,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to get pantry suggestions');
+          throw new Error(
+            errorData.message || "Failed to get pantry suggestions",
+          );
         }
 
         const responseData = await response.json();
@@ -261,11 +263,21 @@ export default function PantryPage() {
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: "center", mb: 6 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
             Pantry Recipe Finder
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Enter the ingredients you have on hand and get AI-powered recipe suggestions
+            Enter the ingredients you have on hand and get AI-powered recipe
+            suggestions
           </Typography>
         </Box>
 
@@ -378,7 +390,11 @@ export default function PantryPage() {
                   >
                     {mutation.isPending ? (
                       <>
-                        <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                        <CircularProgress
+                          size={24}
+                          sx={{ mr: 1 }}
+                          color="inherit"
+                        />
                         Generating Suggestions...
                       </>
                     ) : (
@@ -393,8 +409,14 @@ export default function PantryPage() {
 
         {mutation.isPending && (
           <Box sx={{ width: "100%", mt: 4 }}>
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
-              Please wait while we generate your personalized recipe suggestions...
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              align="center"
+              sx={{ mb: 2 }}
+            >
+              Please wait while we generate your personalized recipe
+              suggestions...
             </Typography>
             <LinearProgress />
           </Box>
@@ -419,7 +441,9 @@ export default function PantryPage() {
                     favorites={favorites}
                     showAddToCalendar={true}
                     addToCalendar={addToCalendarMutation.mutate}
-                    isFavorite={favorites?.some((fav) => fav.name === meal.name)}
+                    isFavorite={favorites?.some(
+                      (fav) => fav.name === meal.name,
+                    )}
                     favoriteRecipe={favoriteMutation.mutate}
                   />
                 </Grid>

@@ -4,14 +4,18 @@ import { Container, Typography, Box, Paper, Grid, Chip } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 
 export default function Favorites() {
-  const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
-    queryKey: ['/api/favorites'],
+  const {
+    data: favorites,
+    isLoading,
+    error,
+  } = useQuery<Recipe[]>({
+    queryKey: ["/api/favorites"],
   });
 
   if (error) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ textAlign: 'center' }}>
+        <Box sx={{ textAlign: "center" }}>
           <Typography color="error">
             Error loading favorites: {(error as Error).message}
           </Typography>
@@ -22,15 +26,18 @@ export default function Favorites() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ maxWidth: '4xl', mx: 'auto', mb: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h3" component="h1" 
-            sx={{ 
-              background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1
-            }}>
+      <Box sx={{ maxWidth: "4xl", mx: "auto", mb: 8 }}>
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
             Favorite Recipes
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
@@ -40,7 +47,7 @@ export default function Favorites() {
 
         <Box sx={{ mt: 4 }}>
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
               <CircularProgress />
             </Box>
           ) : favorites && favorites.length > 0 ? (
@@ -55,9 +62,7 @@ export default function Favorites() {
                       {recipe.description}
                     </Typography>
                     {recipe.instructions !== recipe.description && (
-                      <Typography paragraph>
-                        {recipe.instructions}
-                      </Typography>
+                      <Typography paragraph>{recipe.instructions}</Typography>
                     )}
 
                     <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -79,7 +84,7 @@ export default function Favorites() {
                     </Grid>
 
                     {recipe.dietaryRestriction !== "none" && (
-                      <Chip 
+                      <Chip
                         label={recipe.dietaryRestriction}
                         color="default"
                         size="small"
@@ -91,9 +96,10 @@ export default function Favorites() {
               ))}
             </Grid>
           ) : (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Paper sx={{ p: 4, textAlign: "center" }}>
               <Typography color="text.secondary">
-                No favorite recipes yet. Mark some recipes as favorites from the meal suggestions to see them here.
+                No favorite recipes yet. Mark some recipes as favorites from the
+                meal suggestions to see them here.
               </Typography>
             </Paper>
           )}

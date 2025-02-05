@@ -60,11 +60,13 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
 })({
-  transform: (props: ExpandMoreProps) => (props.expand ? 'rotate(180deg)' : 'rotate(0deg)'),
-  marginLeft: 'auto',
-  transition: (theme) => theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
+  transform: (props: ExpandMoreProps) =>
+    props.expand ? "rotate(180deg)" : "rotate(0deg)",
+  marginLeft: "auto",
+  transition: (theme) =>
+    theme.transitions.create("transform", {
+      duration: theme.transitions.duration.shortest,
+    }),
 });
 
 const mealTypeOptions = [
@@ -87,7 +89,6 @@ const dietaryOptions = [
   { value: "kosher", label: "Kosher" },
 ];
 
-
 export default function Planner() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
@@ -95,7 +96,9 @@ export default function Planner() {
   const [showingMore, setShowingMore] = useState(false);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
-  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
+  const [expandedCards, setExpandedCards] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   const queryClient = useQueryClient();
   const { data: favorites } = useQuery<Recipe[]>({
@@ -135,7 +138,7 @@ export default function Planner() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to get meal suggestions');
+        throw new Error(errorData.message || "Failed to get meal suggestions");
       }
 
       return { response: await res.json(), appendResults: data.appendResults };
@@ -347,7 +350,16 @@ export default function Planner() {
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: "center", mb: 6 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
             Macro Meal Planner
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -442,9 +454,20 @@ export default function Planner() {
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <FormLabel>&nbsp;</FormLabel>
-                    <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        height: "100%",
+                      }}
+                    >
                       <FormControlLabel
-                        control={<Checkbox {...form.register("includeUserRecipes")} defaultChecked={true} />}
+                        control={
+                          <Checkbox
+                            {...form.register("includeUserRecipes")}
+                            defaultChecked={true}
+                          />
+                        }
                         label="Include My Recipes"
                       />
                     </Box>
@@ -509,12 +532,18 @@ export default function Planner() {
             </Grid>
 
             {!showingMore && suggestions.meals.length > 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                 <Button
                   onClick={handleShowMore}
                   variant="outlined"
                   disabled={mutation.isPending}
-                  startIcon={mutation.isPending ? <CircularProgress size={20} /> : <PlusCircle />}
+                  startIcon={
+                    mutation.isPending ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <PlusCircle />
+                    )
+                  }
                 >
                   {mutation.isPending ? "Loading..." : "Show More Options"}
                 </Button>
