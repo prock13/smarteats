@@ -91,7 +91,7 @@ const features = [
     icon: <Favorite sx={{ fontSize: 40 }} />,
     route: "/recipes",
     details: [
-      "Save your favorite recipes for use in the Meal Finder.",
+      "Save your favorite recipes for use in the meal planners",
       "Filter by dietary preferences and restrictions",
       "Save and organize your favorite meals",
       "Share recipes with friends and family",
@@ -99,7 +99,8 @@ const features = [
   },
   {
     title: "Macro Tracking",
-    description: "Track your daily macro intake with detailed analytics and insights.",
+    description:
+      "Track your daily macro intake with detailed analytics and insights.",
     icon: <BarChart sx={{ fontSize: 40 }} />,
     route: "/",
     comingSoon: true,
@@ -114,7 +115,9 @@ const features = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<
+    (typeof features)[0] | null
+  >(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -246,7 +249,8 @@ export default function Home() {
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                  background:
+                    "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                   color: "white",
                   pr: 6,
                 }}
@@ -299,21 +303,24 @@ export default function Home() {
                 </Box>
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>
-                {!selectedFeature.comingSoon && (selectedFeature.route || selectedFeature.isNina) && (
-                  <Button
-                    variant="contained"
-                    onClick={handleNavigate}
-                    sx={{
-                      background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                      color: "white",
-                      "&:hover": {
-                        background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-                      },
-                    }}
-                  >
-                    {selectedFeature.isNina ? "Chat with Nina" : "Try Now"}
-                  </Button>
-                )}
+                {!selectedFeature.comingSoon &&
+                  (selectedFeature.route || selectedFeature.isNina) && (
+                    <Button
+                      variant="contained"
+                      onClick={handleNavigate}
+                      sx={{
+                        background:
+                          "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                        color: "white",
+                        "&:hover": {
+                          background:
+                            "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                        },
+                      }}
+                    >
+                      {selectedFeature.isNina ? "Chat with Nina" : "Try Now"}
+                    </Button>
+                  )}
               </DialogActions>
             </>
           )}
