@@ -118,9 +118,19 @@ export default function Favorites() {
                       macros: {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
-                        fats: recipe.fats
+                        fats: recipe.fats,
+                        calories: recipe.calories || 0,
+                        fiber: recipe.fiber || 0,
+                        sugar: recipe.sugar || 0
                       },
-                      dietaryRestriction: recipe.dietaryRestriction
+                      cookingTime: recipe.cooking_time || {
+                        prep: 15,
+                        cook: 20,
+                        total: 35
+                      },
+                      nutrients: recipe.nutrients || {},
+                      dietaryRestriction: recipe.dietaryRestriction,
+                      isStoredRecipe: true
                     }}
                     targetMacros={{
                       carbs: recipe.carbs,
