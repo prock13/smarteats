@@ -63,7 +63,7 @@ const features = [
     description:
       "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
     icon: <ChatIcon sx={{ fontSize: 40 }} />,
-    route: "/",
+    isNina: true, 
     details: [
       "Get personalized meal suggestions based on your preferences",
       "Real-time nutritional guidance and recipe modifications",
@@ -123,14 +123,15 @@ export default function Home() {
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
   const handleNavigate = () => {
-    if (selectedFeature && !selectedFeature.comingSoon) {
-      setOpenDialog(false);
-      setLocation(selectedFeature.route);
+    if (selectedFeature) {
+      if (selectedFeature.isNina) {
+        return;
+      }
+      if (!selectedFeature.comingSoon && selectedFeature.route) {
+        setOpenDialog(false);
+        setLocation(selectedFeature.route);
+      }
     }
   };
 
@@ -249,7 +250,7 @@ export default function Home() {
                     label="Coming Soon"
                     color="primary"
                     size="small"
-                    sx={{ ml: 'auto', bgcolor: 'white' }}
+                    sx={{ ml: "auto", bgcolor: "white" }}
                   />
                 )}
               </DialogTitle>
@@ -273,7 +274,7 @@ export default function Home() {
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>
                 <Button onClick={handleCloseDialog}>Close</Button>
-                {!selectedFeature.comingSoon && (
+                {!selectedFeature.comingSoon && (selectedFeature.route || selectedFeature.isNina) && (
                   <Button
                     variant="contained"
                     onClick={handleNavigate}
@@ -287,7 +288,7 @@ export default function Home() {
                       },
                     }}
                   >
-                    Try Now
+                    {selectedFeature.isNina ? "Chat with Nina" : "Try Now"}
                   </Button>
                 )}
               </DialogActions>
