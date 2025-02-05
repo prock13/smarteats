@@ -13,7 +13,6 @@ import {
   Grid,
   LinearProgress,
   Collapse,
-  CircularProgress,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -96,7 +95,12 @@ export function RecipeCard({
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
-        dietaryRestriction: "none", // You might want to pass this as a prop if needed
+        calories: meal.macros.calories,
+        fiber: meal.macros.fiber,
+        sugar: meal.macros.sugar,
+        cooking_time: meal.cookingTime,
+        nutrients: meal.nutrients,
+        dietaryRestriction: "none",
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
       return res.json();
@@ -232,15 +236,7 @@ export function RecipeCard({
                   <FavoriteBorder />
                 )}
               </IconButton>
-            ) : meal.isStoredRecipe && (
-              <IconButton
-                color="primary"
-                size="small"
-                disabled
-              >
-                <PersonIcon fontSize="small" />
-              </IconButton>
-            )}
+            ) : null}
           </Box>
         }
       />
@@ -388,109 +384,105 @@ export function RecipeCard({
           </Grid>
         )}
 
-        {!meal.isStoredRecipe && (
-          <>
-            <Box sx={{ mt: 2 }}>
-              <Button
-                onClick={handleExpandClick}
-                endIcon={<ExpandMoreIcon
-                  sx={{
-                    transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s'
-                  }}
-                />}
-                sx={{ width: '100%', justifyContent: 'space-between' }}
-              >
-                {expanded ? 'Show Less' : 'Show More Details'}
-              </Button>
+        <Box sx={{ mt: 2 }}>
+          <Button
+            onClick={handleExpandClick}
+            endIcon={<ExpandMoreIcon
+              sx={{
+                transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
+              }}
+            />}
+            sx={{ width: '100%', justifyContent: 'space-between' }}
+          >
+            {expanded ? 'Show Less' : 'Show More Details'}
+          </Button>
+        </Box>
+
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+            {meal.cookingTime && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon fontSize="small" />
+                  Cooking Time
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="text.secondary">Prep: {meal.cookingTime.prep}min</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="text.secondary">Cook: {meal.cookingTime.cook}min</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="text.secondary">Total: {meal.cookingTime.total}min</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <RestaurantIcon fontSize="small" />
+                Instructions
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                {meal.instructions}
+              </Typography>
             </Box>
 
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-              <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                {meal.cookingTime && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AccessTimeIcon fontSize="small" />
-                      Cooking Time
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>Detailed Nutrition</Typography>
+              <Grid container spacing={2}>
+                {meal.macros.calories !== undefined && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Calories: {meal.macros.calories}kcal
                     </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">Prep: {meal.cookingTime.prep}min</Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">Cook: {meal.cookingTime.cook}min</Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">Total: {meal.cookingTime.total}min</Typography>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                )}
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <RestaurantIcon fontSize="small" />
-                    Instructions
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                    {meal.instructions}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>Detailed Nutrition</Typography>
-                  <Grid container spacing={2}>
-                    {meal.macros.calories && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Calories: {meal.macros.calories}kcal
-                        </Typography>
-                      </Grid>
-                    )}
-                    {meal.macros.fiber && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Fiber: {meal.macros.fiber}g
-                        </Typography>
-                      </Grid>
-                    )}
-                    {meal.macros.sugar && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Sugar: {meal.macros.sugar}g
-                        </Typography>
-                      </Grid>
-                    )}
                   </Grid>
-                </Box>
-
-                {(meal.nutrients?.vitamins || meal.nutrients?.minerals) && (
-                  <Box>
-                    <Typography variant="h6" gutterBottom>Nutrients</Typography>
-                    <Grid container spacing={2}>
-                      {meal.nutrients.vitamins && (
-                        <Grid item xs={12} sm={6}>
-                          <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {meal.nutrients.vitamins.join(', ')}
-                          </Typography>
-                        </Grid>
-                      )}
-                      {meal.nutrients.minerals && (
-                        <Grid item xs={12} sm={6}>
-                          <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {meal.nutrients.minerals.join(', ')}
-                          </Typography>
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
                 )}
+                {meal.macros.fiber !== undefined && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Fiber: {meal.macros.fiber}g
+                    </Typography>
+                  </Grid>
+                )}
+                {meal.macros.sugar !== undefined && (
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sugar: {meal.macros.sugar}g
+                    </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+
+            {meal.nutrients && (meal.nutrients.vitamins || meal.nutrients.minerals) && (
+              <Box>
+                <Typography variant="h6" gutterBottom>Nutrients</Typography>
+                <Grid container spacing={2}>
+                  {meal.nutrients.vitamins && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {meal.nutrients.vitamins.join(', ')}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.nutrients.minerals && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {meal.nutrients.minerals.join(', ')}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
               </Box>
-            </Collapse>
-          </>
-        )}
+            )}
+          </Box>
+        </Collapse>
       </CardContent>
     </Card>
   );
