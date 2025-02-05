@@ -45,41 +45,26 @@ export default function MyFitnessPalPage() {
 
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
-      console.log("Submitting MFP credentials:", data);
-      try {
-        const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
-        console.log("MFP connect response:", res);
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || "Failed to connect account");
-        }
-        return await res.json();
-      } catch (error) {
-        console.error("MFP connect error:", error);
-        throw error;
+      const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to connect account");
       }
+      return res.json();
     },
     onSuccess: () => {
-      console.log("MFP connection successful");
       setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
-      toast({
-        description: "Connected to MyFitnessPal successfully"
-      });
+      toast("Connected to MyFitnessPal successfully");
       form.reset();
     },
     onError: (error: Error) => {
-      console.error("MFP connection error:", error);
       setIsSubmitting(false);
-      toast({
-        description: error.message,
-        variant: "destructive"
-      });
+      toast(error.message);
     },
   });
 
   const onSubmit = async (data: InsertMfpCredentials) => {
-    console.log("Form submitted:", data);
     setIsSubmitting(true);
     await connectMutation.mutateAsync(data);
   };
@@ -138,14 +123,15 @@ export default function MyFitnessPalPage() {
                   )}
                 />
                 <Button
+                  component="button"
                   type="submit"
                   variant="contained"
                   disabled={connectMutation.isPending || isSubmitting}
                   sx={{ mt: 2 }}
                 >
-                  {(connectMutation.isPending || isSubmitting) ? (
+                  {(connectMutation.isPending || isSubmitting) && (
                     <CircularProgress size={24} sx={{ mr: 1 }} />
-                  ) : null}
+                  )}
                   Connect Account
                 </Button>
               </form>
