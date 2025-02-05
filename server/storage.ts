@@ -129,17 +129,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecipes(): Promise<Recipe[]> {
-    const recipes = await db.select({
-      id: recipes.id,
-      name: recipes.name,
-      description: recipes.description,
-      instructions: recipes.instructions,
-      carbs: recipes.carbs,
-      protein: recipes.protein,
-      fats: recipes.fats,
-      dietaryRestriction: recipes.dietaryRestriction
-    }).from(recipes);
-    return recipes;
+    const recipesData = await db.select().from(recipes);
+    return recipesData.map(recipe => ({
+      id: recipe.id,
+      name: recipe.name,
+      description: recipe.description,
+      instructions: recipe.instructions,
+      carbs: recipe.carbs,
+      protein: recipe.protein,
+      fats: recipe.fats,
+      dietaryRestriction: recipe.dietaryRestriction,
+      createdAt: recipe.createdAt
+    }));
   }
 
   async getRecipeById(id: number): Promise<Recipe | undefined> {

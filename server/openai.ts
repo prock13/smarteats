@@ -6,6 +6,7 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing OPENAI_API_KEY environment variable");
 }
 
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Simple rate limiting mechanism
@@ -16,7 +17,6 @@ const API_TIMEOUT = 60000; // 60 second timeout
 
 function checkRateLimit() {
   const now = Date.now();
-  // Remove timestamps older than our window
   while (requestTimestamps.length > 0 && requestTimestamps[0] < now - RATE_LIMIT_WINDOW) {
     requestTimestamps.shift();
   }
@@ -52,7 +52,7 @@ export async function generateMealSuggestions(
     let systemRole: string;
 
     if (pantryItems) {
-      prompt = `Create a recipe using these ingredients:
+      prompt = `Create a detailed recipe using these ingredients:
 - Main carb: ${pantryItems.carbSource}
 - Main protein: ${pantryItems.proteinSource}
 - Main fat: ${pantryItems.fatSource}
@@ -70,12 +70,14 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number
+        "fats": number,
+        "fiber": number,
+        "calories": number
       }
     }
   ]
 }`;
-      systemRole = "You are a professional chef. Provide response only in valid JSON format. Keep recipes simple and focused on the main ingredients provided.";
+      systemRole = "You are a professional chef and nutritionist. Create detailed recipes with accurate nutritional information. Keep your response in valid JSON format.";
     } else {
       const storedRecipes = await storage.getRecipes();
       const availableStoredRecipes = storedRecipes.filter(recipe => {
@@ -86,24 +88,23 @@ Format your response as a JSON object with this exact structure:
       });
 
       const storedRecipesPrompt = availableStoredRecipes.length > 0
-        ? `Here are some stored recipes that you can suggest:\n${availableStoredRecipes.map(recipe => `
+        ? `Available stored recipes:\n${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
-  Dietary Restriction: ${recipe.dietaryRestriction}
-`).join('\n')}`
+  Dietary Restriction: ${recipe.dietaryRestriction}`).join('\n')}`
         : '';
 
-      prompt = `Given these macro nutrient targets:
+      prompt = `Create meal suggestions matching these macro targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
 
 ${storedRecipesPrompt}
-${excludeRecipes.length > 0 ? `\nPlease do NOT suggest any of these previously suggested recipes: ${excludeRecipes.join(', ')}` : ''}
-${dietaryPreference !== "none" ? `\nDietary Preference: ${dietaryPreference}. Please ensure all suggestions comply with ${dietaryPreference} dietary requirements.` : ''}
-${recipeLimit ? `\nPlease suggest up to ${recipeLimit} meal options that meet these criteria.` : '\nPlease suggest multiple meal options that meet these criteria.'}
-${mealTypes.length > 0 ? `\nThese suggestions should be suitable for the following meal types: ${mealTypes.join(', ')}.` : ''}
+${excludeRecipes.length > 0 ? `\nExclude these recipes: ${excludeRecipes.join(', ')}` : ''}
+${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
+${recipeLimit ? `\nProvide ${recipeLimit} meal options.` : ''}
+${mealTypes.length > 0 ? `\nMeal types: ${mealTypes.join(', ')}` : ''}
 
 Format your response as a JSON object with this exact structure:
 {
@@ -115,17 +116,19 @@ Format your response as a JSON object with this exact structure:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number
+        "fats": number,
+        "fiber": number,
+        "calories": number
       },
       "isStoredRecipe": boolean
     }
   ]
 }`;
-      systemRole = "You are a nutrition expert. Provide response only in valid JSON format. Include accurate macro calculations for each meal.";
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios. Always include complete nutritional information. Keep your response in valid JSON format.";
     }
 
-    console.log("Starting generation with mode:", pantryItems ? "pantry-based" : "macro-based");
-    console.log("Sending prompt to OpenAI:", prompt);
+    console.log("Generating suggestions for mode:", pantryItems ? "pantry-based" : "macro-based");
+    console.log("Prompt:", prompt);
 
     const responsePromise = openai.chat.completions.create({
       model: "gpt-4",
@@ -138,57 +141,46 @@ Format your response as a JSON object with this exact structure:
           role: "user",
           content: prompt
         }
-      ]
+      ],
+      temperature: 0.7
     });
 
-    // Add timeout to the OpenAI request
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("OpenAI API request timed out after 60 seconds")), API_TIMEOUT);
+      setTimeout(() => reject(new Error("OpenAI API request timed out")), API_TIMEOUT);
     });
 
-    console.log("Waiting for OpenAI response...");
-    const response = await Promise.race([responsePromise, timeoutPromise]);
-    console.log("Received response from OpenAI");
+    console.log("Awaiting OpenAI response...");
+    const response = await Promise.race([responsePromise, timeoutPromise]) as any;
+    console.log("Received OpenAI response");
 
     const content = response.choices[0].message.content;
     if (!content) {
-      console.error("No content received from OpenAI");
-      throw new Error("Failed to generate meal suggestions");
+      throw new Error("No content received from OpenAI");
     }
 
-    console.log("Raw response from OpenAI:", content);
+    console.log("Parsing response:", content);
+    const parsedContent = JSON.parse(content);
 
-    try {
-      const parsedContent = JSON.parse(content);
-      console.log("Successfully parsed response:", parsedContent);
-
-      if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
-        console.error("Invalid response format:", parsedContent);
-        throw new Error("Invalid response format: missing or invalid meals array");
-      }
-
-      // If this was a macro-based request, verify stored recipes
-      if (!pantryItems) {
-        const storedRecipes = await storage.getRecipes();
-        parsedContent.meals = parsedContent.meals.map(meal => ({
-          ...meal,
-          isStoredRecipe: storedRecipes.some(
-            recipe => recipe.name.toLowerCase() === meal.name.toLowerCase()
-          )
-        }));
-      }
-
-      return parsedContent;
-    } catch (parseError) {
-      console.error("Failed to parse OpenAI response:", parseError);
-      throw new Error("Failed to parse meal suggestions");
+    if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
+      throw new Error("Invalid response format: missing or invalid meals array");
     }
+
+    // If this was a macro-based request, verify stored recipes
+    if (!pantryItems) {
+      const storedRecipes = await storage.getRecipes();
+      parsedContent.meals = parsedContent.meals.map(meal => ({
+        ...meal,
+        isStoredRecipe: storedRecipes.some(recipe => 
+          recipe.name.toLowerCase() === meal.name.toLowerCase()
+        )
+      }));
+    }
+
+    return parsedContent;
   } catch (error: any) {
     console.error("Error in generateMealSuggestions:", error);
     if (error?.status === 429) {
-      throw new Error("OpenAI API rate limit exceeded. Please try again in a few minutes.");
-    } else if (error?.status === 401) {
-      throw new Error("Invalid OpenAI API key. Please check your API key and try again.");
+      throw new Error("Rate limit exceeded. Please try again in a few minutes.");
     }
     throw error;
   }
