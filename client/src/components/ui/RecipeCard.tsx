@@ -86,6 +86,7 @@ interface RecipeCardProps {
   onDelete?: () => void;
   expanded?: boolean;
   onExpandClick?: () => void;
+  mealType?: string;
 }
 
 export function RecipeCard({
@@ -98,6 +99,7 @@ export function RecipeCard({
   onDelete,
   expanded = false,
   onExpandClick = () => {},
+  mealType,
 }: RecipeCardProps) {
   const { toast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
@@ -305,6 +307,7 @@ export function RecipeCard({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        position: 'relative',
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
           transform: 'translateY(-4px)',
@@ -317,12 +320,27 @@ export function RecipeCard({
               : 'rgba(25, 118, 210, 0.05)'
         })
       }}>
+        {mealType && (
+          <Chip
+            label={mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+            color="primary"
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 12,
+              left: 12,
+              zIndex: 1,
+              textTransform: 'capitalize'
+            }}
+          />
+        )}
         <CardHeader
           sx={{
             backgroundColor: 'background.paper',
             borderBottom: '1px solid',
             borderColor: 'divider',
-            pb: 1
+            pb: 1,
+            ...(mealType && { pl: 8 })
           }}
           action={
             <Box sx={{

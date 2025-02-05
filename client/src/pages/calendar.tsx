@@ -299,6 +299,7 @@ export default function CalendarPage() {
                             isStoredRecipe: true,
                             dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
                           }}
+                          mealType={plan.mealType}
                           showAddToCalendar={false}
                           showDelete={true}
                           favorites={favorites}
