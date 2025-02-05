@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Recipe } from "@shared/schema";
-import { Container, Typography, Box, Grid, CircularProgress } from "@mui/material";
+import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from 'react';
+import { Twitter as TwitterIcon, Facebook as FacebookIcon, LinkedIn as LinkedInIcon } from "@mui/icons-material";
 
 export default function Favorites() {
   const { toast } = useToast();
@@ -121,8 +122,17 @@ export default function Favorites() {
                       macros: {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
-                        fats: recipe.fats
+                        fats: recipe.fats,
+                        calories: recipe.calories || undefined,
+                        fiber: recipe.fiber || undefined,
+                        sugar: recipe.sugar || undefined
                       },
+                      cookingTime: recipe.cooking_time || {
+                        prep: 15,
+                        cook: 20,
+                        total: 35
+                      },
+                      nutrients: recipe.nutrients || undefined,
                       dietaryRestriction: recipe.dietaryRestriction,
                       isStoredRecipe: true
                     }}
@@ -141,6 +151,22 @@ export default function Favorites() {
             </Box>
           )}
         </Box>
+
+        <Menu
+          anchorEl={shareAnchorEl}
+          open={Boolean(shareAnchorEl)}
+          onClose={handleShareClose}
+        >
+          <MenuItem onClick={() => shareRecipe("twitter")}>
+            <TwitterIcon sx={{ mr: 1 }} /> Share on Twitter
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("facebook")}>
+            <FacebookIcon sx={{ mr: 1 }} /> Share on Facebook
+          </MenuItem>
+          <MenuItem onClick={() => shareRecipe("linkedin")}>
+            <LinkedInIcon sx={{ mr: 1 }} /> Share on LinkedIn
+          </MenuItem>
+        </Menu>
       </Box>
     </Container>
   );
