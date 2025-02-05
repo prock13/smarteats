@@ -115,7 +115,6 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openChatModal, setOpenChatModal] = useState(false);
 
   const handleLearnMore = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
@@ -127,19 +126,15 @@ export default function Home() {
     setSelectedFeature(null);
   };
 
-  const handleOpenChat = () => {
-    setOpenChatModal(true);
-    setOpenDialog(false);
-  };
-
-  const handleCloseChat = () => {
-    setOpenChatModal(false);
-  };
-
   const handleNavigate = () => {
     if (selectedFeature) {
       if (selectedFeature.isNina) {
-        handleOpenChat();
+        // Trigger the chat modal from navigation
+        const chatBtn = document.querySelector('[data-chat-trigger="true"]') as HTMLElement;
+        if (chatBtn) {
+          chatBtn.click();
+        }
+        setOpenDialog(false);
         return;
       }
       if (!selectedFeature.comingSoon && selectedFeature.route) {
@@ -308,28 +303,6 @@ export default function Home() {
               </DialogActions>
             </>
           )}
-        </Dialog>
-
-        {/* Chat Modal */}
-        <Dialog 
-          open={openChatModal} 
-          onClose={handleCloseChat}
-          maxWidth="md"
-          fullWidth
-          aria-labelledby="chat-dialog-title"
-          aria-describedby="chat-dialog-description"
-        >
-          <DialogTitle id="chat-dialog-title">
-            Chat with Nina
-          </DialogTitle>
-          <DialogContent id="chat-dialog-description">
-            <Typography>
-              Chat interface will be implemented here
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseChat}>Close</Button>
-          </DialogActions>
         </Dialog>
       </Container>
     </Box>
