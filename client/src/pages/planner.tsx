@@ -222,13 +222,14 @@ export default function Planner() {
   const favoriteMutation = useMutation({
     mutationFn: async (meal: any) => {
       const favorite = {
+        id: meal.id,
         name: meal.name,
         description: meal.description,
-        instructions: meal.description,
+        instructions: meal.instructions,
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
-        dietaryRestriction: form.getValues("dietaryPreference"),
+        dietary_restriction: meal.dietary_restriction,
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
       return res.json();
@@ -236,7 +237,7 @@ export default function Planner() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
-        title: "Success!",
+        title: "Success",
         description: "Recipe saved to favorites",
       });
     },
