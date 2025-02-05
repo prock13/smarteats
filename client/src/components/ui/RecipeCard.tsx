@@ -23,6 +23,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   AccessTime as AccessTimeIcon,
   Restaurant as RestaurantIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -88,6 +89,31 @@ export function RecipeCard({
   const { toast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
   const queryClient = useQueryClient();
+
+  const deleteFavoriteMutation = useMutation({
+    mutationFn: async (recipeId: number) => {
+      const res = await apiRequest("DELETE", `/api/favorites/${recipeId}`);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to delete favorite");
+      }
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Success",
+        description: "Recipe removed from favorites",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const addToCalendarMutation = useMutation({
     mutationFn: async ({ meal, mealType }: { meal: Meal; mealType: string }) => {
@@ -165,6 +191,12 @@ export function RecipeCard({
 
   const handleExpandClick = () => {
     onExpandClick();
+  };
+
+  const handleDeleteFavorite = (recipeId: number) => {
+    if (confirm("Are you sure you want to remove this recipe from favorites?")) {
+      deleteFavoriteMutation.mutate(recipeId);
+    }
   };
 
   return (
@@ -273,7 +305,21 @@ export function RecipeCard({
                   <FavoriteBorder />
                 )}
               </IconButton>
-            ) : null}
+            ) : favorites?.some((f) => f.name === meal.name) ? (
+                <IconButton
+                  color="error"
+                  onClick={() => {
+                    const favorite = favorites.find((f) => f.name === meal.name);
+                    if (favorite && favorite.id) { // Added null check for safety
+                      handleDeleteFavorite(favorite.id);
+                    }
+                  }}
+                  disabled={deleteFavoriteMutation.isPending}
+                  size="small"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              ) : null}
           </Box>
         }
       />
