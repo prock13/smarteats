@@ -141,6 +141,23 @@ export async function generateMealSuggestions(
 
     let prompt: string;
     let systemRole: string;
+    let matchingStoredRecipes: Recipe[] = [];
+
+    // If includeUserRecipes is true, get matching stored recipes first
+    if (includeUserRecipes) {
+      const storedRecipes = await storage.getRecipes();
+      matchingStoredRecipes = storedRecipes.filter(recipe => {
+        if (excludeRecipes.includes(recipe.name)) return false;
+        if (dietaryPreference !== "none" && recipe.dietaryRestriction !== dietaryPreference) return false;
+
+        // Basic macro matching (within 20% tolerance)
+        const carbMatch = Math.abs(recipe.carbs - carbs) <= carbs * 0.2;
+        const proteinMatch = Math.abs(recipe.protein - protein) <= protein * 0.2;
+        const fatMatch = Math.abs(recipe.fats - fats) <= fats * 0.2;
+
+        return carbMatch && proteinMatch && fatMatch;
+      });
+    }
 
     if (pantryItems) {
       prompt = `Create a recipe using these ingredients:
@@ -182,34 +199,17 @@ Format your response as a JSON object with this exact structure:
 }`;
       systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format. Do not combine or modify existing recipes.";
     } else {
-      let storedRecipesPrompt = '';
+      // Calculate how many AI recipes to generate
+      const totalDesiredMeals = recipeLimit || 1;
+      const aiRecipesToGenerate = Math.max(1, totalDesiredMeals - matchingStoredRecipes.length);
 
-      if (includeUserRecipes) {
-        const storedRecipes = await storage.getRecipes();
-        const availableStoredRecipes = storedRecipes.filter(recipe => {
-          if (excludeRecipes.includes(recipe.name)) return false;
-          if (dietaryPreference !== "none") return recipe.dietaryRestriction === dietaryPreference;
-          return true;
-        });
-
-        storedRecipesPrompt = availableStoredRecipes.length > 0
-          ? `\nAvailable stored recipes that can be suggested (do not modify these, suggest them as-is if they match the requirements):${availableStoredRecipes.map(recipe => `
-- ${recipe.name}
-  Description: ${recipe.description}
-  Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
-  Dietary Restriction: ${recipe.dietaryRestriction}`).join('\n')}`
-          : '';
-      }
-
-      prompt = `Create meal suggestions matching these macro targets:
+      prompt = `Create ${aiRecipesToGenerate} meal suggestion${aiRecipesToGenerate > 1 ? 's' : ''} matching these macro targets:
 - Carbohydrates: ${carbs}g
 - Protein: ${protein}g
 - Fats: ${fats}g
 
-${storedRecipesPrompt}
-${excludeRecipes.length > 0 ? `\nExclude these recipes: ${excludeRecipes.join(', ')}` : ''}
+${excludeRecipes.length > 0 ? `\nDo not suggest these recipes: ${excludeRecipes.join(', ')}` : ''}
 ${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
-${recipeLimit ? `\nProvide ${recipeLimit} meal options.` : ''}
 ${mealTypes.length > 0 ? `\nMeal types: ${mealTypes.join(', ')}` : ''}
 
 Format your response as a JSON object with this exact structure:
@@ -238,13 +238,11 @@ Format your response as a JSON object with this exact structure:
         "vitamins": string[],
         "minerals": string[]
       },
-      "isStoredRecipe": boolean
+      "isStoredRecipe": false
     }
   ]
-}
-
-Important: If suggesting a stored recipe, set isStoredRecipe to true and use the exact recipe details without modification. For new recipes, set isStoredRecipe to false.`;
-      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. When suggesting stored recipes, use them exactly as provided without modifications.";
+}`;
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. Create completely new recipes.";
     }
 
     const response = await openai.chat.completions.create({
@@ -271,6 +269,32 @@ Important: If suggesting a stored recipe, set isStoredRecipe to true and use the
 
     if (!parsedContent.meals || !Array.isArray(parsedContent.meals)) {
       throw new Error("Invalid response format: missing or invalid meals array");
+    }
+
+    // If we have matching stored recipes, add them to the suggestions
+    if (matchingStoredRecipes.length > 0) {
+      const storedMeals = matchingStoredRecipes.map(recipe => ({
+        name: recipe.name,
+        description: recipe.description,
+        instructions: recipe.instructions,
+        macros: {
+          carbs: recipe.carbs,
+          protein: recipe.protein,
+          fats: recipe.fats,
+          calories: recipe.calories,
+          fiber: recipe.fiber,
+          sugar: recipe.sugar,
+          cholesterol: recipe.cholesterol,
+          sodium: recipe.sodium
+        },
+        cookingTime: recipe.cookingTime,
+        nutrients: recipe.nutrients,
+        isStoredRecipe: true,
+        dietaryRestriction: recipe.dietaryRestriction
+      }));
+
+      // Combine stored recipes with AI-generated ones
+      parsedContent.meals = [...storedMeals, ...parsedContent.meals];
     }
 
     return parsedContent;

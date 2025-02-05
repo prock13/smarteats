@@ -9,28 +9,12 @@ router.post("/api/pantry-suggestions", async (req, res) => {
   try {
     const input = macroInputSchema.parse(req.body);
 
-    const recipe = await generateRecipe({
+    const suggestions = await generateRecipe({
       targetCarbs: input.targetCarbs,
       targetProtein: input.targetProtein,
       targetFats: input.targetFats,
       dietaryPreference: input.dietaryPreference
     });
-
-    const suggestions = {
-      meals: [
-        {
-          name: recipe.name,
-          description: recipe.description,
-          instructions: recipe.instructions,
-          macros: {
-            carbs: recipe.carbs,
-            protein: recipe.protein,
-            fats: recipe.fats
-          },
-          isStoredRecipe: false,
-        },
-      ],
-    };
 
     res.json({ suggestions });
   } catch (error) {
