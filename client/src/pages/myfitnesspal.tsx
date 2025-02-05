@@ -46,48 +46,51 @@ export default function MyFitnessPalPage() {
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
       const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to connect account");
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
-      toast({
-        title: "Success",
-        description: "Connected to MyFitnessPal successfully",
-      });
+      toast("Connected to MyFitnessPal successfully");
+      form.reset();
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast(`Error: ${error.message}`);
     },
   });
 
   const refreshMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/myfitnesspal/refresh");
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to refresh data");
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/nutrition"] });
-      toast({
-        title: "Success",
-        description: "Nutrition data refreshed successfully",
-      });
+      toast("Nutrition data refreshed successfully");
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast(`Error: ${error.message}`);
     },
   });
 
   const onSubmit = (data: InsertMfpCredentials) => {
     connectMutation.mutate(data);
   };
+
+  if (isLoadingConnection) {
+    return (
+      <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 4 }}>

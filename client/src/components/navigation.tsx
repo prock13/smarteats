@@ -27,6 +27,7 @@ import {
   Menu as MenuIcon,
   Kitchen as KitchenIcon,
   MenuBook as MenuBookIcon,
+  FitnessCenter as FitnessCenterIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -60,6 +61,7 @@ export default function Navigation() {
     { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
+    { icon: <FitnessCenterIcon />, text: "MyFitnessPal", path: "/myfitnesspal" },
   ];
 
   const mobileDrawer = (
