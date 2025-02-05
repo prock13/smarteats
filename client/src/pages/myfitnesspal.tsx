@@ -44,12 +44,18 @@ export default function MyFitnessPalPage() {
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
       console.log("Making API request with data:", data);
-      const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to connect account");
+      try {
+        const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
+        console.log("API Response:", res);
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to connect account");
+        }
+        return res.json();
+      } catch (error) {
+        console.error("API request failed:", error);
+        throw error;
       }
-      return res.json();
     },
     onSuccess: () => {
       console.log("Successfully connected MFP account");
