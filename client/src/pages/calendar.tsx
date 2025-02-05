@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, startOfDay, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 import {
   Container,
@@ -7,7 +7,6 @@ import {
   Paper,
   Typography,
   Box,
-  IconButton,
   TextField,
   FormGroup,
   FormControlLabel,
@@ -15,13 +14,13 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import TodayIcon from '@mui/icons-material/Today';
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { RecipeCard } from "@/components/ui/RecipeCard";
+import type { Recipe } from "@shared/schema";
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -33,9 +32,14 @@ export default function CalendarPage() {
     new Set(["breakfast", "lunch", "dinner", "snack"])
   );
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
+  const queryClient = useQueryClient();
 
   const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  const { data: favorites } = useQuery<Recipe[]>({
+    queryKey: ["/api/favorites"],
+  });
 
   const { data: mealPlans, isLoading } = useQuery({
     queryKey: ["/api/meal-plans", startOfMonth.toISOString(), endOfMonth.toISOString()],
@@ -230,14 +234,24 @@ export default function CalendarPage() {
                           name: plan.meal.name,
                           description: plan.meal.description,
                           instructions: plan.meal.instructions || "",
-                          macros: plan.meal.macros,
+                          macros: {
+                            carbs: plan.meal.macros.carbs,
+                            protein: plan.meal.macros.protein,
+                            fats: plan.meal.macros.fats,
+                            calories: plan.meal.calories,
+                            fiber: plan.meal.fiber,
+                            sugar: plan.meal.sugar,
+                            cholesterol: plan.meal.cholesterol,
+                            sodium: plan.meal.sodium
+                          },
+                          cookingTime: plan.meal.cookingTime || null,
+                          nutrients: plan.meal.nutrients || null,
                           isStoredRecipe: true,
-                          cookingTime: plan.meal.cookingTime,
-                          nutrients: plan.meal.nutrients,
-                          dietaryRestriction: plan.meal.dietaryRestriction
+                          dietaryRestriction: plan.meal.dietaryRestriction || "none"
                         }}
                         showAddToCalendar={false}
                         showDelete={true}
+                        favorites={favorites}
                         expanded={expandedCards[plan.id] || false}
                         onExpandClick={() => handleExpandClick(plan.id)}
                         onDelete={() => deleteMealPlan.mutate(plan.id)}
