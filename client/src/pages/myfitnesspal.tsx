@@ -72,31 +72,6 @@ export default function MyFitnessPalPage() {
     },
   });
 
-  const refreshMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/myfitnesspal/refresh");
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to refresh data");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/nutrition"] });
-      toast({
-        title: "Success",
-        description: "Nutrition data refreshed successfully"
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    },
-  });
-
   const onSubmit = (data: InsertMfpCredentials) => {
     console.log("Form submitted with data:", data);
     connectMutation.mutate(data);
@@ -159,6 +134,7 @@ export default function MyFitnessPalPage() {
                   type="submit"
                   variant="contained"
                   disabled={connectMutation.isPending}
+                  onClick={() => console.log("Button clicked")}
                   sx={{ mt: 2 }}
                 >
                   {connectMutation.isPending ? (
