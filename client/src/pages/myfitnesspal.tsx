@@ -39,37 +39,39 @@ export default function MyFitnessPalPage() {
     resolver: zodResolver(insertMfpCredentialsSchema),
     defaultValues: {
       username: "",
+      syncEnabled: true
     }
   });
 
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
+      console.log("Submitting MFP credentials:", data);
       try {
         const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
+        console.log("MFP connect response:", res);
         if (!res.ok) {
           const error = await res.json();
           throw new Error(error.message || "Failed to connect account");
         }
         return await res.json();
       } catch (error) {
-        console.error("API request failed:", error);
+        console.error("MFP connect error:", error);
         throw error;
       }
     },
     onSuccess: () => {
+      console.log("MFP connection successful");
       setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
-        title: "Success",
-        description: "Connected to MyFitnessPal successfully",
-        variant: "default"
+        description: "Connected to MyFitnessPal successfully"
       });
       form.reset();
     },
     onError: (error: Error) => {
+      console.error("MFP connection error:", error);
       setIsSubmitting(false);
       toast({
-        title: "Error",
         description: error.message,
         variant: "destructive"
       });
@@ -77,6 +79,7 @@ export default function MyFitnessPalPage() {
   });
 
   const onSubmit = async (data: InsertMfpCredentials) => {
+    console.log("Form submitted:", data);
     setIsSubmitting(true);
     await connectMutation.mutateAsync(data);
   };
@@ -149,7 +152,7 @@ export default function MyFitnessPalPage() {
             </Form>
           </Paper>
         )}
-        {mfpConnection?.connected && (
+        {mfpConnection?.connected && nutritionData && (
           <>
             <Card className="mb-8">
               <CardHeader>
@@ -165,40 +168,38 @@ export default function MyFitnessPalPage() {
               </CardContent>
             </Card>
 
-            {nutritionData && (
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Today's Progress</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Typography>
-                        Calories: {nutritionData.total_calories} / {nutritionData.goals.calories}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Macronutrients</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Typography>
-                        Protein: {nutritionData.total_macros.protein}g
-                      </Typography>
-                      <Typography>
-                        Carbs: {nutritionData.total_macros.carbohydrates}g
-                      </Typography>
-                      <Typography>
-                        Fat: {nutritionData.total_macros.fat}g
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Today's Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Typography>
+                      Calories: {nutritionData.total_calories} / {nutritionData.goals.calories}
+                    </Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-            )}
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Macronutrients</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Typography>
+                      Protein: {nutritionData.total_macros.protein}g
+                    </Typography>
+                    <Typography>
+                      Carbs: {nutritionData.total_macros.carbohydrates}g
+                    </Typography>
+                    <Typography>
+                      Fat: {nutritionData.total_macros.fat}g
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
           </>
         )}
       </Container>
