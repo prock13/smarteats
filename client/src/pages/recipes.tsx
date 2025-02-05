@@ -13,7 +13,7 @@ import {
   IconButton,
   Chip,
   CircularProgress,
-  Fab,
+  Button,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -132,7 +132,29 @@ export default function Recipes() {
         </Box>
 
         <Paper elevation={2} sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>Your Recipes</Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3
+          }}>
+            <Typography variant="h6">Your Recipes</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setIsModalOpen(true)}
+              sx={{
+                background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                color: "white",
+                "&:hover": {
+                  background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                },
+              }}
+            >
+              Add Recipe
+            </Button>
+          </Box>
+
           {isLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -204,28 +226,12 @@ export default function Recipes() {
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="text.secondary">
-                No recipes yet. Create your first recipe using the + button.
+                No recipes yet. Click the "Add Recipe" button to create your first recipe.
               </Typography>
             </Box>
           )}
         </Paper>
       </Box>
-
-      <Fab
-        color="primary"
-        sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-          '&:hover': {
-            background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-          }
-        }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        <AddIcon />
-      </Fab>
 
       <RecipeModal
         open={isModalOpen}
