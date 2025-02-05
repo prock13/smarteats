@@ -132,7 +132,7 @@ export const insertRecipeSchema = z.object({
 });
 
 export const mealPlanSchema = z.object({
-  date: z.string(),
+  date: z.string().transform(str => new Date(str)),
   meal: z.object({
     name: z.string(),
     description: z.string(),

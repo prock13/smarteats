@@ -115,9 +115,10 @@ export class DatabaseStorage implements IStorage {
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
-        date: plan.date,
+        date: new Date(plan.date),
         meal: plan.meal,
-        mealType: plan.mealType
+        mealType: plan.mealType,
+        userId: plan.userId
       })
       .returning();
     return savedPlan;
