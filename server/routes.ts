@@ -72,10 +72,19 @@ export function registerRoutes(app: Express): Server {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
+      console.log('Received meal plan request:', JSON.stringify(req.body, null, 2));
       const plan = mealPlanSchema.parse(req.body);
-      const saved = await storage.saveMealPlan(plan);
+      console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
+
+      const saved = await storage.saveMealPlan({
+        ...plan,
+        userId: req.user!.id
+      });
+
+      console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
       res.json(saved);
     } catch (error) {
+      console.error('Error saving meal plan:', error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }

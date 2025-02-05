@@ -142,7 +142,7 @@ export const mealPlanSchema = z.object({
       fats: z.number(),
     }),
   }),
-  mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+  mealType: mealTypeEnum,
 });
 
 export const insertUserSchema = createInsertSchema(users).extend({

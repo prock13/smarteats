@@ -158,16 +158,25 @@ export function RecipeCard({
 
   const addToCalendarMutation = useMutation({
     mutationFn: async ({ meal, mealType, date }: { meal: Meal; mealType: string; date: string }) => {
+      console.log('Adding to calendar:', { meal, mealType, date });
       const mealPlan = {
         date,
         meal: {
           name: meal.name,
           description: meal.description,
-          macros: meal.macros,
+          macros: {
+            carbs: meal.macros.carbs,
+            protein: meal.macros.protein,
+            fats: meal.macros.fats,
+          },
         },
         mealType,
       };
       const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to add meal to calendar");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -267,6 +276,11 @@ export function RecipeCard({
   };
 
   const handleCalendarSubmit = () => {
+    console.log('Submitting calendar entry:', {
+      meal,
+      mealType: selectedMealType,
+      date: selectedDate
+    });
     addToCalendarMutation.mutate({
       meal,
       mealType: selectedMealType,

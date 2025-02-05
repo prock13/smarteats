@@ -112,6 +112,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
+    console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
@@ -121,6 +122,7 @@ export class DatabaseStorage implements IStorage {
         userId: plan.userId
       })
       .returning();
+    console.log('Saved meal plan:', JSON.stringify(savedPlan, null, 2));
     return savedPlan;
   }
 
