@@ -55,16 +55,13 @@ export default function MyFitnessPalPage() {
       console.log("Successfully connected MFP account");
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
-        title: "Success",
-        description: "Connected to MyFitnessPal successfully",
-        variant: "default"
+        description: "Connected to MyFitnessPal successfully"
       });
       form.reset();
     },
     onError: (error: Error) => {
       console.error("Failed to connect MFP account:", error);
       toast({
-        title: "Error",
         description: error.message,
         variant: "destructive"
       });
@@ -73,6 +70,13 @@ export default function MyFitnessPalPage() {
 
   const onSubmit = async (data: InsertMfpCredentials) => {
     console.log("Form submitted with data:", data);
+    console.log("Form state:", form.formState);
+
+    if (Object.keys(form.formState.errors).length > 0) {
+      console.error("Form validation errors:", form.formState.errors);
+      return;
+    }
+
     try {
       await connectMutation.mutateAsync(data);
     } catch (error) {
@@ -117,7 +121,12 @@ export default function MyFitnessPalPage() {
 
             <Form {...form}>
               <form 
-                onSubmit={form.handleSubmit(onSubmit)} 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  console.log("Form onSubmit triggered");
+                  console.log("Current form values:", form.getValues());
+                  form.handleSubmit(onSubmit)(e);
+                }} 
                 className="space-y-4"
               >
                 <FormField
