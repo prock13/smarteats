@@ -19,7 +19,6 @@ import {
   Favorite,
   FavoriteBorder,
   Share as ShareIcon,
-  Person as PersonIcon,
   ExpandMore as ExpandMoreIcon,
   AccessTime as AccessTimeIcon,
   Restaurant as RestaurantIcon,
@@ -29,9 +28,38 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Recipe } from "@shared/schema";
 
+interface Macros {
+  carbs: number;
+  protein: number;
+  fats: number;
+  calories?: number | null;
+  fiber?: number | null;
+  sugar?: number | null;
+}
+
+interface CookingTime {
+  prep: number;
+  cook: number;
+  total: number;
+}
+
+interface Meal {
+  name: string;
+  description: string;
+  instructions: string;
+  macros: Macros;
+  cookingTime?: CookingTime;
+  nutrients?: {
+    vitamins?: string[];
+    minerals?: string[];
+  };
+  dietaryRestriction?: string;
+  isStoredRecipe?: boolean;
+}
+
 interface RecipeCardProps {
-  meal: any;
-  onShare: (event: React.MouseEvent<HTMLElement>, meal: any) => void;
+  meal: Meal;
+  onShare: (event: React.MouseEvent<HTMLElement>, meal: Meal) => void;
   targetMacros?: {
     carbs: number;
     protein: number;
@@ -57,7 +85,7 @@ export function RecipeCard({
   const queryClient = useQueryClient();
 
   const addToCalendarMutation = useMutation({
-    mutationFn: async ({ meal, mealType }: { meal: any; mealType: string }) => {
+    mutationFn: async ({ meal, mealType }: { meal: Meal; mealType: string }) => {
       const today = new Date().toISOString();
       const mealPlan = {
         date: today,
@@ -73,13 +101,11 @@ export function RecipeCard({
     },
     onSuccess: () => {
       toast({
-        title: "Success!",
         description: "Meal added to today's calendar",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -87,7 +113,7 @@ export function RecipeCard({
   });
 
   const favoriteMutation = useMutation({
-    mutationFn: async (meal: any) => {
+    mutationFn: async (meal: Meal) => {
       const favorite = {
         name: meal.name,
         description: meal.description,
@@ -100,7 +126,7 @@ export function RecipeCard({
         sugar: meal.macros.sugar,
         cooking_time: meal.cookingTime,
         nutrients: meal.nutrients,
-        dietaryRestriction: "none",
+        dietaryRestriction: meal.dietaryRestriction || "none",
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
       return res.json();
@@ -108,22 +134,16 @@ export function RecipeCard({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
-        title: "Success!",
         description: "Recipe saved to favorites",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
         description: error.message,
         variant: "destructive",
       });
     },
   });
-
-  const handleExpandClick = () => {
-    onExpandClick();
-  };
 
   const mealTypeOptions = [
     { label: "Breakfast", value: "breakfast" },
@@ -131,6 +151,10 @@ export function RecipeCard({
     { label: "Dinner", value: "dinner" },
     { label: "Snack", value: "snack" },
   ];
+
+  const handleExpandClick = () => {
+    onExpandClick();
+  };
 
   return (
     <Card sx={{
@@ -434,21 +458,21 @@ export function RecipeCard({
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>Detailed Nutrition</Typography>
               <Grid container spacing={2}>
-                {meal.macros.calories !== undefined && (
+                {meal.macros.calories !== undefined && meal.macros.calories !== null && (
                   <Grid item xs={6}>
                     <Typography variant="body2" color="text.secondary">
                       Calories: {meal.macros.calories}kcal
                     </Typography>
                   </Grid>
                 )}
-                {meal.macros.fiber !== undefined && (
+                {meal.macros.fiber !== undefined && meal.macros.fiber !== null && (
                   <Grid item xs={6}>
                     <Typography variant="body2" color="text.secondary">
                       Fiber: {meal.macros.fiber}g
                     </Typography>
                   </Grid>
                 )}
-                {meal.macros.sugar !== undefined && (
+                {meal.macros.sugar !== undefined && meal.macros.sugar !== null && (
                   <Grid item xs={6}>
                     <Typography variant="body2" color="text.secondary">
                       Sugar: {meal.macros.sugar}g
