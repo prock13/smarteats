@@ -1,6 +1,6 @@
 import { users, meals, recipes, mealSuggestions, mealPlans, favorites, type User, type InsertUser, type Meal, type MacroInput, type MealSuggestion, type MealPlan, type Recipe, type InsertRecipe, type Favorite, type InsertFavorite } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -181,7 +181,8 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .select()
       .from(favorites)
-      .where(eq(favorites.userId, userId));
+      .where(eq(favorites.userId, userId))
+      .orderBy(desc(favorites.createdAt));
 
     console.log("Found favorites:", result);
     return result;
