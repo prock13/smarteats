@@ -55,11 +55,11 @@ export default function Navigation() {
   };
 
   const navigationItems = [
-    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <MenuBookIcon />, text: "Meal Planner", path: "/planner" },
+    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
+    { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
-    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
   ];
 
   const mobileDrawer = (
