@@ -16,6 +16,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Chip,
 } from "@mui/material";
 import {
   Restaurant,
@@ -95,6 +96,19 @@ const features = [
       "Share recipes with friends and family",
     ],
   },
+  {
+    title: "Macro Tracking",
+    description: "Track your daily macro intake with detailed analytics and insights.",
+    icon: <BarChart sx={{ fontSize: 40 }} />,
+    route: "/",
+    comingSoon: true,
+    details: [
+      "Real-time macro nutrient tracking",
+      "Customizable daily and weekly goals",
+      "Detailed nutrition analytics and trends",
+      "Progress visualization and reports",
+    ],
+  },
 ];
 
 export default function Home() {
@@ -114,7 +128,7 @@ export default function Home() {
   };
 
   const handleNavigate = () => {
-    if (selectedFeature) {
+    if (selectedFeature && !selectedFeature.comingSoon) {
       setOpenDialog(false);
       setLocation(selectedFeature.route);
     }
@@ -163,7 +177,7 @@ export default function Home() {
         {/* Features Grid */}
         <Grid container spacing={4}>
           {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={6} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <Card
                 sx={{
                   height: "100%",
@@ -183,6 +197,14 @@ export default function Home() {
                   <Typography gutterBottom variant="h5" component="h2">
                     {feature.title}
                   </Typography>
+                  {feature.comingSoon && (
+                    <Chip
+                      label="Coming Soon"
+                      color="primary"
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  )}
                   <Typography variant="body2" color="text.secondary">
                     {feature.description}
                   </Typography>
@@ -222,6 +244,14 @@ export default function Home() {
               >
                 {selectedFeature.icon}
                 {selectedFeature.title}
+                {selectedFeature.comingSoon && (
+                  <Chip
+                    label="Coming Soon"
+                    color="primary"
+                    size="small"
+                    sx={{ ml: 'auto', bgcolor: 'white' }}
+                  />
+                )}
               </DialogTitle>
               <DialogContent sx={{ mt: 2 }}>
                 <Typography variant="body1" paragraph>
@@ -243,21 +273,23 @@ export default function Home() {
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>
                 <Button onClick={handleCloseDialog}>Close</Button>
-                <Button
-                  variant="contained"
-                  onClick={handleNavigate}
-                  sx={{
-                    background:
-                      "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                    color: "white",
-                    "&:hover": {
+                {!selectedFeature.comingSoon && (
+                  <Button
+                    variant="contained"
+                    onClick={handleNavigate}
+                    sx={{
                       background:
-                        "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-                    },
-                  }}
-                >
-                  Try Now
-                </Button>
+                        "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                      color: "white",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                      },
+                    }}
+                  >
+                    Try Now
+                  </Button>
+                )}
               </DialogActions>
             </>
           )}
