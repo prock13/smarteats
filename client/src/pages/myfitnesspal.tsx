@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function MyFitnessPalPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: mfpConnection, isLoading: isLoadingConnection } = useQuery({
     queryKey: ["/api/myfitnesspal/connection"],
@@ -61,6 +62,7 @@ export default function MyFitnessPalPage() {
     },
     onSuccess: () => {
       console.log("Successfully connected MFP account");
+      setIsSubmitting(false);
       // Force refetch the connection status
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
@@ -70,6 +72,7 @@ export default function MyFitnessPalPage() {
     },
     onError: (error: Error) => {
       console.error("Failed to connect MFP account:", error);
+      setIsSubmitting(false);
       toast({
         description: error.message,
         variant: "destructive"
@@ -86,6 +89,7 @@ export default function MyFitnessPalPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await connectMutation.mutateAsync(data);
     } catch (error) {
@@ -119,7 +123,7 @@ export default function MyFitnessPalPage() {
           MyFitnessPal Integration
         </Typography>
 
-        {!mfpConnection?.connected ? (
+        {!mfpConnection?.connected && !isSubmitting ? (
           <Paper elevation={2} sx={{ p: 4, mb: 4 }}>
             <Typography variant="h5" gutterBottom>
               Connect Your Account
@@ -157,10 +161,10 @@ export default function MyFitnessPalPage() {
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={connectMutation.isPending}
+                  disabled={connectMutation.isPending || isSubmitting}
                   sx={{ mt: 2 }}
                 >
-                  {connectMutation.isPending ? (
+                  {(connectMutation.isPending || isSubmitting) ? (
                     <CircularProgress size={24} sx={{ mr: 1 }} />
                   ) : null}
                   Connect Account
@@ -174,7 +178,7 @@ export default function MyFitnessPalPage() {
               <CardHeader>
                 <CardTitle>Connected Account</CardTitle>
                 <CardDescription>
-                  You're connected as {mfpConnection.username}
+                  You're connected as {mfpConnection?.username}
                 </CardDescription>
               </CardHeader>
               <CardContent>
