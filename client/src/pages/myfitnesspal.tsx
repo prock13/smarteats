@@ -72,9 +72,9 @@ export default function MyFitnessPalPage() {
     },
   });
 
-  const onSubmit = (data: InsertMfpCredentials) => {
+  const onSubmit = async (data: InsertMfpCredentials) => {
     console.log("Form submitted with data:", data);
-    connectMutation.mutate(data);
+    await connectMutation.mutateAsync(data);
   };
 
   if (isLoadingConnection) {
@@ -134,7 +134,6 @@ export default function MyFitnessPalPage() {
                   type="submit"
                   variant="contained"
                   disabled={connectMutation.isPending}
-                  onClick={() => console.log("Button clicked")}
                   sx={{ mt: 2 }}
                 >
                   {connectMutation.isPending ? (
@@ -155,16 +154,9 @@ export default function MyFitnessPalPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button
-                  variant="outlined"
-                  onClick={() => refreshMutation.mutate()}
-                  disabled={refreshMutation.isPending}
-                >
-                  {refreshMutation.isPending ? (
-                    <CircularProgress size={24} sx={{ mr: 1 }} />
-                  ) : null}
-                  Refresh Data
-                </Button>
+                <Typography>
+                  Your MyFitnessPal account is connected. View your nutrition data below.
+                </Typography>
               </CardContent>
             </Card>
 
