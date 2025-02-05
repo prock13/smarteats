@@ -55,11 +55,11 @@ export default function Navigation() {
   };
 
   const navigationItems = [
-    { icon: <MenuBookIcon />, text: "Meal Planner", path: "/planner" },
-    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
     { icon: <CalendarMonth />, text: "Calendar", path: "/calendar" },
+    { icon: <MenuBookIcon />, text: "Meal Planner", path: "/planner" },
     { icon: <Restaurant />, text: "My Recipes", path: "/recipes" },
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
+    { icon: <KitchenIcon />, text: "Pantry", path: "/pantry" },
   ];
 
   const mobileDrawer = (
@@ -95,7 +95,7 @@ export default function Navigation() {
 
   return (
     <>
-      <AppBar position="static" color="default" elevation={1}>
+      <AppBar position="static" color="primary" elevation={1}>
         <Container maxWidth="lg">
           <Toolbar>
             <IconButton
@@ -118,7 +118,7 @@ export default function Navigation() {
               }}
               onClick={() => setLocation("/")}
             >
-              <Logo sx={{ fontSize: 50 }} />
+              <Logo sx={{ fontSize: 50, color: "inherit" }} />
             </Box>
 
             <Box
