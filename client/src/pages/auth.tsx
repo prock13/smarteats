@@ -46,18 +46,20 @@ export default function AuthPage() {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: "100vh", 
-      width: "100%", 
-      bgcolor: "grey.100", // Light gray background for the entire page
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        width: "100%",
+        bgcolor: "grey.100", // Light gray background for the entire page
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <Container
         component="main"
         maxWidth="sm"
-        sx={{bgcolor: "grey.100"}} //This line is redundant but kept for consistency with edited code.
+        sx={{ bgcolor: "grey.100" }} //This line is redundant but kept for consistency with edited code.
       >
         <Card className="w-full">
           <CardHeader className="space-y-1">
@@ -65,7 +67,7 @@ export default function AuthPage() {
               <Logo sx={{ fontSize: 128 }} />
             </Box>
             <CardTitle className="text-2xl text-center">
-              Welcome to Smart Meal Planner
+              Welcome to SmartEats
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -116,7 +118,8 @@ export default function AuthPage() {
                       className="w-full"
                       disabled={loginMutation.isPending}
                       style={{
-                        background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                        background:
+                          "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                         color: "white",
                       }}
                     >
@@ -164,7 +167,8 @@ export default function AuthPage() {
                       className="w-full"
                       disabled={registerMutation.isPending}
                       style={{
-                        background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                        background:
+                          "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                         color: "white",
                       }}
                     >
