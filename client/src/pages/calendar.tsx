@@ -32,6 +32,7 @@ export default function CalendarPage() {
   const [selectedMealTypes, setSelectedMealTypes] = useState<Set<string>>(
     new Set(["breakfast", "lunch", "dinner", "snack"])
   );
+  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
 
   const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -97,6 +98,13 @@ export default function CalendarPage() {
     }
   };
 
+  const handleExpandClick = (planId: number) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [planId]: !prev[planId]
+    }));
+  };
+
   const mealTypeOptions = [
     { label: "Breakfast", value: "breakfast" },
     { label: "Lunch", value: "lunch" },
@@ -127,112 +135,125 @@ export default function CalendarPage() {
   }, {});
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="h3" component="h1" 
-          sx={{ 
-            background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 1
-          }}>
-          Meal Planning Calendar
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Plan your meals and track your nutrition goals
-        </Typography>
-      </Box>
+    <Box sx={{ py: 4 }}>
+      <Container maxWidth="lg">
+        <Box sx={{ textAlign: "center", mb: 6 }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
+            Meal Planning Calendar
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Plan your meals and track your nutrition goals
+          </Typography>
+        </Box>
 
-      <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <TextField
-              type="date"
-              label="Select Date"
-              value={format(date, "yyyy-MM-dd")}
-              onChange={handleDateChange}
-              fullWidth
-            />
-          </Grid>
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                type="date"
+                label="Select Date"
+                value={format(date, "yyyy-MM-dd")}
+                onChange={handleDateChange}
+                fullWidth
+              />
+            </Grid>
 
-          <Grid item xs={12} md={4}>
-            <ToggleButtonGroup
-              value={viewType}
-              exclusive
-              onChange={handleViewChange}
-              aria-label="view type"
-              fullWidth
-            >
-              <ToggleButton value="day" aria-label="day view">
-                <TodayIcon sx={{ mr: 1 }} /> Day
-              </ToggleButton>
-              <ToggleButton value="week" aria-label="week view">
-                <ViewWeekIcon sx={{ mr: 1 }} /> Week
-              </ToggleButton>
-              <ToggleButton value="month" aria-label="month view">
-                <CalendarMonthIcon sx={{ mr: 1 }} /> Month
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <ToggleButtonGroup
+                value={viewType}
+                exclusive
+                onChange={handleViewChange}
+                aria-label="view type"
+                fullWidth
+              >
+                <ToggleButton value="day" aria-label="day view">
+                  <TodayIcon sx={{ mr: 1 }} /> Day
+                </ToggleButton>
+                <ToggleButton value="week" aria-label="week view">
+                  <ViewWeekIcon sx={{ mr: 1 }} /> Week
+                </ToggleButton>
+                <ToggleButton value="month" aria-label="month view">
+                  <CalendarMonthIcon sx={{ mr: 1 }} /> Month
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
 
-          <Grid item xs={12} md={4}>
-            <FormGroup row sx={{ justifyContent: 'center' }}>
-              {mealTypeOptions.map((option) => (
-                <FormControlLabel
-                  key={option.value}
-                  control={
-                    <Checkbox
-                      checked={selectedMealTypes.has(option.value)}
-                      onChange={() => handleMealTypeToggle(option.value)}
-                      disabled={selectedMealTypes.size === 1 && selectedMealTypes.has(option.value)}
-                    />
-                  }
-                  label={option.label}
-                />
-              ))}
-            </FormGroup>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {isLoading ? (
-        <Typography align="center">Loading...</Typography>
-      ) : (
-        getDisplayDates().map((displayDate) => {
-          const dateStr = format(displayDate, "yyyy-MM-dd");
-          const mealsForDate = mealsByDate?.[dateStr] || [];
-
-          return mealsForDate.length > 0 ? (
-            <Box key={dateStr} sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom>
-                {format(displayDate, "EEEE, MMMM d, yyyy")}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Filter Meal Types
               </Typography>
-              <Grid container spacing={3}>
-                {mealsForDate.map((plan: any) => (
-                  <Grid item xs={12} md={6} lg={4} key={plan.id}>
-                    <RecipeCard
-                      meal={{
-                        name: plan.meal.name,
-                        description: plan.meal.description,
-                        instructions: "",
-                        macros: plan.meal.macros,
-                        isStoredRecipe: true
-                      }}
-                      showAddToCalendar={false}
-                      showDelete={true}
-                      onDelete={() => deleteMealPlan.mutate(plan.id)}
-                    />
-                  </Grid>
+              <FormGroup row>
+                {mealTypeOptions.map((option) => (
+                  <FormControlLabel
+                    key={option.value}
+                    control={
+                      <Checkbox
+                        checked={selectedMealTypes.has(option.value)}
+                        onChange={() => handleMealTypeToggle(option.value)}
+                        disabled={selectedMealTypes.size === 1 && selectedMealTypes.has(option.value)}
+                      />
+                    }
+                    label={option.label}
+                  />
                 ))}
-              </Grid>
-            </Box>
-          ) : viewType === 'day' ? (
-            <Typography key={dateStr} color="text.secondary" align="center">
-              No meals planned for {format(displayDate, "MMMM d, yyyy")}
-            </Typography>
-          ) : null
-        })
-      )}
-    </Container>
+              </FormGroup>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {isLoading ? (
+          <Typography align="center">Loading...</Typography>
+        ) : (
+          getDisplayDates().map((displayDate) => {
+            const dateStr = format(displayDate, "yyyy-MM-dd");
+            const mealsForDate = mealsByDate?.[dateStr] || [];
+
+            return mealsForDate.length > 0 ? (
+              <Box key={dateStr} sx={{ mb: 4 }}>
+                <Typography variant="h6" gutterBottom>
+                  {format(displayDate, "EEEE, MMMM d, yyyy")}
+                </Typography>
+                <Grid container spacing={3}>
+                  {mealsForDate.map((plan: any) => (
+                    <Grid item xs={12} md={6} lg={4} key={plan.id}>
+                      <RecipeCard
+                        meal={{
+                          name: plan.meal.name,
+                          description: plan.meal.description,
+                          instructions: plan.meal.instructions || "",
+                          macros: plan.meal.macros,
+                          isStoredRecipe: true,
+                          cookingTime: plan.meal.cookingTime,
+                          nutrients: plan.meal.nutrients,
+                          dietaryRestriction: plan.meal.dietaryRestriction
+                        }}
+                        showAddToCalendar={false}
+                        showDelete={true}
+                        expanded={expandedCards[plan.id] || false}
+                        onExpandClick={() => handleExpandClick(plan.id)}
+                        onDelete={() => deleteMealPlan.mutate(plan.id)}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            ) : viewType === 'day' ? (
+              <Typography key={dateStr} color="text.secondary" align="center">
+                No meals planned for {format(displayDate, "MMMM d, yyyy")}
+              </Typography>
+            ) : null
+          })
+        )}
+      </Container>
+    </Box>
   );
 }
