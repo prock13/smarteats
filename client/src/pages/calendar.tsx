@@ -16,6 +16,9 @@ import {
   Card,
   CardContent,
   CardHeader,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -26,6 +29,7 @@ export default function CalendarPage() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(startOfDay(new Date()));
   const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
+  const [selectedMealTypes, setSelectedMealTypes] = useState<Set<string>>(new Set(["breakfast", "lunch", "dinner", "snack"]));
 
   const startOfMonth = new Date(date?.getFullYear() || 2024, date?.getMonth() || 0, 1);
   const endOfMonth = new Date(date?.getFullYear() || 2024, (date?.getMonth() || 0) + 1, 0);
@@ -76,10 +80,32 @@ export default function CalendarPage() {
     setDate(startOfDay(selectedDate));
   };
 
+  const handleMealTypeToggle = (mealType: string) => {
+    setSelectedMealTypes((prev) => {
+      const newTypes = new Set(prev);
+      if (newTypes.has(mealType)) {
+        newTypes.delete(mealType);
+      } else {
+        newTypes.add(mealType);
+      }
+      return newTypes;
+    });
+  };
+
+  const mealTypeOptions = [
+    { label: "Breakfast", value: "breakfast" },
+    { label: "Lunch", value: "lunch" },
+    { label: "Dinner", value: "dinner" },
+    { label: "Snack", value: "snack" },
+  ];
+
   const mealsByDate = mealPlans?.reduce((acc: Record<string, any[]>, plan: any) => {
     const dateStr = format(new Date(plan.date), "yyyy-MM-dd");
     if (!acc[dateStr]) acc[dateStr] = [];
-    acc[dateStr].push(plan);
+    // Only add meals of selected types
+    if (selectedMealTypes.has(plan.mealType)) {
+      acc[dateStr].push(plan);
+    }
     return acc;
   }, {});
 
@@ -128,6 +154,27 @@ export default function CalendarPage() {
                 </FormControl>
               </Box>
             )}
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Filter Meal Types
+              </Typography>
+              <FormGroup>
+                {mealTypeOptions.map((option) => (
+                  <FormControlLabel
+                    key={option.value}
+                    control={
+                      <Checkbox
+                        checked={selectedMealTypes.has(option.value)}
+                        onChange={() => handleMealTypeToggle(option.value)}
+                        disabled={selectedMealTypes.size === 1 && selectedMealTypes.has(option.value)}
+                      />
+                    }
+                    label={option.label}
+                  />
+                ))}
+              </FormGroup>
+            </Box>
           </Paper>
         </Grid>
 
