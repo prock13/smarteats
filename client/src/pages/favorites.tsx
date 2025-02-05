@@ -10,6 +10,7 @@ export default function Favorites() {
   const { toast } = useToast();
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
+  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
 
   const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
@@ -23,6 +24,13 @@ export default function Favorites() {
   const handleShareClose = () => {
     setShareAnchorEl(null);
     setSharingRecipe(null);
+  };
+
+  const handleExpandClick = (index: number) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   const shareRecipe = async (platform: string) => {
@@ -108,7 +116,7 @@ export default function Favorites() {
             </Box>
           ) : favorites && favorites.length > 0 ? (
             <Grid container spacing={3}>
-              {favorites.map((recipe: Recipe) => (
+              {favorites.map((recipe: Recipe, index: number) => (
                 <Grid item xs={12} md={6} key={recipe.id}>
                   <RecipeCard
                     meal={{
@@ -138,6 +146,8 @@ export default function Favorites() {
                       fats: recipe.fats
                     }}
                     onShare={handleShare}
+                    onExpandClick={() => handleExpandClick(index)}
+                    expanded={expandedCards[index] || false}
                     showAddToCalendar={true}
                     favorites={favorites}
                   />
