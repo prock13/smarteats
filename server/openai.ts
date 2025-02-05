@@ -48,7 +48,6 @@ export async function generateMealSuggestions(
   try {
     checkRateLimit();
 
-    // Based on whether pantry items are provided, we'll use different prompt strategies
     let prompt: string;
     let systemRole: string;
 
@@ -72,8 +71,7 @@ Respond with a JSON object in this exact format:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number,
-        "calories": number
+        "fats": number
       },
       "cookingTime": {
         "prep": number,
@@ -132,8 +130,7 @@ Respond with a JSON object in this exact format:
       "macros": {
         "carbs": number,
         "protein": number,
-        "fats": number,
-        "calories": number
+        "fats": number
       },
       "cookingTime": {
         "prep": number,
@@ -162,7 +159,7 @@ Respond with a JSON object in this exact format:
           content: prompt
         }
       ],
-      temperature: 0.7,
+      response_format: { type: "json_object" }
     });
 
     // Add timeout to the OpenAI request
@@ -171,7 +168,7 @@ Respond with a JSON object in this exact format:
     });
 
     console.log("Waiting for OpenAI response...");
-    const response = await Promise.race([responsePromise, timeoutPromise]) as any;
+    const response = await Promise.race([responsePromise, timeoutPromise]);
     console.log("Received response from OpenAI");
 
     const content = response.choices[0].message.content;
