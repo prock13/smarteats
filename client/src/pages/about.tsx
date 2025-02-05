@@ -112,10 +112,7 @@ export default function AboutPage() {
               </Link>{" "}
               system where users can save and organize their preferred recipes
               for quick access, add custom tags, and share recipes across
-              various social media platforms. All of this is presented through
-              an intuitive, easy-to-use interface that's responsive across all
-              devices, making meal planning and nutrition tracking a seamless
-              experience.
+              various social media platforms.
             </Typography>
           </Box>
         </Paper>

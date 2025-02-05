@@ -17,7 +17,6 @@ import Profile from "@/pages/profile";
 import Pantry from "@/pages/pantry";
 import Terms from "@/pages/terms";
 import About from "@/pages/about";
-import MyFitnessPal from "@/pages/myfitnesspal"; // Added import
 import Navigation from "@/components/navigation";
 import { Footer } from "@/components/Footer";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
@@ -50,7 +49,6 @@ function ThemedApp() {
             <ProtectedRoute path="/favorites" component={Favorites} />
             <ProtectedRoute path="/profile" component={Profile} />
             <ProtectedRoute path="/pantry" component={Pantry} />
-            <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} /> {/* Added route */}
             <Route component={NotFound} />
           </Switch>
         </Container>
