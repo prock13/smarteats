@@ -350,6 +350,31 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.patch("/api/favorites/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const favoriteId = parseInt(req.params.id);
+      if (isNaN(favoriteId)) {
+        throw new Error("Invalid favorite ID");
+      }
+
+      const { tags } = req.body;
+      if (!Array.isArray(tags)) {
+        throw new Error("Tags must be an array of strings");
+      }
+
+      await storage.updateFavoriteTags(req.user!.id, favoriteId, tags);
+      res.json({ message: "Tags updated successfully" });
+    } catch (error) {
+      console.error("Error updating favorite tags:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

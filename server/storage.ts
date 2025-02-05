@@ -35,6 +35,7 @@ export interface IStorage {
   addFavorite(userId: number, favorite: Omit<InsertFavorite, "userId">): Promise<Favorite>;
   removeFavorite(userId: number, favoriteId: number): Promise<void>;
   isFavorite(userId: number, recipeName: string): Promise<boolean>;
+  updateFavoriteTags(userId: number, favoriteId: number, tags: string[]): Promise<void>;
 
   // Session store
   sessionStore: session.Store;
@@ -190,7 +191,7 @@ export class DatabaseStorage implements IStorage {
     console.log("Adding favorite for user:", userId, "recipe:", favorite);
     const [savedFavorite] = await db
       .insert(favorites)
-      .values({ ...favorite, userId })
+      .values({ ...favorite, userId, tags: [] })
       .returning();
     console.log("Added favorite:", savedFavorite);
     return savedFavorite;
@@ -226,6 +227,18 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ password: newPassword })
       .where(eq(users.id, userId));
+  }
+  async updateFavoriteTags(userId: number, favoriteId: number, tags: string[]): Promise<void> {
+    console.log("Updating tags for favorite:", favoriteId, "new tags:", tags);
+    await db
+      .update(favorites)
+      .set({ tags })
+      .where(
+        and(
+          eq(favorites.userId, userId),
+          eq(favorites.id, favoriteId)
+        )
+      );
   }
 }
 
