@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import {
   Box,
@@ -29,7 +30,6 @@ import {
   Chat as ChatIcon,
   Kitchen as KitchenIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
 
 const features = [
   {
@@ -121,6 +121,11 @@ export default function Home() {
   const handleLearnMore = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
     setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedFeature(null);
   };
 
   const handleNavigate = () => {
