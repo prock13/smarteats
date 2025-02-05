@@ -1,9 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Recipe } from "@shared/schema";
-import { Container, Typography, Box, Paper, Grid, Chip } from "@mui/material";
-import { CircularProgress } from "@mui/material";
+import { Container, Typography, Box, Grid, CircularProgress } from "@mui/material";
+import { RecipeCard } from "@/components/ui/RecipeCard";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
 
 export default function Favorites() {
+  const { toast } = useToast();
+  const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
+  const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
+
   const {
     data: favorites,
     isLoading,
@@ -11,6 +17,59 @@ export default function Favorites() {
   } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
   });
+
+  const handleShare = (event: React.MouseEvent<HTMLElement>, recipe: Recipe) => {
+    setShareAnchorEl(event.currentTarget);
+    setSharingRecipe(recipe);
+  };
+
+  const handleShareClose = () => {
+    setShareAnchorEl(null);
+    setSharingRecipe(null);
+  };
+
+  const shareRecipe = async (platform: string) => {
+    if (!sharingRecipe) return;
+
+    const shareText = `Check out this healthy recipe from Smart Meal Planner!\n\nRecipe: ${sharingRecipe.name}\n${sharingRecipe.description}\n\nNutritional Info:\n• Carbs: ${sharingRecipe.carbs}g\n• Protein: ${sharingRecipe.protein}g\n• Fats: ${sharingRecipe.fats}g\n\nDiscover more recipes at: ${window.location.origin}`;
+    const baseUrl = window.location.origin;
+
+    let platformUrl = "";
+    switch (platform) {
+      case "twitter":
+        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
+        break;
+      case "facebook":
+        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
+        break;
+      case "linkedin":
+        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
+        break;
+      default:
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `${sharingRecipe.name} - Smart Meal Planner`,
+              text: shareText,
+              url: baseUrl,
+            });
+            toast({
+              title: "Success!",
+              description: "Recipe shared successfully",
+            });
+          } catch (error) {
+            console.error("Error sharing:", error);
+          }
+          handleShareClose();
+          return;
+        }
+    }
+
+    if (platformUrl) {
+      window.open(platformUrl, "_blank", "noopener,noreferrer");
+    }
+    handleShareClose();
+  };
 
   if (error) {
     return (
@@ -53,55 +112,33 @@ export default function Favorites() {
           ) : favorites && favorites.length > 0 ? (
             <Grid container spacing={3}>
               {favorites.map((recipe: Recipe) => (
-                <Grid item xs={12} key={recipe.id}>
-                  <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                      {recipe.name}
-                    </Typography>
-                    <Typography color="text.secondary" paragraph>
-                      {recipe.description}
-                    </Typography>
-                    {recipe.instructions !== recipe.description && (
-                      <Typography paragraph>{recipe.instructions}</Typography>
-                    )}
-
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">
-                          Carbs: {recipe.carbs}g
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">
-                          Protein: {recipe.protein}g
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="body2" color="text.secondary">
-                          Fats: {recipe.fats}g
-                        </Typography>
-                      </Grid>
-                    </Grid>
-
-                    {recipe.dietaryRestriction !== "none" && (
-                      <Chip
-                        label={recipe.dietaryRestriction}
-                        color="default"
-                        size="small"
-                        sx={{ mt: 1 }}
-                      />
-                    )}
-                  </Paper>
+                <Grid item xs={12} md={6} key={recipe.id}>
+                  <RecipeCard
+                    meal={{
+                      name: recipe.name,
+                      description: recipe.description,
+                      instructions: recipe.instructions,
+                      macros: {
+                        carbs: recipe.carbs,
+                        protein: recipe.protein,
+                        fats: recipe.fats
+                      },
+                      dietaryRestriction: recipe.dietaryRestriction,
+                      isStoredRecipe: true
+                    }}
+                    onShare={handleShare}
+                    showAddToCalendar={true}
+                  />
                 </Grid>
               ))}
             </Grid>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
+            <Box sx={{ textAlign: "center", py: 4 }}>
               <Typography color="text.secondary">
                 No favorite recipes yet. Mark some recipes as favorites from the
                 meal suggestions to see them here.
               </Typography>
-            </Paper>
+            </Box>
           )}
         </Box>
       </Box>
