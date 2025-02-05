@@ -70,7 +70,7 @@ export default function CalendarPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
       toast({
         title: "Success",
-        description: "Meal plan deleted successfully"
+        description: "Meal removed from calendar"
       });
     },
     onError: (error: Error) => {
@@ -274,38 +274,46 @@ export default function CalendarPage() {
                   {format(displayDate, "EEEE, MMMM d, yyyy")}
                 </Typography>
                 <Grid container spacing={3}>
-                  {mealsForDate.map((plan: any) => (
-                    <Grid item xs={12} md={6} lg={4} key={plan.id}>
-                      <RecipeCard
-                        meal={{
-                          name: plan.meal.name,
-                          description: plan.meal.description,
-                          instructions: plan.meal.instructions || "",
-                          macros: {
-                            carbs: plan.meal.macros.carbs,
-                            protein: plan.meal.macros.protein,
-                            fats: plan.meal.macros.fats,
-                            calories: plan.meal.calories,
-                            fiber: plan.meal.fiber,
-                            sugar: plan.meal.sugar,
-                            cholesterol: plan.meal.cholesterol,
-                            sodium: plan.meal.sodium
-                          },
-                          cookingTime: plan.meal.cookingTime || null,
-                          nutrients: plan.meal.nutrients || null,
-                          isStoredRecipe: true,
-                          dietaryRestriction: plan.meal.dietaryRestriction || "none"
-                        }}
-                        showAddToCalendar={false}
-                        showDelete={true}
-                        favorites={favorites}
-                        expanded={expandedCards[plan.id] || false}
-                        onExpandClick={() => handleExpandClick(plan.id)}
-                        onShare={handleShareClick}
-                        onDelete={() => deleteMealPlan.mutate(plan.id)}
-                      />
-                    </Grid>
-                  ))}
+                  {mealsForDate.map((plan: any) => {
+                    // Find the matching favorite to get complete recipe details
+                    const favorite = favorites?.find(f => f.name === plan.meal.name);
+                    return (
+                      <Grid item xs={12} md={6} lg={4} key={plan.id}>
+                        <RecipeCard
+                          meal={{
+                            name: plan.meal.name,
+                            description: plan.meal.description,
+                            instructions: favorite?.instructions || plan.meal.instructions || "",
+                            macros: {
+                              carbs: plan.meal.macros.carbs,
+                              protein: plan.meal.macros.protein,
+                              fats: plan.meal.macros.fats,
+                              calories: favorite?.calories || plan.meal.calories || null,
+                              fiber: favorite?.fiber || plan.meal.fiber || null,
+                              sugar: favorite?.sugar || plan.meal.sugar || null,
+                              cholesterol: favorite?.cholesterol || plan.meal.cholesterol || null,
+                              sodium: favorite?.sodium || plan.meal.sodium || null
+                            },
+                            cookingTime: favorite?.cookingTime || plan.meal.cookingTime || null,
+                            nutrients: favorite?.nutrients || plan.meal.nutrients || null,
+                            isStoredRecipe: true,
+                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
+                          }}
+                          showAddToCalendar={false}
+                          showDelete={true}
+                          favorites={favorites}
+                          expanded={expandedCards[plan.id] || false}
+                          onExpandClick={() => handleExpandClick(plan.id)}
+                          onShare={handleShareClick}
+                          onDelete={() => {
+                            if (confirm('Are you sure you want to remove this meal from the calendar?')) {
+                              deleteMealPlan.mutate(plan.id);
+                            }
+                          }}
+                        />
+                      </Grid>
+                    );
+                  })}
                 </Grid>
               </Box>
             ) : viewType === 'day' ? (
