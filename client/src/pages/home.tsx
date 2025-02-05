@@ -239,9 +239,10 @@ export default function Home() {
         >
           {selectedFeature && (
             <>
-              <DialogTitle 
-                id="feature-dialog-title" 
+              <DialogTitle
+                id="feature-dialog-title"
                 sx={{
+                  position: "relative",
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
@@ -263,14 +264,15 @@ export default function Home() {
                 <IconButton
                   onClick={handleCloseDialog}
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     right: 8,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'white',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "white",
+                    "&:hover": {
+                      bgcolor: "rgba(255, 255, 255, 0.1)",
                     },
+                    zIndex: 1,
                   }}
                 >
                   <CloseIcon />
