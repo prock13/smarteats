@@ -73,7 +73,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   return (
     <Drawer open={open} onClose={onClose}>
       <DrawerContent className="h-[80vh]">
-        <DrawerHeader>
+        <DrawerHeader className="relative border-b">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               src="/chef-avatar.png"
@@ -82,7 +82,15 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
             />
             <DrawerTitle>Chat with Chef Nina</DrawerTitle>
           </Box>
-          <IconButton onClick={onClose} edge="end">
+          <IconButton 
+            onClick={onClose} 
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
             <CloseIcon />
           </IconButton>
         </DrawerHeader>
