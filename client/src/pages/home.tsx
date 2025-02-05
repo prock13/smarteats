@@ -63,7 +63,7 @@ const features = [
     description:
       "Meet Nina, your personal AI chef assistant who helps you plan meals and discover new recipes.",
     icon: <ChatIcon sx={{ fontSize: 40 }} />,
-    isNina: true, 
+    isNina: true,
     details: [
       "Get personalized meal suggestions based on your preferences",
       "Real-time nutritional guidance and recipe modifications",
@@ -113,10 +113,9 @@ const features = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [selectedFeature, setSelectedFeature] = useState<
-    (typeof features)[0] | null
-  >(null);
+  const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openChatModal, setOpenChatModal] = useState(false);
 
   const handleLearnMore = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
@@ -128,9 +127,19 @@ export default function Home() {
     setSelectedFeature(null);
   };
 
+  const handleOpenChat = () => {
+    setOpenChatModal(true);
+    setOpenDialog(false);
+  };
+
+  const handleCloseChat = () => {
+    setOpenChatModal(false);
+  };
+
   const handleNavigate = () => {
     if (selectedFeature) {
       if (selectedFeature.isNina) {
+        handleOpenChat();
         return;
       }
       if (!selectedFeature.comingSoon && selectedFeature.route) {
@@ -235,16 +244,18 @@ export default function Home() {
           onClose={handleCloseDialog}
           maxWidth="sm"
           fullWidth
+          aria-labelledby="feature-dialog-title"
+          aria-describedby="feature-dialog-description"
         >
           {selectedFeature && (
             <>
               <DialogTitle
+                id="feature-dialog-title"
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  background:
-                    "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                  background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                   color: "white",
                 }}
               >
@@ -259,7 +270,7 @@ export default function Home() {
                   />
                 )}
               </DialogTitle>
-              <DialogContent sx={{ mt: 2 }}>
+              <DialogContent id="feature-dialog-description">
                 <Typography variant="body1" paragraph>
                   {selectedFeature.description}
                 </Typography>
@@ -284,12 +295,10 @@ export default function Home() {
                     variant="contained"
                     onClick={handleNavigate}
                     sx={{
-                      background:
-                        "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
+                      background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                       color: "white",
                       "&:hover": {
-                        background:
-                          "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                        background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
                       },
                     }}
                   >
@@ -299,6 +308,28 @@ export default function Home() {
               </DialogActions>
             </>
           )}
+        </Dialog>
+
+        {/* Chat Modal */}
+        <Dialog 
+          open={openChatModal} 
+          onClose={handleCloseChat}
+          maxWidth="md"
+          fullWidth
+          aria-labelledby="chat-dialog-title"
+          aria-describedby="chat-dialog-description"
+        >
+          <DialogTitle id="chat-dialog-title">
+            Chat with Nina
+          </DialogTitle>
+          <DialogContent id="chat-dialog-description">
+            <Typography>
+              Chat interface will be implemented here
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseChat}>Close</Button>
+          </DialogActions>
         </Dialog>
       </Container>
     </Box>
