@@ -43,7 +43,7 @@ export default function MyFitnessPalPage() {
 
   const connectMutation = useMutation({
     mutationFn: async (data: InsertMfpCredentials) => {
-      console.log("Submitting MFP credentials:", data);
+      console.log("Making API request with data:", data);
       const res = await apiRequest("POST", "/api/myfitnesspal/connect", data);
       if (!res.ok) {
         const error = await res.json();
