@@ -83,7 +83,7 @@ export default function PantryPage() {
       carbSource: "",
       proteinSource: "",
       fatSource: "",
-      mealType: "dinner",
+      mealType: "breakfast",
       dietaryPreference: "none",
       includeUserRecipes: false,
     },

@@ -118,19 +118,14 @@ export default function Favorites() {
                       macros: {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
-                        fats: recipe.fats,
-                        calories: recipe.calories || undefined,
-                        fiber: recipe.fiber || undefined,
-                        sugar: recipe.sugar || undefined
+                        fats: recipe.fats
                       },
-                      cookingTime: recipe.cooking_time || {
-                        prep: 15,
-                        cook: 20,
-                        total: 35
-                      },
-                      nutrients: recipe.nutrients || undefined,
-                      dietaryRestriction: recipe.dietaryRestriction,
-                      isStoredRecipe: true
+                      dietaryRestriction: recipe.dietaryRestriction
+                    }}
+                    targetMacros={{
+                      carbs: recipe.carbs,
+                      protein: recipe.protein,
+                      fats: recipe.fats
                     }}
                     onShare={handleShare}
                     showAddToCalendar={true}
