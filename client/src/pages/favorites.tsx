@@ -11,11 +11,7 @@ export default function Favorites() {
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
 
-  const {
-    data: favorites,
-    isLoading,
-    error,
-  } = useQuery<Recipe[]>({
+  const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
   });
 
@@ -138,6 +134,7 @@ export default function Favorites() {
                     }}
                     onShare={handleShare}
                     showAddToCalendar={true}
+                    favorites={favorites}
                   />
                 </Grid>
               ))}

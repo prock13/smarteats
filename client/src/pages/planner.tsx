@@ -505,8 +505,17 @@ export default function Planner() {
           </CardContent>
         </Card>
 
-        {mutation.isPending && !suggestions && (
+        {mutation.isPending && (
           <Box sx={{ width: "100%", mt: 4 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              align="center"
+              sx={{ mb: 2 }}
+            >
+              Please wait while we generate your personalized recipe
+              suggestions...
+            </Typography>
             <LinearProgress />
           </Box>
         )}
