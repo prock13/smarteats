@@ -51,7 +51,9 @@ export default function MyFitnessPalPage() {
           const error = await res.json();
           throw new Error(error.message || "Failed to connect account");
         }
-        return res.json();
+        const responseData = await res.json();
+        console.log("API Response data:", responseData);
+        return responseData;
       } catch (error) {
         console.error("API request failed:", error);
         throw error;
@@ -59,6 +61,7 @@ export default function MyFitnessPalPage() {
     },
     onSuccess: () => {
       console.log("Successfully connected MFP account");
+      // Force refetch the connection status
       queryClient.invalidateQueries({ queryKey: ["/api/myfitnesspal/connection"] });
       toast({
         description: "Connected to MyFitnessPal successfully"
