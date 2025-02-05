@@ -164,7 +164,7 @@ export function RecipeCard({
         localDate.getFullYear(),
         localDate.getMonth(),
         localDate.getDate(),
-        0, 0, 0
+        12, 0, 0
       ).toISOString();
 
       const mealPlan = {
@@ -276,14 +276,10 @@ export function RecipeCard({
   };
 
   const handleCalendarSubmit = () => {
-    // Ensure we keep the date as selected without timezone conversion
-    // Add time component to ensure consistent timezone handling
-    const dateWithTime = `${selectedDate}T00:00:00.000Z`;
-
     addToCalendarMutation.mutate({
       meal,
       mealType: selectedMealType,
-      date: dateWithTime,
+      date: selectedDate,
     });
   };
 
