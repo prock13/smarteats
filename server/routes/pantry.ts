@@ -8,19 +8,13 @@ const router = Router();
 router.post("/api/pantry-suggestions", async (req, res) => {
   try {
     const input = macroInputSchema.parse(req.body);
-    const { carbSource, proteinSource, fatSource, dietaryPreference } = input;
 
-    const targetMacros = {
-      carbs: input.targetCarbs,
-      protein: input.targetProtein,
-      fats: input.targetFats,
-    };
-
-    const recipe = await generateRecipe(
-      { carbSource, proteinSource, fatSource },
-      targetMacros,
-      dietaryPreference
-    );
+    const recipe = await generateRecipe({
+      targetCarbs: input.targetCarbs,
+      targetProtein: input.targetProtein,
+      targetFats: input.targetFats,
+      dietaryPreference: input.dietaryPreference
+    });
 
     const suggestions = {
       meals: [
@@ -28,10 +22,11 @@ router.post("/api/pantry-suggestions", async (req, res) => {
           name: recipe.name,
           description: recipe.description,
           instructions: recipe.instructions,
-          macros: recipe.macros,
-          cookingTime: recipe.cookingTime,
-          nutrients: recipe.nutrients,
-          dietaryRestriction: recipe.dietaryRestriction,
+          macros: {
+            carbs: recipe.carbs,
+            protein: recipe.protein,
+            fats: recipe.fats
+          },
           isStoredRecipe: false,
         },
       ],
