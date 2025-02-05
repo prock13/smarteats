@@ -15,7 +15,6 @@ export default function MyFitnessPalPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get MFP connection status
   const { data: mfpConnection, isLoading: isLoadingConnection } = useQuery({
     queryKey: ["/api/myfitnesspal/connection"],
     queryFn: async () => {
@@ -25,7 +24,6 @@ export default function MyFitnessPalPage() {
     }
   });
 
-  // Get nutrition progress if connected
   const { data: nutritionData, isLoading: isLoadingNutrition } = useQuery({
     queryKey: ["/api/myfitnesspal/nutrition"],
     queryFn: async () => {
@@ -75,11 +73,11 @@ export default function MyFitnessPalPage() {
 
   const onSubmit = async (data: InsertMfpCredentials) => {
     console.log("Form submitted with data:", data);
-    await connectMutation.mutateAsync(data);
-  };
-
-  const handleButtonClick = () => {
-    console.log("Button clicked");
+    try {
+      await connectMutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   if (isLoadingConnection) {
@@ -118,7 +116,10 @@ export default function MyFitnessPalPage() {
             </Typography>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form 
+                onSubmit={form.handleSubmit(onSubmit)} 
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="username"
@@ -139,7 +140,6 @@ export default function MyFitnessPalPage() {
                   type="submit"
                   variant="contained"
                   disabled={connectMutation.isPending}
-                  onClick={handleButtonClick}
                   sx={{ mt: 2 }}
                 >
                   {connectMutation.isPending ? (
