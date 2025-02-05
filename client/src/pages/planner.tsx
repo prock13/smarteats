@@ -465,7 +465,7 @@ export default function Planner() {
                         control={
                           <Checkbox
                             {...form.register("includeUserRecipes")}
-                            defaultChecked={false}
+                            defaultChecked={true}
                           />
                         }
                         label="Include My Recipes"
