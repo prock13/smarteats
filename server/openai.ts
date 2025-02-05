@@ -129,7 +129,7 @@ export async function generateMealSuggestions(
   dietaryPreference: string = "none",
   recipeLimit?: number,
   excludeRecipes: string[] = [],
-  includeUserRecipes: boolean = true,
+  includeUserRecipes: boolean = false,
   pantryItems?: {
     carbSource?: string;
     proteinSource?: string;
@@ -180,23 +180,26 @@ Format your response as a JSON object with this exact structure:
     }
   ]
 }`;
-      systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format.";
+      systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format. Do not combine or modify existing recipes.";
     } else {
-      const storedRecipes = await storage.getRecipes();
-      const availableStoredRecipes = storedRecipes.filter(recipe => {
-        if (!includeUserRecipes) return false;
-        if (excludeRecipes.includes(recipe.name)) return false;
-        if (dietaryPreference !== "none") return recipe.dietaryRestriction === dietaryPreference;
-        return true;
-      });
+      let storedRecipesPrompt = '';
 
-      const storedRecipesPrompt = availableStoredRecipes.length > 0
-        ? `Available stored recipes:\n${availableStoredRecipes.map(recipe => `
+      if (includeUserRecipes) {
+        const storedRecipes = await storage.getRecipes();
+        const availableStoredRecipes = storedRecipes.filter(recipe => {
+          if (excludeRecipes.includes(recipe.name)) return false;
+          if (dietaryPreference !== "none") return recipe.dietaryRestriction === dietaryPreference;
+          return true;
+        });
+
+        storedRecipesPrompt = availableStoredRecipes.length > 0
+          ? `\nAvailable stored recipes that can be suggested (do not modify these, suggest them as-is if they match the requirements):${availableStoredRecipes.map(recipe => `
 - ${recipe.name}
   Description: ${recipe.description}
   Macros: ${recipe.carbs}g carbs, ${recipe.protein}g protein, ${recipe.fats}g fats
   Dietary Restriction: ${recipe.dietaryRestriction}`).join('\n')}`
-        : '';
+          : '';
+      }
 
       prompt = `Create meal suggestions matching these macro targets:
 - Carbohydrates: ${carbs}g
@@ -238,8 +241,10 @@ Format your response as a JSON object with this exact structure:
       "isStoredRecipe": boolean
     }
   ]
-}`;
-      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format.";
+}
+
+Important: If suggesting a stored recipe, set isStoredRecipe to true and use the exact recipe details without modification. For new recipes, set isStoredRecipe to false.`;
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. When suggesting stored recipes, use them exactly as provided without modifications.";
     }
 
     const response = await openai.chat.completions.create({

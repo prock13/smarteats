@@ -99,7 +99,7 @@ export const macroInputSchema = z.object({
   mealCount: z.number().min(1).max(10),
   dietaryPreference: dietaryPreferenceEnum.default("none"),
   mealTypes: z.array(mealTypeEnum).min(1, "Select at least one meal type"),
-  includeUserRecipes: z.boolean().default(true)
+  includeUserRecipes: z.boolean().default(false)
 });
 
 export const cookingTimeSchema = z.object({
