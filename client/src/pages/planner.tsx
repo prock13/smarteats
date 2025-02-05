@@ -222,14 +222,13 @@ export default function Planner() {
   const favoriteMutation = useMutation({
     mutationFn: async (meal: any) => {
       const favorite = {
-        id: meal.id,
         name: meal.name,
         description: meal.description,
         instructions: meal.instructions,
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
-        dietary_restriction: meal.dietary_restriction,
+        dietaryRestriction: meal.dietaryRestriction || "none",
       };
       const res = await apiRequest("POST", "/api/favorites", favorite);
       return res.json();
