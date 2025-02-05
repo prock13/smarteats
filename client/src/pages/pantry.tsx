@@ -71,6 +71,7 @@ export default function PantryPage() {
   const [suggestions, setSuggestions] = useState<any>(null);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
+  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
   const queryClient = useQueryClient();
 
   const { data: favorites } = useQuery<Recipe[]>({
@@ -232,6 +233,13 @@ export default function PantryPage() {
   const handleShareClose = () => {
     setShareAnchorEl(null);
     setSharingMeal(null);
+  };
+
+  const handleExpandClick = (index: number) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   const shareRecipe = async (platform: string) => {
@@ -439,12 +447,8 @@ export default function PantryPage() {
                       fats: meal.macros.fats,
                     }}
                     favorites={favorites}
-                    showAddToCalendar={true}
-                    addToCalendar={addToCalendarMutation.mutate}
-                    isFavorite={favorites?.some(
-                      (fav) => fav.name === meal.name,
-                    )}
-                    favoriteRecipe={favoriteMutation.mutate}
+                    expanded={expandedCards[index] || false}
+                    onExpandClick={() => handleExpandClick(index)}
                   />
                 </Grid>
               ))}
