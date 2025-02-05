@@ -119,6 +119,9 @@ export default function Navigation() {
               onClick={() => setLocation("/")}
             >
               <Logo sx={{ fontSize: 50, color: "inherit" }} />
+              <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+                SmartEats
+              </Typography>
             </Box>
 
             <Box
