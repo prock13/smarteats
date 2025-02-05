@@ -17,6 +17,10 @@ import {
   TextField,
   Chip,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -28,6 +32,7 @@ import {
   Restaurant as RestaurantIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -94,7 +99,9 @@ export function RecipeCard({
 }: RecipeCardProps) {
   const { toast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [newTag, setNewTag] = useState("");
+  const [isCalendarDialogOpen, setIsCalendarDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const favorite = favorites?.find((f) => f.name === meal.name);
   const [tags, setTags] = useState<string[]>(favorite?.tags || []);
@@ -150,10 +157,9 @@ export function RecipeCard({
   });
 
   const addToCalendarMutation = useMutation({
-    mutationFn: async ({ meal, mealType }: { meal: Meal; mealType: string }) => {
-      const today = new Date().toISOString();
+    mutationFn: async ({ meal, mealType, date }: { meal: Meal; mealType: string; date: Date }) => {
       const mealPlan = {
-        date: today,
+        date: date.toISOString(),
         meal: {
           name: meal.name,
           description: meal.description,
@@ -167,8 +173,9 @@ export function RecipeCard({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Meal added to today's calendar",
+        description: "Meal added to calendar",
       });
+      setIsCalendarDialogOpen(false);
     },
     onError: (error: Error) => {
       toast({
@@ -251,57 +258,467 @@ export function RecipeCard({
     }
   };
 
+  const handleAddToCalendar = () => {
+    setIsCalendarDialogOpen(true);
+  };
+
+  const handleCalendarDialogClose = () => {
+    setIsCalendarDialogOpen(false);
+  };
+
+  const handleCalendarSubmit = () => {
+    const date = new Date(selectedDate);
+    addToCalendarMutation.mutate({
+      meal,
+      mealType: selectedMealType,
+      date,
+    });
+  };
+
   return (
-    <Card sx={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: (theme) => theme.shadows[8]
-      },
-      ...(meal.isStoredRecipe && {
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'light'
-            ? 'rgba(25, 118, 210, 0.02)'
-            : 'rgba(25, 118, 210, 0.05)'
-      })
-    }}>
-      <CardHeader
-        sx={{
-          backgroundColor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          pb: 1
-        }}
-        action={
+    <>
+      <Card sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: (theme) => theme.shadows[8]
+        },
+        ...(meal.isStoredRecipe && {
+          backgroundColor: (theme) =>
+            theme.palette.mode === 'light'
+              ? 'rgba(25, 118, 210, 0.02)'
+              : 'rgba(25, 118, 210, 0.05)'
+        })
+      }}>
+        <CardHeader
+          sx={{
+            backgroundColor: 'background.paper',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            pb: 1
+          }}
+          action={
+            <Box sx={{
+              display: "flex",
+              gap: 1.5,
+              alignItems: 'center',
+              pr: 1
+            }}>
+              {onShare && (
+                <IconButton
+                  onClick={(e) => onShare(e, meal)}
+                  color="primary"
+                  size="small"
+                >
+                  <ShareIcon />
+                </IconButton>
+              )}
+              {showAddToCalendar && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<CalendarIcon />}
+                  onClick={handleAddToCalendar}
+                  sx={{
+                    minWidth: 'auto',
+                    whiteSpace: 'nowrap',
+                    px: 2
+                  }}
+                >
+                  Add to Calendar
+                </Button>
+              )}
+              {!meal.isStoredRecipe && favorites && !showDelete ? (
+                <IconButton
+                  color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
+                  onClick={() => {
+                    if (!favorites?.some((f) => f.name === meal.name)) {
+                      favoriteMutation.mutate(meal);
+                    }
+                  }}
+                  disabled={favoriteMutation.isPending || favorites?.some((f) => f.name === meal.name)}
+                  size="small"
+                >
+                  {favorites?.some((f) => f.name === meal.name) ? <Favorite /> : <FavoriteBorder />}
+                </IconButton>
+              ) : null}
+              {showDelete && favorites && (
+                <IconButton
+                  color="error"
+                  onClick={() => {
+                    const favorite = favorites.find((f) => f.name === meal.name);
+                    if (favorite?.id) {
+                      handleDeleteFavorite(favorite.id);
+                    }
+                  }}
+                  disabled={deleteFavoriteMutation.isPending}
+                  size="small"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </Box>
+          }
+        />
+        <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Box sx={{
-            display: "flex",
-            gap: 1.5,
+            display: 'flex',
             alignItems: 'center',
-            pr: 1
+            gap: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            pb: 1.5,
+            mb: 2,
           }}>
-            {onShare && (
-              <IconButton
-                onClick={(e) => onShare(e, meal)}
-                color="primary"
-                size="small"
-              >
-                <ShareIcon />
-              </IconButton>
-            )}
-            {showAddToCalendar && (
-              <>
-                <FormControl sx={{ minWidth: 120 }}>
-                  <Select
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{
+                fontWeight: 600,
+                flexGrow: 1
+              }}
+            >
+              {meal.name}
+            </Typography>
+          </Box>
+
+          <Typography
+            variant="body1"
+            paragraph
+            sx={{
+              color: 'text.secondary',
+              lineHeight: 1.6,
+              mb: 3
+            }}
+          >
+            {meal.description}
+          </Typography>
+
+          {targetMacros && (
+            <Grid container spacing={2.5}>
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1
+                  }}
+                >
+                  <span>Carbs</span>
+                  <span>{meal.macros.carbs}g</span>
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min(
+                    targetMacros.carbs > 0
+                      ? (meal.macros.carbs / targetMacros.carbs) * 100
+                      : 0,
+                    100
+                  )}
+                  sx={{
+                    mb: 2.5,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: 'action.hover',
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                      backgroundColor: 'primary.main',
+                      transition: 'transform 0.4s linear'
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1
+                  }}
+                >
+                  <span>Protein</span>
+                  <span>{meal.macros.protein}g</span>
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min(
+                    targetMacros.protein > 0
+                      ? (meal.macros.protein / targetMacros.protein) * 100
+                      : 0,
+                    100
+                  )}
+                  sx={{
+                    mb: 2.5,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: 'action.hover',
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                      backgroundColor: 'success.main',
+                      transition: 'transform 0.4s linear'
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1
+                  }}
+                >
+                  <span>Fats</span>
+                  <span>{meal.macros.fats}g</span>
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min(
+                    targetMacros.fats > 0
+                      ? (meal.macros.fats / targetMacros.fats) * 100
+                      : 0,
+                    100
+                  )}
+                  sx={{
+                    mb: 2.5,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: 'action.hover',
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                      backgroundColor: 'warning.main',
+                      transition: 'transform 0.4s linear'
+                    }
+                  }}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          <Box sx={{ mt: 2 }}>
+            <Button
+              onClick={handleExpandClick}
+              endIcon={<ExpandMoreIcon
+                sx={{
+                  transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
+                }}
+              />}
+              sx={{ width: '100%', justifyContent: 'space-between' }}
+            >
+              {expanded ? 'Show Less' : 'Show More Details'}
+            </Button>
+          </Box>
+
+          <Collapse in={expanded} timeout="auto" unmountOnExit>
+            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+              {meal.cookingTime && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AccessTimeIcon fontSize="small" />
+                    Cooking Time
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {meal.cookingTime.prep !== null && (
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Prep: {meal.cookingTime.prep}min
+                        </Typography>
+                      </Grid>
+                    )}
+                    {meal.cookingTime.cook !== null && (
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Cook: {meal.cookingTime.cook}min
+                        </Typography>
+                      </Grid>
+                    )}
+                    {meal.cookingTime.total !== null && (
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Total: {meal.cookingTime.total}min
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
+              )}
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <RestaurantIcon fontSize="small" />
+                  Instructions
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                  {meal.instructions}
+                </Typography>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>Nutritional Information</Typography>
+                <Grid container spacing={2}>
+                  {meal.macros.calories !== undefined && meal.macros.calories !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Calories: {meal.macros.calories}kcal
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.fiber !== undefined && meal.macros.fiber !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Fiber: {meal.macros.fiber}g
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.sugar !== undefined && meal.macros.sugar !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Sugar: {meal.macros.sugar}g
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.cholesterol !== undefined && meal.macros.cholesterol !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Cholesterol: {meal.macros.cholesterol}mg
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.sodium !== undefined && meal.macros.sodium !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Sodium: {meal.macros.sodium}mg
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+
+              {meal.nutrients && (meal.nutrients.vitamins || meal.nutrients.minerals) && (
+                <Box>
+                  <Typography variant="h6" gutterBottom>Additional Nutrients</Typography>
+                  <Grid container spacing={2}>
+                    {meal.nutrients.vitamins && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {meal.nutrients.vitamins.join(', ')}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {meal.nutrients.minerals && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {meal.nutrients.minerals.join(', ')}
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
+              )}
+
+              {showDelete && favorite && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Tags
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                    {tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        onDelete={() => handleDeleteTag(tag)}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                  <TextField
+                    fullWidth
                     size="small"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyPress={handleAddTag}
+                    placeholder="Add a tag (press Enter)"
+                    InputProps={{
+                      endAdornment: (
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (newTag.trim() && favorite.id) {
+                              const updatedTags = [...tags, newTag.trim()];
+                              setTags(updatedTags);
+                              updateTagsMutation.mutate({ recipeId: favorite.id, tags: updatedTags });
+                              setNewTag('');
+                            }
+                          }}
+                        >
+                          <AddIcon />
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          </Collapse>
+        </CardContent>
+      </Card>
+
+      <Dialog 
+        open={isCalendarDialogOpen} 
+        onClose={handleCalendarDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          pb: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          Add to Calendar
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleCalendarDialogClose}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  sx={{ width: '100%' }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <Select
                     value={selectedMealType}
                     onChange={(e) => setSelectedMealType(e.target.value)}
-                    sx={{
-                      backgroundColor: 'background.paper',
-                      '& .MuiSelect-select': { py: 1 }
-                    }}
+                    displayEmpty
                   >
                     {mealTypeOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -310,373 +727,23 @@ export function RecipeCard({
                     ))}
                   </Select>
                 </FormControl>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CalendarIcon />}
-                  onClick={() =>
-                    addToCalendarMutation.mutate({
-                      meal,
-                      mealType: selectedMealType,
-                    })
-                  }
-                  disabled={addToCalendarMutation.isPending}
-                  sx={{
-                    minWidth: 'auto',
-                    whiteSpace: 'nowrap',
-                    px: 2
-                  }}
-                >
-                  {addToCalendarMutation.isPending ? "Adding..." : "Add to Calendar"}
-                </Button>
-              </>
-            )}
-            {!meal.isStoredRecipe && favorites && !showDelete ? (
-              <IconButton
-                color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
-                onClick={() => {
-                  if (!favorites?.some((f) => f.name === meal.name)) {
-                    favoriteMutation.mutate(meal);
-                  }
-                }}
-                disabled={favoriteMutation.isPending || favorites?.some((f) => f.name === meal.name)}
-                size="small"
-              >
-                {favorites?.some((f) => f.name === meal.name) ? <Favorite /> : <FavoriteBorder />}
-              </IconButton>
-            ) : null}
-            {showDelete && favorites && (
-              <IconButton
-                color="error"
-                onClick={() => {
-                  const favorite = favorites.find((f) => f.name === meal.name);
-                  if (favorite?.id) {
-                    handleDeleteFavorite(favorite.id);
-                  }
-                }}
-                disabled={deleteFavoriteMutation.isPending}
-                size="small"
-              >
-                <DeleteIcon />
-              </IconButton>
-            )}
-          </Box>
-        }
-      />
-      <CardContent sx={{ flexGrow: 1, p: 3 }}>
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          pb: 1.5,
-          mb: 2,
-        }}>
-          <Typography
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: 600,
-              flexGrow: 1
-            }}
-          >
-            {meal.name}
-          </Typography>
-        </Box>
-
-        <Typography
-          variant="body1"
-          paragraph
-          sx={{
-            color: 'text.secondary',
-            lineHeight: 1.6,
-            mb: 3
-          }}
-        >
-          {meal.description}
-        </Typography>
-
-        {targetMacros && (
-          <Grid container spacing={2.5}>
-            <Grid item xs={12}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 1
-                }}
-              >
-                <span>Carbs</span>
-                <span>{meal.macros.carbs}g</span>
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={Math.min(
-                  targetMacros.carbs > 0
-                    ? (meal.macros.carbs / targetMacros.carbs) * 100
-                    : 0,
-                  100
-                )}
-                sx={{
-                  mb: 2.5,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: 'action.hover',
-                  '& .MuiLinearProgress-bar': {
-                    borderRadius: 4,
-                    backgroundColor: 'primary.main',
-                    transition: 'transform 0.4s linear'
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 1
-                }}
-              >
-                <span>Protein</span>
-                <span>{meal.macros.protein}g</span>
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={Math.min(
-                  targetMacros.protein > 0
-                    ? (meal.macros.protein / targetMacros.protein) * 100
-                    : 0,
-                  100
-                )}
-                sx={{
-                  mb: 2.5,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: 'action.hover',
-                  '& .MuiLinearProgress-bar': {
-                    borderRadius: 4,
-                    backgroundColor: 'success.main',
-                    transition: 'transform 0.4s linear'
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 1
-                }}
-              >
-                <span>Fats</span>
-                <span>{meal.macros.fats}g</span>
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={Math.min(
-                  targetMacros.fats > 0
-                    ? (meal.macros.fats / targetMacros.fats) * 100
-                    : 0,
-                  100
-                )}
-                sx={{
-                  mb: 2.5,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: 'action.hover',
-                  '& .MuiLinearProgress-bar': {
-                    borderRadius: 4,
-                    backgroundColor: 'warning.main',
-                    transition: 'transform 0.4s linear'
-                  }
-                }}
-              />
-            </Grid>
-          </Grid>
-        )}
-
-        <Box sx={{ mt: 2 }}>
-          <Button
-            onClick={handleExpandClick}
-            endIcon={<ExpandMoreIcon
-              sx={{
-                transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s'
-              }}
-            />}
-            sx={{ width: '100%', justifyContent: 'space-between' }}
-          >
-            {expanded ? 'Show Less' : 'Show More Details'}
-          </Button>
-        </Box>
-
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-            {meal.cookingTime && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AccessTimeIcon fontSize="small" />
-                  Cooking Time
-                </Typography>
-                <Grid container spacing={2}>
-                  {meal.cookingTime.prep !== null && (
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Prep: {meal.cookingTime.prep}min
-                      </Typography>
-                    </Grid>
-                  )}
-                  {meal.cookingTime.cook !== null && (
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Cook: {meal.cookingTime.cook}min
-                      </Typography>
-                    </Grid>
-                  )}
-                  {meal.cookingTime.total !== null && (
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Total: {meal.cookingTime.total}min
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Box>
-            )}
-
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <RestaurantIcon fontSize="small" />
-                Instructions
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                {meal.instructions}
-              </Typography>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>Nutritional Information</Typography>
-              <Grid container spacing={2}>
-                {meal.macros.calories !== undefined && meal.macros.calories !== null && (
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Calories: {meal.macros.calories}kcal
-                    </Typography>
-                  </Grid>
-                )}
-                {meal.macros.fiber !== undefined && meal.macros.fiber !== null && (
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Fiber: {meal.macros.fiber}g
-                    </Typography>
-                  </Grid>
-                )}
-                {meal.macros.sugar !== undefined && meal.macros.sugar !== null && (
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Sugar: {meal.macros.sugar}g
-                    </Typography>
-                  </Grid>
-                )}
-                {meal.macros.cholesterol !== undefined && meal.macros.cholesterol !== null && (
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Cholesterol: {meal.macros.cholesterol}mg
-                    </Typography>
-                  </Grid>
-                )}
-                {meal.macros.sodium !== undefined && meal.macros.sodium !== null && (
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Sodium: {meal.macros.sodium}mg
-                    </Typography>
-                  </Grid>
-                )}
               </Grid>
-            </Box>
-
-            {meal.nutrients && (meal.nutrients.vitamins || meal.nutrients.minerals) && (
-              <Box>
-                <Typography variant="h6" gutterBottom>Additional Nutrients</Typography>
-                <Grid container spacing={2}>
-                  {meal.nutrients.vitamins && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" gutterBottom>Vitamins</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {meal.nutrients.vitamins.join(', ')}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {meal.nutrients.minerals && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" gutterBottom>Minerals</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {meal.nutrients.minerals.join(', ')}
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Box>
-            )}
-
-            {showDelete && favorite && (
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  Tags
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                  {tags.map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      onDelete={() => handleDeleteTag(tag)}
-                      color="primary"
-                      variant="outlined"
-                    />
-                  ))}
-                </Stack>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyPress={handleAddTag}
-                  placeholder="Add a tag (press Enter)"
-                  InputProps={{
-                    endAdornment: (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          if (newTag.trim() && favorite.id) {
-                            const updatedTags = [...tags, newTag.trim()];
-                            setTags(updatedTags);
-                            updateTagsMutation.mutate({ recipeId: favorite.id, tags: updatedTags });
-                            setNewTag('');
-                          }
-                        }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    ),
-                  }}
-                />
-              </Box>
-            )}
+            </Grid>
           </Box>
-        </Collapse>
-      </CardContent>
-    </Card>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={handleCalendarDialogClose}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleCalendarSubmit}
+            variant="contained"
+            disabled={addToCalendarMutation.isPending}
+          >
+            {addToCalendarMutation.isPending ? "Adding..." : "Add to Calendar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
