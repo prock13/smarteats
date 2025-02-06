@@ -83,11 +83,16 @@ export function registerRoutes(app: Express): Server {
       const plan = mealPlanSchema.parse(req.body);
       console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
 
-      const saved = await storage.saveMealPlan({
-        ...plan,
-        userId: req.user!.id
-      });
+      // Create the meal plan object with required fields
+      const mealPlanData = {
+        id: 0, // This will be replaced by the database
+        userId: req.user!.id,
+        date: plan.date,
+        meal: plan.meal,
+        mealType: plan.mealType
+      };
 
+      const saved = await storage.saveMealPlan(mealPlanData);
       console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
       res.json(saved);
     } catch (error) {
