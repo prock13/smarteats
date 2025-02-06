@@ -38,7 +38,7 @@ function ThemedApp() {
         flexDirection: 'column'
       }}>
         {!isAuthPage && <Navigation />}
-        <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 1, md: 4 }, flex: 1 }}>
           <Switch>
             <Route path="/auth" component={Auth} />
             <ProtectedRoute path="/terms" component={Terms} />
