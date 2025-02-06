@@ -26,9 +26,27 @@ async function createServer(): Promise<HttpServer> {
 
   // Enable CORS for development
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Allow Replit domains and localhost for development
+    const allowedOrigins = [
+      /\.replit\.dev$/,  // Match all replit.dev subdomains
+      'http://localhost:5000',
+      'http://0.0.0.0:5000'
+    ];
+
+    const origin = req.headers.origin;
+    if (origin && (
+      allowedOrigins.some(allowed => 
+        typeof allowed === 'string' 
+          ? allowed === origin 
+          : allowed.test(origin)
+      )
+    )) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     if (req.method === 'OPTIONS') {
       res.status(200).end();
