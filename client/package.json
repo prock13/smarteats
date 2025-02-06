@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "VITE_ALLOW_ALL_HOSTS=true vite",
+    "dev": "vite --port 3000",
     "build": "tsc && vite build",
     "test": "vitest",
     "test:watch": "vitest watch",
