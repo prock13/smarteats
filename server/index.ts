@@ -16,7 +16,20 @@ app.use(express.urlencoded({ extended: false }));
 
 // Enable CORS for development
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Allow requests from Replit's domain
+  const allowedOrigins = process.env.VITE_SERVER_ALLOWED_HOSTS 
+    ? JSON.parse(process.env.VITE_SERVER_ALLOWED_HOSTS)
+    : ["localhost", "0.0.0.0", "*.replit.dev"];
+
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.some(allowed => 
+    allowed.startsWith('*') 
+      ? origin.endsWith(allowed.slice(1))
+      : origin.includes(allowed)
+  )) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -71,9 +84,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Start server
-const port = parseInt(process.env.PORT || '5000', 10);
-server.listen(port, () => {
-  console.log(`Server running on port ${port} (${process.env.NODE_ENV || 'development'} mode)`);
+const port = parseInt(process.env.PORT || '3000', 10);
+const host = process.env.HOST || '0.0.0.0';
+
+server.listen(port, host, () => {
+  console.log(`Server running on http://${host}:${port} (${process.env.NODE_ENV || 'development'} mode)`);
 });
 
 // Graceful shutdown handler
