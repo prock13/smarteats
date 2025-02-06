@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 // Register API routes first
 const server = registerRoutes(app);
 
-// Initialize server before setting up Vite
+// Initialize server
 const EXPRESS_PORT = 3000;
 const EXPRESS_HOST = '0.0.0.0';
 
