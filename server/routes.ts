@@ -1,17 +1,19 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { createServer, Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
 import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { insertFavoriteSchema } from "@shared/schema";
-import crypto from "crypto";
 
 export function registerRoutes(app: Express): Server {
   // Verify required environment variables
   if (!process.env.REPL_ID) {
     throw new Error('REPL_ID environment variable is required for session security');
   }
+
+  // Create HTTP server first
+  const server = createServer(app);
 
   try {
     // Set up authentication routes and middleware
@@ -402,11 +404,10 @@ export function registerRoutes(app: Express): Server {
     });
 
 
-    const httpServer = createServer(app);
     console.log('HTTP server created successfully');
-    return httpServer;
+    return server;
   } catch (error) {
     console.error('Error in route registration:', error);
-    throw error; // Re-throw to be caught by the enhanced error logging
+    throw error;
   }
 }
