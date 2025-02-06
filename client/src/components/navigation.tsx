@@ -234,7 +234,7 @@ export default function Navigation() {
               ))}
             </Box>
 
-            {/* Common action buttons */}
+            {/* Common action buttons for both mobile and desktop */}
             <Box 
               sx={{ 
                 display: "flex", 
@@ -251,32 +251,35 @@ export default function Navigation() {
               >
                 <ChatIcon />
               </IconButton>
-              <IconButton 
-                onClick={handleMenu} 
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-              >
-                <MenuItem onClick={() => handleNavigate("/settings")}>
-                  Settings
-                </MenuItem>
-                <MenuItem onClick={() => logoutMutation.mutate()}>
-                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
-                </MenuItem>
-              </Menu>
+              {/* Only show profile menu on desktop */}
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <IconButton 
+                  onClick={handleMenu} 
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <MenuItem onClick={() => handleNavigate("/profile")}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={() => logoutMutation.mutate()}>
+                    {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                  </MenuItem>
+                </Menu>
+              </Box>
             </Box>
           </Toolbar>
         </Container>
