@@ -9,15 +9,25 @@ interface LogoProps extends Omit<SvgIconProps, 'sx'> {
 
 export const Logo = (props: LogoProps) => {
   // Default sizes for responsive design
-  const defaultSize = { xs: 32, md: 50 }; // Updated desktop size to 50px
+  const defaultSize = { xs: 32, md: 50 };
 
   // Get size from props or use default
-  const size = props.sx?.fontSize ? 
-    typeof props.sx.fontSize === 'object' ?
-      `${props.sx.fontSize.xs || defaultSize.xs}px` :
-      typeof props.sx.fontSize === 'number' ?
-        `${props.sx.fontSize}px` : props.sx.fontSize
-    : `${defaultSize.xs}px`;
+  const fontSize = props.sx?.fontSize;
+  let size: string;
+
+  if (typeof fontSize === 'object' && fontSize !== null) {
+    // Handle responsive object format
+    size = `${fontSize.xs || defaultSize.xs}px`;
+    if (window.matchMedia('(min-width: 900px)').matches) { // md breakpoint
+      size = `${fontSize.md || defaultSize.md}px`;
+    }
+  } else if (typeof fontSize === 'number') {
+    size = `${fontSize}px`;
+  } else if (typeof fontSize === 'string') {
+    size = fontSize;
+  } else {
+    size = `${defaultSize.xs}px`;
+  }
 
   return (
     <img 
