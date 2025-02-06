@@ -11,35 +11,26 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [
     react({
-      // Optimize for Replit's environment
       jsxRuntime: "automatic",
-      babel: {
-        // Add Replit-specific Babel plugins if needed
-        plugins: [],
-      }
     }), 
     runtimeErrorOverlay(), 
     themePlugin()
   ],
   server: {
-    host: process.env.VITE_HOST,
-    port: parseInt(process.env.VITE_DEV_SERVER_PORT || "5000"),
+    host: '0.0.0.0',
+    port: 5000,
+    strictPort: true,
     hmr: {
-      clientPort: process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT ? 
-        parseInt(process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT) : 443,
-      host: process.env.VITE_DEV_SERVER_HMR_HOST
+      clientPort: 443,
+      protocol: 'wss',
     },
-    // Simple proxy configuration
     proxy: {
-      "/api": "http://localhost:5000"
-    },
-    // Add explicit allowed hosts configuration with specific Replit domain
-    allowedHosts: [
-      "localhost",
-      "0.0.0.0",
-      process.env.VITE_ALLOWED_HOST,
-      "*.replit.dev"
-    ]
+      "/api": {
+        target: "http://0.0.0.0:5000",
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   resolve: {
     alias: {
