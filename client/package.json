@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_ALLOW_ALL_HOSTS=true vite",
     "build": "tsc && vite build",
     "test": "vitest",
     "test:watch": "vitest watch",

@@ -2,8 +2,13 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Set host environment variable to allow all hosts
-process.env.HOST = "0.0.0.0";
+// Reset all environment variables to their defaults
+process.env = {
+  ...process.env,
+  HOST: "0.0.0.0",
+  VITE_ALLOW_ALL_HOSTS: "true",
+  VITE_DEV_SERVER_HOSTNAME: "0.0.0.0",
+};
 
 const app = express();
 app.use(express.json());
