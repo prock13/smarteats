@@ -82,29 +82,20 @@ export default function Navigation() {
     >
       <Box 
         sx={{ 
-          p: 3,
+          p: 2,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: 1
         }}
       >
-        <Avatar 
-          sx={{ 
-            width: 64, 
-            height: 64,
-            mb: 1
-          }}
-        >
-          {user.name?.[0]?.toUpperCase() || <AccountCircle />}
+        <Avatar sx={{ width: 40, height: 40 }}>
+          {user.username?.[0]?.toUpperCase() || <AccountCircle />}
         </Avatar>
-        <Typography variant="h6">{user.name}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {user.email}
-        </Typography>
+        <Typography variant="subtitle1">{user.username}</Typography>
       </Box>
 
-      <Divider sx={{ mb: 2 }} />
+      <Divider sx={{ mb: 1 }} />
 
       <List>
         {navigationItems.map((item) => {
@@ -116,7 +107,6 @@ export default function Navigation() {
                 selected={isActive}
                 sx={{
                   py: 1.5,
-                  color: "text.primary",
                   "&.Mui-selected": {
                     bgcolor: "primary.main",
                     color: "primary.contrastText",
@@ -129,14 +119,11 @@ export default function Navigation() {
                   },
                 }}
               >
-                <ListItemIcon sx={{ color: "inherit" }}>
-                  {item.icon}
-                </ListItemIcon>
+                <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText 
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontSize: "0.95rem",
-                    fontWeight: isActive ? 600 : 400,
+                    fontSize: "0.9rem",
                   }}
                 />
               </ListItemButton>
@@ -144,19 +131,7 @@ export default function Navigation() {
           );
         })}
 
-        <Divider sx={{ my: 2 }} />
-
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => handleNavigate("/profile")}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon>
-              <AccountCircle />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-          </ListItemButton>
-        </ListItem>
+        <Divider sx={{ my: 1 }} />
 
         <ListItem disablePadding>
           <ListItemButton
@@ -178,9 +153,7 @@ export default function Navigation() {
             <ListItemIcon>
               <AccountCircle />
             </ListItemIcon>
-            <ListItemText 
-              primary={logoutMutation.isPending ? "Logging out..." : "Logout"}
-            />
+            <ListItemText primary={logoutMutation.isPending ? "Logging out..." : "Logout"} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -193,9 +166,7 @@ export default function Navigation() {
         position="static" 
         color="primary" 
         elevation={1}
-        sx={{
-          height: { xs: 56, md: 64 },
-        }}
+        sx={{ height: { xs: 56, md: 64 } }}
       >
         <Container maxWidth="lg">
           <Toolbar
@@ -218,19 +189,18 @@ export default function Navigation() {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: { xs: 0.5, sm: 1 },
+                gap: { xs: 1, sm: 1.5 },
                 flexGrow: 1,
                 cursor: "pointer",
               }}
               onClick={() => setLocation("/")}
             >
-              <Logo sx={{ fontSize: { xs: 40, md: 50 }, color: "inherit" }} />
+              <Logo sx={{ fontSize: { xs: 32, md: 36 } }} />
               <Typography 
-                variant="h5" 
-                component="div" 
+                variant="h6" 
                 sx={{ 
                   fontWeight: "bold",
-                  fontSize: { xs: "1.25rem", md: "1.5rem" },
+                  fontSize: { xs: "1.1rem", md: "1.25rem" },
                   display: { xs: "none", sm: "block" }
                 }}
               >
@@ -242,7 +212,7 @@ export default function Navigation() {
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "center",
-                gap: 2,
+                gap: 1,
               }}
             >
               {navigationItems.map((item) => (
@@ -252,23 +222,35 @@ export default function Navigation() {
                   startIcon={item.icon}
                   onClick={() => handleNavigate(item.path)}
                   sx={{
-                    opacity: location === item.path ? 1 : 0.8,
+                    opacity: location === item.path ? 1 : 0.85,
                     fontWeight: location === item.path ? 600 : 400,
                   }}
                 >
                   {item.text}
                 </Button>
               ))}
+            </Box>
 
+            {/* Common action buttons */}
+            <Box 
+              sx={{ 
+                display: "flex", 
+                gap: 0.5,
+                "& .MuiIconButton-root": {
+                  padding: 1,
+                }
+              }}
+            >
               <IconButton
                 color="inherit"
                 onClick={() => setChatOpen(true)}
-                sx={{ ml: 1 }}
               >
                 <ChatIcon />
               </IconButton>
-
-              <IconButton size="large" onClick={handleMenu} color="inherit">
+              <IconButton 
+                onClick={handleMenu} 
+                color="inherit"
+              >
                 <AccountCircle />
               </IconButton>
               <Menu
@@ -284,9 +266,6 @@ export default function Navigation() {
                   horizontal: "right",
                 }}
               >
-                <MenuItem onClick={() => handleNavigate("/profile")}>
-                  Profile
-                </MenuItem>
                 <MenuItem onClick={() => handleNavigate("/settings")}>
                   Settings
                 </MenuItem>
@@ -294,24 +273,6 @@ export default function Navigation() {
                   {logoutMutation.isPending ? "Logging out..." : "Logout"}
                 </MenuItem>
               </Menu>
-            </Box>
-
-            {/* Mobile-only icons */}
-            <Box 
-              sx={{ 
-                display: { xs: "flex", md: "none" }, 
-                gap: 0.5,
-                "& .MuiIconButton-root": {
-                  padding: 1,
-                }
-              }}
-            >
-              <IconButton color="inherit" onClick={() => setChatOpen(true)}>
-                <ChatIcon />
-              </IconButton>
-              <IconButton onClick={handleMenu} color="inherit">
-                <AccountCircle />
-              </IconButton>
             </Box>
           </Toolbar>
         </Container>
