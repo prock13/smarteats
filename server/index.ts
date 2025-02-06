@@ -2,10 +2,33 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Set Vite environment variables
+process.env.VITE_DEV_SERVER_HOST = '0.0.0.0';
+process.env.VITE_DEV_SERVER_HMRHOST = '0.0.0.0';
+process.env.VITE_ALLOW_HOSTS = '*';
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add CORS headers for Replit domains
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host.includes('.replit.dev')) {
+    res.header('Access-Control-Allow-Origin', `https://${host}`);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  // Handle OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
