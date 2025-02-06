@@ -65,7 +65,7 @@ export default function Navigation() {
     { icon: <Favorite />, text: "Favorites", path: "/favorites" },
   ];
 
-  const mobileDrawer = (
+  const drawer = (
     <Drawer
       variant="temporary"
       anchor="left"
@@ -173,6 +173,7 @@ export default function Navigation() {
             sx={{
               minHeight: { xs: 56, md: 64 },
               px: { xs: 1, sm: 2 },
+              gap: 2,
             }}
           >
             <IconButton
@@ -180,7 +181,7 @@ export default function Navigation() {
               aria-label="open drawer"
               edge="start"
               onClick={() => setMobileOpen(true)}
-              sx={{ mr: 1, display: { md: "none" } }}
+              sx={{ display: { md: "none" } }}
             >
               <MenuIcon />
             </IconButton>
@@ -190,12 +191,11 @@ export default function Navigation() {
                 display: "flex",
                 alignItems: "center",
                 gap: { xs: 1, sm: 1.5 },
-                flexGrow: 1,
                 cursor: "pointer",
               }}
               onClick={() => setLocation("/")}
             >
-              <Logo sx={{ fontSize: { xs: 32, md: 36 } }} />
+              <Logo />
               <Typography 
                 variant="h6" 
                 sx={{ 
@@ -208,11 +208,14 @@ export default function Navigation() {
               </Typography>
             </Box>
 
+            {/* Desktop Navigation */}
             <Box
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "center",
                 gap: 1,
+                ml: "auto",
+                mr: 2,
               }}
             >
               {navigationItems.map((item) => (
@@ -236,6 +239,7 @@ export default function Navigation() {
               sx={{ 
                 display: "flex", 
                 gap: 0.5,
+                ml: { xs: "auto", md: 0 },
                 "& .MuiIconButton-root": {
                   padding: 1,
                 }
@@ -278,7 +282,7 @@ export default function Navigation() {
         </Container>
       </AppBar>
 
-      {mobileDrawer}
+      {drawer}
       <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
     </>
   );
