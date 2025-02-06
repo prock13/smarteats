@@ -11,8 +11,6 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [
     react({
-      // Enable Fast Refresh for Replit
-      fastRefresh: true,
       // Optimize for Replit's environment
       jsxRuntime: "automatic",
       babel: {
@@ -34,7 +32,14 @@ export default defineConfig({
     // Simple proxy configuration
     proxy: {
       "/api": "http://localhost:5000"
-    }
+    },
+    // Add explicit allowed hosts configuration with specific Replit domain
+    allowedHosts: [
+      "localhost",
+      "0.0.0.0",
+      process.env.VITE_ALLOWED_HOST,
+      "*.replit.dev"
+    ]
   },
   resolve: {
     alias: {
