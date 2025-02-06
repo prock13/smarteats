@@ -144,15 +144,15 @@ export default function Home() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, py: { xs: 2, md: 8 } }}>
+    <Box sx={{ flexGrow: 1, py: 8 }}>
       <Container maxWidth="lg">
         {/* Hero Section */}
-        <Box sx={{ textAlign: "center", mb: { xs: 4, md: 8 } }}>
+        <Box sx={{ textAlign: "center", mb: 8 }}>
           <Typography
             variant="h3"
             component="h1"
             sx={{
-              mb: { xs: 1, md: 2 },
+              mb: 2,
               background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -161,7 +161,7 @@ export default function Home() {
           >
             Smarter Eating, Made Simple
           </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: { xs: 2, md: 4 } }}>
+          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
             AI-driven meal planning tailored just for you.
           </Typography>
           <Button
