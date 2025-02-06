@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite --port 5000",
     "build": "tsc && vite build",
     "test": "vitest",
     "test:watch": "vitest watch",
