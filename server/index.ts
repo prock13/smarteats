@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -16,23 +15,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // Enable CORS for development
 app.use((req, res, next) => {
-  // Allow requests from Replit's domain
-  const allowedOrigins = process.env.VITE_SERVER_ALLOWED_HOSTS 
-    ? JSON.parse(process.env.VITE_SERVER_ALLOWED_HOSTS)
-    : ["localhost", "0.0.0.0", "*.replit.dev"];
-
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.some(allowed => 
-    allowed.startsWith('*') 
-      ? origin.endsWith(allowed.slice(1))
-      : origin.includes(allowed)
-  )) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -58,37 +43,29 @@ app.use((req, res, next) => {
 // Register API routes
 const server = registerRoutes(app);
 
-// Set up Vite or static serving based on environment
-if (process.env.NODE_ENV !== 'production') {
-  // Set up Vite in development
-  setupVite(app, server).catch((error) => {
-    console.error('Failed to set up Vite:', error);
-    process.exit(1);
-  });
-} else {
-  // Serve static files in production
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('*', (_req, res) => {
+
+// Serve static files (always, since Vite handling is removed)
+app.use(express.static(path.join(__dirname, '../client/dist')));
+app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
   });
-}
 
 // Global error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Server error:', err);
   res.status(500).json({
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
+    message: process.env.NODE_ENV === 'production'
+      ? 'Internal server error'
       : err.message
   });
 });
 
 // Start server
-const port = parseInt(process.env.PORT || '3000', 10);
-const host = process.env.HOST || '0.0.0.0';
+const EXPRESS_PORT = 4000;
+const EXPRESS_HOST = '0.0.0.0';
 
-server.listen(port, host, () => {
-  console.log(`Server running on http://${host}:${port} (${process.env.NODE_ENV || 'development'} mode)`);
+server.listen(EXPRESS_PORT, EXPRESS_HOST, () => {
+  console.log(`Express server running on http://${EXPRESS_HOST}:${EXPRESS_PORT} (${process.env.NODE_ENV || 'development'} mode)`);
 });
 
 // Graceful shutdown handler

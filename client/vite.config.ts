@@ -17,28 +17,20 @@ export default defineConfig({
     themePlugin()
   ],
   server: {
-    host: process.env.VITE_HOST || '0.0.0.0',
-    port: parseInt(process.env.VITE_DEV_SERVER_PORT || '5000'),
+    host: '0.0.0.0',
+    port: 8000,
     strictPort: true,
     hmr: {
-      clientPort: parseInt(process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT || '443'),
+      clientPort: process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT ? parseInt(process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT) : 443,
       host: process.env.VITE_DEV_SERVER_HMR_HOST,
       protocol: 'wss',
     },
     proxy: {
       "/api": {
-        target: `http://${process.env.VITE_HOST || '0.0.0.0'}:3000`,
+        target: "http://localhost:4000",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Proxying:', req.method, req.url, '=>', proxyReq.path);
-          });
-        }
+        ws: true
       }
     }
   },
