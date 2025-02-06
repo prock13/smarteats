@@ -74,19 +74,19 @@ export default function Navigation() {
       ModalProps={{ keepMounted: true }}
       sx={{
         display: { xs: "block", md: "none" },
-        "& .MuiDrawer-paper": { 
+        "& .MuiDrawer-paper": {
           width: 280,
           bgcolor: "background.paper",
         },
       }}
     >
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 1
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
         }}
       >
         <Avatar sx={{ width: 40, height: 40 }}>
@@ -120,7 +120,7 @@ export default function Navigation() {
                 }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText 
+                <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
                     fontSize: "0.9rem",
@@ -135,13 +135,13 @@ export default function Navigation() {
 
         <ListItem disablePadding>
           <ListItemButton
-            onClick={() => handleNavigate("/settings")}
+            onClick={() => handleNavigate("/profile")}
             sx={{ py: 1.5 }}
           >
             <ListItemIcon>
-              <SettingsIcon />
+              <AccountCircle />
             </ListItemIcon>
-            <ListItemText primary="Settings" />
+            <ListItemText primary="Profile" />
           </ListItemButton>
         </ListItem>
 
@@ -162,9 +162,9 @@ export default function Navigation() {
 
   return (
     <>
-      <AppBar 
-        position="static" 
-        color="primary" 
+      <AppBar
+        position="static"
+        color="primary"
         elevation={1}
         sx={{ height: { xs: 56, md: 64 } }}
       >
@@ -196,12 +196,12 @@ export default function Navigation() {
               onClick={() => setLocation("/")}
             >
               <Logo />
-              <Typography 
-                variant="h6" 
-                sx={{ 
+              <Typography
+                variant="h6"
+                sx={{
                   fontWeight: "bold",
                   fontSize: { xs: "1.1rem", md: "1.25rem" },
-                  display: { xs: "none", sm: "block" }
+                  display: { xs: "none", sm: "block" },
                 }}
               >
                 SmartEats
@@ -235,14 +235,14 @@ export default function Navigation() {
             </Box>
 
             {/* Common action buttons for both mobile and desktop */}
-            <Box 
-              sx={{ 
-                display: "flex", 
+            <Box
+              sx={{
+                display: "flex",
                 gap: 0.5,
                 ml: { xs: "auto", md: 0 },
                 "& .MuiIconButton-root": {
                   padding: 1,
-                }
+                },
               }}
             >
               <IconButton
@@ -253,8 +253,8 @@ export default function Navigation() {
               </IconButton>
               {/* Only show profile menu on desktop */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <IconButton 
-                  onClick={handleMenu} 
+                <IconButton
+                  onClick={handleMenu}
                   color="inherit"
                 >
                   <AccountCircle />
