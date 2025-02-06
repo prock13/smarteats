@@ -8,6 +8,9 @@ import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Define the Replit host explicitly
+const REPLIT_HOST = "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
+
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
@@ -16,30 +19,34 @@ export default defineConfig({
     strictPort: true,
     hmr: {
       clientPort: 443,
-      host: "*.replit.dev",
+      host: REPLIT_HOST,
     },
     fs: {
       strict: true,
-      allow: [path.resolve(__dirname, "src"), path.resolve(__dirname, "../shared")]
+      allow: [
+        path.resolve(__dirname, "src"),
+        path.resolve(__dirname, "../shared"),
+      ],
     },
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
+      "/api": {
+        target: "http://0.0.0.0:5000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
     cors: true,
     allowedHosts: [
       "localhost",
       "0.0.0.0",
       "*.replit.dev",
-      "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"
-    ]
+      REPLIT_HOST,
+    ],
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@shared": path.resolve(__dirname, "../shared")
-    }
-  }
+      "@shared": path.resolve(__dirname, "../shared"),
+    },
+  },
 });
