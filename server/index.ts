@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import path from "path";
 import { fileURLToPath } from "url";
+import { setupVite, serveStatic, log } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,43 +31,54 @@ app.use((req, res, next) => {
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  console.log(`${req.method} ${req.url}`);
+  log(`${req.method} ${req.url}`, 'express');
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
+    log(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`, 'express');
   });
 
   next();
 });
 
-// Register API routes
+// Register API routes first
 const server = registerRoutes(app);
 
-
-// Serve static files (always, since Vite handling is removed)
-app.use(express.static(path.join(__dirname, '../client/dist')));
-app.get('*', (_req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-  });
-
-// Global error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Server error:', err);
-  res.status(500).json({
-    message: process.env.NODE_ENV === 'production'
-      ? 'Internal server error'
-      : err.message
-  });
-});
-
-// Start server
-const EXPRESS_PORT = 4000;
+// Initialize server before setting up Vite
+const EXPRESS_PORT = 3000;
 const EXPRESS_HOST = '0.0.0.0';
 
-server.listen(EXPRESS_PORT, EXPRESS_HOST, () => {
-  console.log(`Express server running on http://${EXPRESS_HOST}:${EXPRESS_PORT} (${process.env.NODE_ENV || 'development'} mode)`);
-});
+const startServer = async () => {
+  try {
+    // Handle static files and SPA routing based on environment
+    if (process.env.NODE_ENV === 'production') {
+      // Serve static files in production
+      serveStatic(app);
+    } else {
+      // Setup Vite middleware for development
+      await setupVite(app, server);
+    }
+
+    // Global error handler
+    app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+      console.error('Server error:', err);
+      res.status(500).json({
+        message: process.env.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : err.message
+      });
+    });
+
+    server.listen(EXPRESS_PORT, EXPRESS_HOST, () => {
+      log(`Express server running on http://${EXPRESS_HOST}:${EXPRESS_PORT} (${process.env.NODE_ENV || 'development'} mode)`, 'express');
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // Graceful shutdown handler
 const shutdown = () => {

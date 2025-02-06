@@ -18,16 +18,11 @@ export default defineConfig({
   ],
   server: {
     host: '0.0.0.0',
-    port: 8000,
+    port: 5000,
     strictPort: true,
-    hmr: {
-      clientPort: process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT ? parseInt(process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT) : 443,
-      host: process.env.VITE_DEV_SERVER_HMR_HOST,
-      protocol: 'wss',
-    },
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
         ws: true
