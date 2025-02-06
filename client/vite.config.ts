@@ -16,13 +16,19 @@ export default defineConfig({
     strictPort: true,
     hmr: {
       clientPort: 443,
-      host: "*.replit.dev"
+      host: "*.replit.dev",
     },
     fs: {
       strict: true,
       allow: [path.resolve(__dirname, "src"), path.resolve(__dirname, "../shared")]
     },
-    // Add explicit allowedHosts configuration
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true
+      }
+    },
+    cors: true,
     allowedHosts: [
       "localhost",
       "0.0.0.0",

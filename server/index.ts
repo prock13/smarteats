@@ -11,18 +11,35 @@ app.use(express.urlencoded({ extended: false }));
 
 // Enable CORS and proper host handling
 app.use((req, res, next) => {
-  // Allow the Replit host
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  const allowedHosts = [
+    "localhost",
+    "0.0.0.0",
+    "*.replit.dev",
+    "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"
+  ];
 
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  const host = req.get('host');
+  if (host && (
+    allowedHosts.includes(host) ||
+    host.endsWith('.replit.dev') ||
+    host === 'localhost:5000' ||
+    host === '0.0.0.0:5000'
+  )) {
+    // Allow the Replit host
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
+
+    next();
+  } else {
+    res.status(403).json({ error: 'Host not allowed' });
   }
-
-  next();
 });
 
 // Request logging middleware
@@ -57,8 +74,17 @@ app.use((req, res, next) => {
 // Main application bootstrap
 (async () => {
   try {
-    // Register API routes and get HTTP server instance
+    // Register API routes first
     const server = registerRoutes(app);
+
+    // Set up Vite or static serving based on environment
+    if (process.env.NODE_ENV !== "production") {
+      log("Setting up Vite development server...");
+      await setupVite(app, server);
+    } else {
+      log("Setting up static file serving...");
+      serveStatic(app);
+    }
 
     // Global error handler
     app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
@@ -69,13 +95,6 @@ app.use((req, res, next) => {
           : err.message
       });
     });
-
-    // Set up development or production mode
-    if (process.env.NODE_ENV !== "production") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
 
     // Start server
     const port = 5000;
