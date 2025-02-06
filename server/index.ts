@@ -10,6 +10,15 @@ const __dirname = path.dirname(__filename);
 // Initialize express app
 const app = express();
 
+// Enhanced error logging
+const logError = (err: Error) => {
+  console.error('Detailed error:', {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+  });
+};
+
 // Basic middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -42,26 +51,36 @@ app.use((req, res, next) => {
 });
 
 // Register API routes first
-const server = registerRoutes(app);
+let server;
+try {
+  log('Registering routes...', 'express');
+  server = registerRoutes(app);
+  log('Routes registered successfully', 'express');
+} catch (err) {
+  logError(err as Error);
+  process.exit(1);
+}
 
-// Initialize server
-const EXPRESS_PORT = 3000;
-const EXPRESS_HOST = '0.0.0.0';
+// Let Express use the default port (3000) or the one from environment
+const port = Number(process.env.PORT) || 3000;
+const host = '0.0.0.0';
 
 const startServer = async () => {
   try {
+    log('Starting server initialization...', 'express');
+
     // Handle static files and SPA routing based on environment
     if (process.env.NODE_ENV === 'production') {
-      // Serve static files in production
+      log('Setting up production static serving...', 'express');
       serveStatic(app);
     } else {
-      // Setup Vite middleware for development
+      log('Setting up development Vite middleware...', 'express');
       await setupVite(app, server);
     }
 
     // Global error handler
     app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-      console.error('Server error:', err);
+      logError(err);
       res.status(500).json({
         message: process.env.NODE_ENV === 'production'
           ? 'Internal server error'
@@ -69,11 +88,11 @@ const startServer = async () => {
       });
     });
 
-    server.listen(EXPRESS_PORT, EXPRESS_HOST, () => {
-      log(`Express server running on http://${EXPRESS_HOST}:${EXPRESS_PORT} (${process.env.NODE_ENV || 'development'} mode)`, 'express');
+    server.listen(port, host, () => {
+      log(`Express server running on http://${host}:${port} (${process.env.NODE_ENV || 'development'} mode)`, 'express');
     });
   } catch (err) {
-    console.error('Failed to start server:', err);
+    logError(err as Error);
     process.exit(1);
   }
 };
