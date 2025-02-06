@@ -9,6 +9,32 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Enable CORS and proper host handling
+app.use((req, res, next) => {
+  const allowedHosts = [
+    "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev",
+    "localhost",
+    "0.0.0.0"
+  ];
+
+  const host = req.get('host');
+  if (host && allowedHosts.includes(host)) {
+    // Allow the specific Replit host and development hosts
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
+    next();
+  } else {
+    res.status(403).json({ error: 'Host not allowed' });
+  }
+});
+
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
@@ -62,7 +88,7 @@ app.use((req, res, next) => {
     }
 
     // Start server
-    const port = 5000; // Explicitly set port to 5000
+    const port = 5000;
     server.listen(port, "0.0.0.0", () => {
       log(`Server running on port ${port} (${process.env.NODE_ENV || "development"} mode)`);
     });
