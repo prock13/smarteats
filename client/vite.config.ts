@@ -8,42 +8,33 @@ import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Get Replit hostname from environment variable or fallback
-const REPLIT_HOST = process.env.VITE_ALLOWED_HOST || "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
-
 export default defineConfig({
-  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
+  plugins: [
+    react({
+      // Enable Fast Refresh for Replit
+      fastRefresh: true,
+      // Optimize for Replit's environment
+      jsxRuntime: "automatic",
+      babel: {
+        // Add Replit-specific Babel plugins if needed
+        plugins: [],
+      }
+    }), 
+    runtimeErrorOverlay(), 
+    themePlugin()
+  ],
   server: {
-    host: "0.0.0.0",
-    port: 5000,
-    strictPort: true,
+    host: process.env.VITE_HOST,
+    port: parseInt(process.env.VITE_DEV_SERVER_PORT || "5000"),
     hmr: {
-      clientPort: 443,
-      host: REPLIT_HOST,
+      clientPort: process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT ? 
+        parseInt(process.env.VITE_DEV_SERVER_HMR_CLIENT_PORT) : 443,
+      host: process.env.VITE_DEV_SERVER_HMR_HOST
     },
-    fs: {
-      strict: true,
-      allow: [
-        path.resolve(__dirname, "src"),
-        path.resolve(__dirname, "../shared"),
-      ],
-    },
+    // Simple proxy configuration
     proxy: {
-      "/api": {
-        target: "http://0.0.0.0:5000",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-    cors: {
-      origin: "*",
-    },
-    allowedHosts: [
-      "localhost",
-      "0.0.0.0",
-      "*.replit.dev",
-      REPLIT_HOST,
-    ],
+      "/api": "http://localhost:5000"
+    }
   },
   resolve: {
     alias: {

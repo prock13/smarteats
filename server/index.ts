@@ -2,8 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-const REPLIT_HOST = process.env.VITE_ALLOWED_HOST || "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
-
 // Initialize express app
 const app = express();
 
@@ -11,37 +9,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Enable CORS and proper host handling
+// Enable CORS for development
 app.use((req, res, next) => {
-  const allowedHosts = [
-    "localhost",
-    "0.0.0.0",
-    "*.replit.dev",
-    REPLIT_HOST
-  ];
+  const origin = req.get('origin');
 
-  const host = req.get('host');
-  if (host && (
-    allowedHosts.includes(host) ||
-    host.endsWith('.replit.dev') ||
-    host === 'localhost:5000' ||
-    host === '0.0.0.0:5000'
-  )) {
-    // Allow the Replit host
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Allow requests from any origin in development
+  res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-    // Handle preflight
-    if (req.method === 'OPTIONS') {
-      res.status(200).end();
-      return;
-    }
-
-    next();
-  } else {
-    res.status(403).json({ error: 'Host not allowed' });
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
   }
+
+  next();
 });
 
 // Request logging middleware
