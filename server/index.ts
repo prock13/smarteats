@@ -2,11 +2,19 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Set host environment variable to allow all hosts
+process.env.HOST = "0.0.0.0";
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add CORS headers to allow all hosts in development
 app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
