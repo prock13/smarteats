@@ -17,7 +17,18 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       host: "*.replit.dev"
-    }
+    },
+    fs: {
+      strict: true,
+      allow: [path.resolve(__dirname, "src"), path.resolve(__dirname, "../shared")]
+    },
+    // Add explicit allowedHosts configuration
+    allowedHosts: [
+      "localhost",
+      "0.0.0.0",
+      "*.replit.dev",
+      "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"
+    ]
   },
   resolve: {
     alias: {
