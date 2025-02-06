@@ -17,6 +17,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Avatar,
+  Divider,
 } from "@mui/material";
 import {
   CalendarMonth,
@@ -27,6 +29,7 @@ import {
   Menu as MenuIcon,
   Kitchen as KitchenIcon,
   MenuBook as MenuBookIcon,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -34,7 +37,7 @@ import { ChatBot } from "./chat-bot";
 export default function Navigation() {
   const { user, logoutMutation } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -71,39 +74,142 @@ export default function Navigation() {
       ModalProps={{ keepMounted: true }}
       sx={{
         display: { xs: "block", md: "none" },
-        "& .MuiDrawer-paper": { width: 240, bgcolor: "background.paper" },
+        "& .MuiDrawer-paper": { 
+          width: 280,
+          bgcolor: "background.paper",
+        },
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Logo sx={{ fontSize: 40 }} />
+      <Box 
+        sx={{ 
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        <Avatar 
+          sx={{ 
+            width: 64, 
+            height: 64,
+            mb: 1
+          }}
+        >
+          {user.name?.[0]?.toUpperCase() || <AccountCircle />}
+        </Avatar>
+        <Typography variant="h6">{user.name}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {user.email}
+        </Typography>
       </Box>
+
+      <Divider sx={{ mb: 2 }} />
+
       <List>
-        {navigationItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => handleNavigate(item.path)}
-              sx={{ color: "text.primary" }}
-            >
-              <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {navigationItems.map((item) => {
+          const isActive = location === item.path;
+          return (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigate(item.path)}
+                selected={isActive}
+                sx={{
+                  py: 1.5,
+                  color: "text.primary",
+                  "&.Mui-selected": {
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText",
+                    "&:hover": {
+                      bgcolor: "primary.dark",
+                    },
+                    "& .MuiListItemIcon-root": {
+                      color: "inherit",
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: "inherit" }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontSize: "0.95rem",
+                    fontWeight: isActive ? 600 : 400,
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+
+        <Divider sx={{ my: 2 }} />
+
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={() => handleNavigate("/profile")}
+            sx={{ py: 1.5 }}
+          >
+            <ListItemIcon>
+              <AccountCircle />
+            </ListItemIcon>
+            <ListItemText primary="Profile" />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={() => handleNavigate("/settings")}
+            sx={{ py: 1.5 }}
+          >
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Settings" />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={() => logoutMutation.mutate()}
+            sx={{ py: 1.5 }}
+          >
+            <ListItemIcon>
+              <AccountCircle />
+            </ListItemIcon>
+            <ListItemText 
+              primary={logoutMutation.isPending ? "Logging out..." : "Logout"}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Drawer>
   );
 
   return (
     <>
-      <AppBar position="static" color="primary" elevation={1}>
+      <AppBar 
+        position="static" 
+        color="primary" 
+        elevation={1}
+        sx={{
+          height: { xs: 56, md: 64 },
+        }}
+      >
         <Container maxWidth="lg">
-          <Toolbar>
+          <Toolbar
+            sx={{
+              minHeight: { xs: 56, md: 64 },
+              px: { xs: 1, sm: 2 },
+            }}
+          >
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={() => setMobileOpen(true)}
-              sx={{ mr: 2, display: { md: "none" } }}
+              sx={{ mr: 1, display: { md: "none" } }}
             >
               <MenuIcon />
             </IconButton>
@@ -112,14 +218,22 @@ export default function Navigation() {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
+                gap: { xs: 0.5, sm: 1 },
                 flexGrow: 1,
                 cursor: "pointer",
               }}
               onClick={() => setLocation("/")}
             >
-              <Logo sx={{ fontSize: 50, color: "inherit" }} />
-              <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+              <Logo sx={{ fontSize: { xs: 40, md: 50 }, color: "inherit" }} />
+              <Typography 
+                variant="h5" 
+                component="div" 
+                sx={{ 
+                  fontWeight: "bold",
+                  fontSize: { xs: "1.25rem", md: "1.5rem" },
+                  display: { xs: "none", sm: "block" }
+                }}
+              >
                 SmartEats
               </Typography>
             </Box>
@@ -137,6 +251,10 @@ export default function Navigation() {
                   color="inherit"
                   startIcon={item.icon}
                   onClick={() => handleNavigate(item.path)}
+                  sx={{
+                    opacity: location === item.path ? 1 : 0.8,
+                    fontWeight: location === item.path ? 600 : 400,
+                  }}
                 >
                   {item.text}
                 </Button>
@@ -169,8 +287,8 @@ export default function Navigation() {
                 <MenuItem onClick={() => handleNavigate("/profile")}>
                   Profile
                 </MenuItem>
-                <MenuItem onClick={() => handleNavigate("/myfitnesspal")}>
-                  MyFitnessPal
+                <MenuItem onClick={() => handleNavigate("/settings")}>
+                  Settings
                 </MenuItem>
                 <MenuItem onClick={() => logoutMutation.mutate()}>
                   {logoutMutation.isPending ? "Logging out..." : "Logout"}
@@ -179,11 +297,19 @@ export default function Navigation() {
             </Box>
 
             {/* Mobile-only icons */}
-            <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
+            <Box 
+              sx={{ 
+                display: { xs: "flex", md: "none" }, 
+                gap: 0.5,
+                "& .MuiIconButton-root": {
+                  padding: 1,
+                }
+              }}
+            >
               <IconButton color="inherit" onClick={() => setChatOpen(true)}>
                 <ChatIcon />
               </IconButton>
-              <IconButton size="large" onClick={handleMenu} color="inherit">
+              <IconButton onClick={handleMenu} color="inherit">
                 <AccountCircle />
               </IconButton>
             </Box>
