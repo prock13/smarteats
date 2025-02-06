@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+const REPLIT_HOST = process.env.VITE_ALLOWED_HOST || "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
+
 // Initialize express app
 const app = express();
 
@@ -15,7 +17,7 @@ app.use((req, res, next) => {
     "localhost",
     "0.0.0.0",
     "*.replit.dev",
-    "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"
+    REPLIT_HOST
   ];
 
   const host = req.get('host');

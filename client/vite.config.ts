@@ -8,8 +8,8 @@ import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Define the Replit host explicitly
-const REPLIT_HOST = "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
+// Get Replit hostname from environment variable or fallback
+const REPLIT_HOST = process.env.VITE_ALLOWED_HOST || "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev";
 
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
@@ -35,7 +35,9 @@ export default defineConfig({
         secure: false,
       },
     },
-    cors: true,
+    cors: {
+      origin: "*",
+    },
     allowedHosts: [
       "localhost",
       "0.0.0.0",
