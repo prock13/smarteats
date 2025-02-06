@@ -21,6 +21,7 @@ import Navigation from "@/components/navigation";
 import { Footer } from "@/components/Footer";
 import { Box, Container, Snackbar, Alert } from "@mui/material";
 import { useLocation } from "wouter";
+import MyFitnessPal from "@/pages/myfitnesspal";
 
 function ThemedApp() {
   const { theme } = useTheme();
@@ -49,6 +50,7 @@ function ThemedApp() {
             <ProtectedRoute path="/favorites" component={Favorites} />
             <ProtectedRoute path="/profile" component={Profile} />
             <ProtectedRoute path="/pantry" component={Pantry} />
+            <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
             <Route component={NotFound} />
           </Switch>
         </Container>
