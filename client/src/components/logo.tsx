@@ -1,5 +1,4 @@
 import { SvgIconProps, SxProps, Theme } from '@mui/material';
-import { useEffect, useState } from 'react';
 
 // Extend SvgIconProps to properly type the sx prop
 interface LogoProps extends Omit<SvgIconProps, 'sx'> {
@@ -9,31 +8,26 @@ interface LogoProps extends Omit<SvgIconProps, 'sx'> {
 }
 
 export const Logo = (props: LogoProps) => {
+  // Default sizes for responsive design
   const defaultSize = { xs: 32, md: 50 };
-  const [size, setSize] = useState(`${defaultSize.xs}px`);
 
-  useEffect(() => {
-    const fontSize = props.sx?.fontSize;
-    const updateSize = () => {
-      if (typeof fontSize === 'object' && fontSize !== null) {
-        const isDesktop = window.matchMedia('(min-width: 900px)').matches;
-        setSize(`${isDesktop ? (fontSize.md || defaultSize.md) : (fontSize.xs || defaultSize.xs)}px`);
-      } else if (typeof fontSize === 'number') {
-        setSize(`${fontSize}px`);
-      } else if (typeof fontSize === 'string') {
-        setSize(fontSize);
-      } else {
-        setSize(`${defaultSize.xs}px`);
-      }
-    };
+  // Get size from props or use default
+  const fontSize = props.sx?.fontSize;
+  let size: string;
 
-    updateSize();
-    const mediaQuery = window.matchMedia('(min-width: 900px)');
-    const handleResize = () => updateSize();
-    mediaQuery.addListener(handleResize);
-
-    return () => mediaQuery.removeListener(handleResize);
-  }, [props.sx?.fontSize]);
+  if (typeof fontSize === 'object' && fontSize !== null) {
+    // Handle responsive object format
+    size = `${fontSize.xs || defaultSize.xs}px`;
+    if (window.matchMedia('(min-width: 900px)').matches) { // md breakpoint
+      size = `${fontSize.md || defaultSize.md}px`;
+    }
+  } else if (typeof fontSize === 'number') {
+    size = `${fontSize}px`;
+  } else if (typeof fontSize === 'string') {
+    size = fontSize;
+  } else {
+    size = `${defaultSize.xs}px`;
+  }
 
   return (
     <img 
