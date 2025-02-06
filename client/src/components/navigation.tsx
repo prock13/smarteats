@@ -195,7 +195,7 @@ export default function Navigation() {
               }}
               onClick={() => setLocation("/")}
             >
-              <Logo />
+              <Logo sx={{ fontSize: { xs: 32, md: 50 } }} />
               <Typography
                 variant="h6"
                 sx={{
