@@ -1,11 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import path from "path";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import fs from 'fs';
+import { type Server } from "http";
+import { setupVite, serveStatic, log } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -23,7 +25,7 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      console.log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
     }
   });
 
@@ -41,20 +43,11 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
 });
 
-// Serve static files in production
+// Serve static files in production, use Vite middleware in development
 if (process.env.NODE_ENV === "production") {
-  const publicPath = path.resolve(__dirname, "../dist/public");
-  app.use(express.static(publicPath));
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(publicPath, "index.html"));
-  });
+  serveStatic(app);
 } else {
-  // In development, proxy to the Vite dev server
-  app.use('/', createProxyMiddleware({ 
-    target: 'http://localhost:3000',
-    changeOrigin: true,
-    ws: true,
-  }));
+  setupVite(app, server);
 }
 
 const PORT = 5000;
