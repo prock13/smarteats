@@ -117,7 +117,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-const PORT = 3000;
+const PORT = 5000;
 server.listen(PORT, "0.0.0.0", () => {
   log(`Server running on port ${PORT}`);
 });
