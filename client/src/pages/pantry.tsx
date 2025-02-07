@@ -72,7 +72,6 @@ export default function PantryPage() {
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
-  
 
   const { data: favorites } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
@@ -378,7 +377,23 @@ export default function PantryPage() {
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
                   <RecipeCard
-                    meal={meal}
+                    meal={{
+                      name: meal.name,
+                      description: meal.description,
+                      instructions: meal.instructions,
+                      macros: {
+                        carbs: meal.macros.carbs,
+                        protein: meal.macros.protein,
+                        fats: meal.macros.fats,
+                        calories: meal.macros.calories,
+                        servingSize: meal.macros.servingSize,
+                        fiber: meal.macros.fiber,
+                        sugar: meal.macros.sugar
+                      },
+                      cookingTime: meal.cookingTime,
+                      nutrients: meal.nutrients,
+                      dietaryRestriction: meal.dietaryRestriction
+                    }}
                     onShare={handleShareClick}
                     targetMacros={{
                       carbs: meal.macros.carbs,

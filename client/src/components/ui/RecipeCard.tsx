@@ -43,6 +43,7 @@ interface Macros {
   protein: number;
   fats: number;
   calories?: number | null;
+  servingSize?: string | null;
   fiber?: number | null;
   sugar?: number | null;
   cholesterol?: number | null;
@@ -652,46 +653,48 @@ export function RecipeCard({
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
-                  {meal.macros.calories !== undefined &&
-                    meal.macros.calories !== null && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Calories: {meal.macros.calories}kcal
-                        </Typography>
-                      </Grid>
-                    )}
-                  {meal.macros.fiber !== undefined &&
-                    meal.macros.fiber !== null && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Fiber: {meal.macros.fiber}g
-                        </Typography>
-                      </Grid>
-                    )}
-                  {meal.macros.sugar !== undefined &&
-                    meal.macros.sugar !== null && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Sugar: {meal.macros.sugar}g
-                        </Typography>
-                      </Grid>
-                    )}
-                  {meal.macros.cholesterol !== undefined &&
-                    meal.macros.cholesterol !== null && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Cholesterol: {meal.macros.cholesterol}mg
-                        </Typography>
-                      </Grid>
-                    )}
-                  {meal.macros.sodium !== undefined &&
-                    meal.macros.sodium !== null && (
-                      <Grid item xs={6}>
-                        <Typography variant="body2" color="text.secondary">
-                          Sodium: {meal.macros.sodium}mg
-                        </Typography>
-                      </Grid>
-                    )}
+                  {meal.macros.calories !== undefined && meal.macros.calories !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Calories: {meal.macros.calories}kcal
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.servingSize !== undefined && meal.macros.servingSize !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Serving Size: {meal.macros.servingSize}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.sugar !== undefined && meal.macros.sugar !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Sugar: {meal.macros.sugar}g
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.fiber !== undefined && meal.macros.fiber !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Fiber: {meal.macros.fiber}g
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.cholesterol !== undefined && meal.macros.cholesterol !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Cholesterol: {meal.macros.cholesterol}mg
+                      </Typography>
+                    </Grid>
+                  )}
+                  {meal.macros.sodium !== undefined && meal.macros.sodium !== null && (
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Sodium: {meal.macros.sodium}mg
+                      </Typography>
+                    </Grid>
+                  )}
                 </Grid>
               </Box>
 

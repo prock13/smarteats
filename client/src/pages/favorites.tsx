@@ -33,6 +33,7 @@ interface Recipe {
   };
   dietaryRestriction?: string[];
   tags?: string[];
+  servingSize?: string;
 }
 
 
@@ -158,6 +159,7 @@ export default function Favorites() {
                         protein: recipe.protein,
                         fats: recipe.fats,
                         calories: recipe.calories || 0,
+                        servingSize: recipe.servingSize || null,
                         fiber: recipe.fiber || 0,
                         sugar: recipe.sugar || 0
                       },

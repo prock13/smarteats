@@ -28,6 +28,7 @@ export const recipes = pgTable("recipes", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
+  servingSize: text("serving_size"),
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -122,6 +123,7 @@ export const insertRecipeSchema = z.object({
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
   calories: z.number().nullable(),
+  servingSize: z.string().nullable(),
   fiber: z.number().nullable(),
   sugar: z.number().nullable(),
   cholesterol: z.number().nullable(),
@@ -173,7 +175,7 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
 // Types
 export type MacroInput = z.infer<typeof macroInputSchema>;
 export type Meal = typeof meals.$inferSelect;
-export type Recipe = typeof recipes.$inferSelect;
+export type Recipe = typeof recipes.$inferSelect & { servingSize: string | null };
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;
 export type MealPlan = typeof mealPlans.$inferSelect;

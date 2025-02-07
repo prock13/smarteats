@@ -184,8 +184,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt));
 
+    // Map the results to include servingSize as required by Recipe type
+    const favoritesWithServingSize = result.map(favorite => ({
+      ...favorite,
+      servingSize: favorite.servingSize || null
+    }));
+
     console.log("Found favorites:", result);
-    return result;
+    return favoritesWithServingSize;
   }
 
   async addFavorite(userId: number, favorite: Omit<InsertFavorite, "userId">): Promise<Favorite> {

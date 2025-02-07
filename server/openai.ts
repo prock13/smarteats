@@ -55,6 +55,7 @@ Format your response as a JSON object with this exact structure:
   "name": "Recipe name",
   "description": "Brief description",
   "instructions": "Step-by-step instructions",
+  "servingSize": "Serving size (e.g., '1 cup' or '2 servings')",
   "macros": {
     "carbs": number,
     "protein": number,
@@ -76,14 +77,14 @@ Format your response as a JSON object with this exact structure:
   }
 }
 
-Include detailed nutritional information and cooking time. If you're unsure about any value, use null.`;
+Include detailed nutritional information, serving size, and cooking time. If you're unsure about any value, use null.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients."
+          content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios, serving sizes, and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients."
         },
         {
           role: "user",
@@ -103,6 +104,7 @@ Include detailed nutritional information and cooking time. If you're unsure abou
       name: parsedContent.name,
       description: parsedContent.description,
       instructions: parsedContent.instructions,
+      servingSize: parsedContent.servingSize,
       carbs: parsedContent.macros.carbs,
       protein: parsedContent.macros.protein,
       fats: parsedContent.macros.fats,
@@ -159,22 +161,14 @@ export async function generateMealSuggestions(
       });
     }
 
-    if (pantryItems) {
-      prompt = `Create a recipe using these ingredients:
-- Main carb: ${pantryItems.carbSource}
-- Main protein: ${pantryItems.proteinSource}
-- Main fat: ${pantryItems.fatSource}
-
-The recipe should be suitable for: ${mealTypes[0]}
-Dietary preference: ${dietaryPreference}
-
-Format your response as a JSON object with this exact structure:
+    const format = `Format your response as a JSON object with this exact structure:
 {
   "meals": [
     {
       "name": "Recipe name",
       "description": "Brief description",
       "instructions": "Step-by-step instructions",
+      "servingSize": "Serving size (e.g., '1 cup' or '2 servings')",
       "macros": {
         "carbs": number,
         "protein": number,
@@ -197,6 +191,17 @@ Format your response as a JSON object with this exact structure:
     }
   ]
 }`;
+
+    if (pantryItems) {
+      prompt = `Create a recipe using these ingredients:
+- Main carb: ${pantryItems.carbSource}
+- Main protein: ${pantryItems.proteinSource}
+- Main fat: ${pantryItems.fatSource}
+
+The recipe should be suitable for: ${mealTypes[0]}
+Dietary preference: ${dietaryPreference}
+
+${format}`;
       systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format. Do not combine or modify existing recipes.";
     } else {
       // Calculate how many AI recipes to generate
@@ -212,36 +217,7 @@ ${excludeRecipes.length > 0 ? `\nDo not suggest these recipes: ${excludeRecipes.
 ${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
 ${mealTypes.length > 0 ? `\nMeal types: ${mealTypes.join(', ')}` : ''}
 
-Format your response as a JSON object with this exact structure:
-{
-  "meals": [
-    {
-      "name": "Recipe name",
-      "description": "Brief description",
-      "instructions": "Step-by-step instructions",
-      "macros": {
-        "carbs": number,
-        "protein": number,
-        "fats": number,
-        "calories": number,
-        "fiber": number,
-        "sugar": number,
-        "cholesterol": number,
-        "sodium": number
-      },
-      "cookingTime": {
-        "prep": number,
-        "cook": number,
-        "total": number
-      },
-      "nutrients": {
-        "vitamins": string[],
-        "minerals": string[]
-      },
-      "isStoredRecipe": false
-    }
-  ]
-}`;
+${format}`;
       systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. Create completely new recipes.";
     }
 
@@ -277,6 +253,7 @@ Format your response as a JSON object with this exact structure:
         name: recipe.name,
         description: recipe.description,
         instructions: recipe.instructions,
+        servingSize: recipe.servingSize, // Added servingSize here
         macros: {
           carbs: recipe.carbs,
           protein: recipe.protein,

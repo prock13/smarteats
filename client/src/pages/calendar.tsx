@@ -289,6 +289,7 @@ export default function CalendarPage() {
                               protein: plan.meal.macros.protein,
                               fats: plan.meal.macros.fats,
                               calories: favorite?.calories || plan.meal.calories || null,
+                              servingSize: favorite?.servingSize || plan.meal.servingSize || null,
                               fiber: favorite?.fiber || plan.meal.fiber || null,
                               sugar: favorite?.sugar || plan.meal.sugar || null,
                               cholesterol: favorite?.cholesterol || plan.meal.cholesterol || null,
