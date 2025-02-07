@@ -232,6 +232,13 @@ export default function Recipes() {
                   </Box>
 
                   <Grid container spacing={2} sx={{ mt: 1 }}>
+                    {recipe.servingSize && (
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                          Serving Size: {recipe.servingSize}
+                        </Typography>
+                      </Grid>
+                    )}
                     <Grid item xs={4}>
                       <Typography variant="body2" color="text.secondary">
                         Carbs: {recipe.carbs}g
@@ -281,6 +288,7 @@ export default function Recipes() {
           protein: editingRecipe.protein,
           fats: editingRecipe.fats,
           calories: editingRecipe.calories,
+          servingSize: editingRecipe.servingSize,
           fiber: editingRecipe.fiber,
           sugar: editingRecipe.sugar,
           cholesterol: editingRecipe.cholesterol,

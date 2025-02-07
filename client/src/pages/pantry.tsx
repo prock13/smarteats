@@ -386,15 +386,22 @@ export default function PantryPage() {
                         protein: meal.macros.protein,
                         fats: meal.macros.fats,
                         calories: meal.macros.calories,
-                        servingSize: meal.macros.servingSize,
-                        fiber: meal.macros.fiber,
-                        sugar: meal.macros.sugar,
-                        cholesterol: meal.macros.cholesterol,
-                        sodium: meal.macros.sodium
+                        servingSize: meal.servingSize || null, 
+                        fiber: meal.macros.fiber || null,
+                        sugar: meal.macros.sugar || null,
+                        cholesterol: meal.macros.cholesterol || null,
+                        sodium: meal.macros.sodium || null
                       },
-                      cookingTime: meal.cookingTime,
-                      nutrients: meal.nutrients,
-                      dietaryRestriction: meal.dietaryRestriction
+                      cookingTime: meal.cookingTime || {
+                        prep: 15,
+                        cook: 20,
+                        total: 35
+                      },
+                      nutrients: meal.nutrients || {
+                        vitamins: null,
+                        minerals: null
+                      },
+                      dietaryRestriction: meal.dietaryRestriction || "none"
                     }}
                     onShare={handleShareClick}
                     targetMacros={{

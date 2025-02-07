@@ -653,9 +653,9 @@ export function RecipeCard({
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
-                  {meal.macros.servingSize !== undefined && meal.macros.servingSize !== null && (
+                  {meal.macros.servingSize && (
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "medium" }}>
                         Serving Size: {meal.macros.servingSize}
                       </Typography>
                     </Grid>
@@ -681,13 +681,14 @@ export function RecipeCard({
                       </Typography>
                     </Grid>
                   )}
-                  {meal.macros.cholesterol !== undefined && meal.macros.cholesterol !== null && (
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Cholesterol: {meal.macros.cholesterol}mg
-                      </Typography>
-                    </Grid>
-                  )}
+                  {meal.macros.cholesterol !== undefined &&
+                    meal.macros.cholesterol !== null && (
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Cholesterol: {meal.macros.cholesterol}mg
+                        </Typography>
+                      </Grid>
+                    )}
                   {meal.macros.sodium !== undefined && meal.macros.sodium !== null && (
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">

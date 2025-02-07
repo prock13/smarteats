@@ -25,17 +25,13 @@ interface Recipe {
   calories?: number;
   fiber?: number;
   sugar?: number;
+  cholesterol?: number;
+  sodium?: number;
   instructions: string;
-  cooking_time?: {
-    prep: number;
-    cook: number;
-    total: number;
-  };
+  servingSize?: string;
   dietaryRestriction?: string[];
   tags?: string[];
-  servingSize?: string;
 }
-
 
 export default function Favorites() {
   const { toast } = useToast();
@@ -158,18 +154,23 @@ export default function Favorites() {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
                         fats: recipe.fats,
-                        calories: recipe.calories || 0,
+                        calories: recipe.calories || null,
                         servingSize: recipe.servingSize || null,
-                        fiber: recipe.fiber || 0,
-                        sugar: recipe.sugar || 0
+                        fiber: recipe.fiber || null,
+                        sugar: recipe.sugar || null,
+                        cholesterol: recipe.cholesterol || null,
+                        sodium: recipe.sodium || null
                       },
-                      cookingTime: recipe.cooking_time || {
+                      cookingTime: recipe.cookingTime || {
                         prep: 15,
                         cook: 20,
                         total: 35
                       },
-                      nutrients: recipe.nutrients || {},
-                      dietaryRestriction: Array.isArray(recipe.dietaryRestriction) ? recipe.dietaryRestriction[0] : recipe.dietaryRestriction,
+                      nutrients: recipe.nutrients || {
+                        vitamins: null,
+                        minerals: null
+                      },
+                      dietaryRestriction: Array.isArray(recipe.dietaryRestriction) ? recipe.dietaryRestriction[0] : recipe.dietaryRestriction || "none",
                       isStoredRecipe: false 
                     }}
                     targetMacros={{
