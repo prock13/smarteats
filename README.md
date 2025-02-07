@@ -1,6 +1,6 @@
 # smarteats
 
-![SmartEats-Logo](https://github.com/user-attachments/assets/a4c5eb29-061b-43a4-a235-4914b2134e41)
+![SmartEats-Logo-64x64](https://github.com/user-attachments/assets/b28a539b-9c99-449d-80c8-7e25a5de91af)
 
 SmartEats is a comprehensive AI-powered meal planning platform that helps users create personalized meal plans based on their nutritional preferences and available ingredients. The application features two innovative recipe discovery systems: Macro Match, which helps you find the perfect meals to fit your remaining macro-nutrient goals for the day, and Pantry Pal, which generates recipe suggestions based on ingredients you have on hand. Each recipe comes with detailed nutritional information, cooking instructions, and macro-nutrient tracking visualized through interactive progress bars.
 
