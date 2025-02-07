@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { insertRecipeSchema, type InsertRecipe, type Recipe } from "@shared/schema";
+import { type InsertRecipe, type Recipe } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { RecipeModal } from "@/components/ui/RecipeModal";
@@ -246,8 +246,8 @@ export default function Recipes() {
           sugar: editingRecipe.sugar,
           cholesterol: editingRecipe.cholesterol,
           sodium: editingRecipe.sodium,
-          cookingTime: editingRecipe.cookingTime,
-          nutrients: editingRecipe.nutrients,
+          cookingTime: editingRecipe.cookingTime as { prep: number | null; cook: number | null; total: number | null; } | null,
+          nutrients: editingRecipe.nutrients as { vitamins: string[] | null; minerals: string[] | null; } | null,
           dietaryRestriction: editingRecipe.dietaryRestriction as "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"
         } : undefined}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
