@@ -447,7 +447,32 @@ export default function Planner() {
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
                   <RecipeCard
-                    meal={meal}
+                    meal={{
+                      name: meal.name,
+                      description: meal.description,
+                      instructions: meal.instructions,
+                      macros: {
+                        carbs: meal.macros.carbs,
+                        protein: meal.macros.protein,
+                        fats: meal.macros.fats,
+                        calories: meal.macros.calories || null,
+                        servingSize: meal.servingSize || null,
+                        fiber: meal.macros.fiber || null,
+                        sugar: meal.macros.sugar || null,
+                        cholesterol: meal.macros.cholesterol || null,
+                        sodium: meal.macros.sodium || null
+                      },
+                      cookingTime: meal.cookingTime || {
+                        prep: 15,
+                        cook: 20,
+                        total: 35
+                      },
+                      nutrients: meal.nutrients || {
+                        vitamins: null,
+                        minerals: null
+                      },
+                      dietaryRestriction: meal.dietaryRestriction || "none"
+                    }}
                     onShare={handleShareClick}
                     targetMacros={{
                       carbs: form.getValues("targetCarbs"),

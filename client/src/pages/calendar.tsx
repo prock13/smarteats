@@ -288,14 +288,21 @@ export default function CalendarPage() {
                               protein: plan.meal.macros.protein,
                               fats: plan.meal.macros.fats,
                               calories: favorite?.calories || plan.meal.macros.calories || null,
-                              servingSize: favorite?.servingSize || plan.meal.macros.servingSize || null,
+                              servingSize: favorite?.servingSize || plan.meal.servingSize || null,
                               fiber: favorite?.fiber || plan.meal.macros.fiber || null,
                               sugar: favorite?.sugar || plan.meal.macros.sugar || null,
                               cholesterol: favorite?.cholesterol || plan.meal.macros.cholesterol || null,
                               sodium: favorite?.sodium || plan.meal.macros.sodium || null
                             },
-                            cookingTime: favorite?.cookingTime || plan.meal.cookingTime || null,
-                            nutrients: favorite?.nutrients || plan.meal.nutrients || null,
+                            cookingTime: favorite?.cookingTime || plan.meal.cookingTime || {
+                              prep: 15,
+                              cook: 20,
+                              total: 35
+                            },
+                            nutrients: favorite?.nutrients || plan.meal.nutrients || {
+                              vitamins: null,
+                              minerals: null
+                            },
                             isStoredRecipe: true,
                             dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
                           }}
