@@ -246,9 +246,9 @@ export default function Recipes() {
           sugar: editingRecipe.sugar,
           cholesterol: editingRecipe.cholesterol,
           sodium: editingRecipe.sodium,
-          cookingTime: editingRecipe.cookingTime as any,
-          nutrients: editingRecipe.nutrients as any,
-          dietaryRestriction: editingRecipe.dietaryRestriction
+          cookingTime: editingRecipe.cookingTime,
+          nutrients: editingRecipe.nutrients,
+          dietaryRestriction: editingRecipe.dietaryRestriction as "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"
         } : undefined}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
       />
