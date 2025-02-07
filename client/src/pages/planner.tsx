@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -326,7 +325,7 @@ export default function Planner() {
 
   const handleMealTypeChange = (
     checked: boolean,
-    value: keyof typeof mealTypeEnum,
+    value: "breakfast" | "lunch" | "dinner" | "snack",
   ) => {
     const currentValues = form.watch("mealTypes") || [];
     if (checked) {
@@ -414,12 +413,12 @@ export default function Planner() {
                               checked={form
                                 .watch("mealTypes")
                                 ?.includes(
-                                  option.value as keyof typeof mealTypeEnum,
+                                  option.value as "breakfast" | "lunch" | "dinner" | "snack",
                                 )}
                               onChange={(e) => {
                                 handleMealTypeChange(
                                   e.target.checked,
-                                  option.value as keyof typeof mealTypeEnum,
+                                  option.value as "breakfast" | "lunch" | "dinner" | "snack",
                                 );
                               }}
                             />
