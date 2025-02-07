@@ -7,7 +7,8 @@ process.env.VITE_DEV_SERVER_HOST = '0.0.0.0';
 process.env.VITE_DEV_SERVER_PORT = '3000';
 process.env.VITE_HMR_HOST = '0.0.0.0';
 process.env.VITE_HMR_PROTOCOL = 'ws';
-process.env.VITE_ALLOW_HOSTS = '*';
+process.env.VITE_ALLOW_HOSTS = '*,b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev';
+process.env.VITE_CONFIG_FILE = 'vite.config.ts'; // Explicitly tell Vite to use the TypeScript config
 
 const app = express();
 app.use(express.json());
@@ -16,7 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 // Add CORS headers for Replit domains
 app.use((req, res, next) => {
   const host = req.headers.host || '';
-  if (host.includes('.replit.dev')) {
+  if (host.includes('.replit.dev') || host.includes('.repl.co')) {
     res.header('Access-Control-Allow-Origin', `https://${host}`);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
