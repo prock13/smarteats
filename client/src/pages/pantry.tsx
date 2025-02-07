@@ -90,7 +90,6 @@ export default function PantryPage() {
     },
   });
 
-  
 
   const mutation = useMutation({
     mutationFn: async (data: PantryInput) => {

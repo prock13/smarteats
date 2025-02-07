@@ -19,14 +19,14 @@ import {
   MenuItem,
   Select,
   TextField,
-  FormControlLabel,
-  Checkbox,
-  CircularProgress,
   FormControl,
   FormLabel,
   FormHelperText,
+  Checkbox,
+  CircularProgress,
   LinearProgress,
   Menu,
+  FormControlLabel,
 } from "@mui/material";
 import {
   Add as PlusCircle,
@@ -34,11 +34,9 @@ import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
 } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
 import type { Recipe } from "@shared/schema";
-import type { IconButtonProps } from "@mui/material/IconButton";
 import { RecipeCard } from "@/components/ui/RecipeCard";
-import { useState } from "react"; // Added import
+import { useState } from "react";
 
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -46,7 +44,6 @@ interface ExpandMoreProps extends IconButtonProps {
 }
 
 import { IconButton } from "@mui/material";
-
 
 
 const mealTypeOptions = [
@@ -166,7 +163,6 @@ export default function Planner() {
       setSuggestions(null);
     },
   });
-
 
   const onSubmit = (data: MacroInput) => {
     if (!data.mealTypes || data.mealTypes.length === 0) {

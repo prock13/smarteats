@@ -1,16 +1,13 @@
 import OpenAI from "openai";
 
-interface ImportMetaEnv {
-  readonly VITE_OPENAI_API_KEY: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_OPENAI_API_KEY: string;
+  }
 }
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
 });
 
 const CHATBOT_PERSONALITY = `You are Chef Nina, a friendly and enthusiastic AI meal planning assistant. You have the following traits:
