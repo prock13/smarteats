@@ -93,24 +93,14 @@ export default function Planner() {
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
-      const {
-        targetCarbs,
-        targetProtein,
-        targetFats,
-        mealCount,
-        dietaryPreference = "none",
-        mealTypes,
-        includeUserRecipes = false,
-      } = data;
-
       const requestData = {
-        targetCarbs,
-        targetProtein,
-        targetFats,
-        mealCount,
-        dietaryPreference,
-        mealTypes,
-        includeUserRecipes,
+        targetCarbs: data.targetCarbs,
+        targetProtein: data.targetProtein,
+        targetFats: data.targetFats,
+        mealCount: data.mealCount,
+        dietaryPreference: data.dietaryPreference,
+        mealTypes: data.mealTypes,
+        includeUserRecipes: data.includeUserRecipes,
         excludeRecipes:
           data.appendResults && suggestions?.meals
             ? suggestions.meals.map((meal: any) => meal.name)
