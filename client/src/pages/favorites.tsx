@@ -46,9 +46,9 @@ export default function Favorites() {
     queryKey: ["/api/favorites"],
   });
 
-  const handleShare = (event: React.MouseEvent<HTMLElement>, recipe: Recipe) => {
+  const handleShare = (event: React.MouseEvent<HTMLElement>, meal: any) => {
     setShareAnchorEl(event.currentTarget);
-    setSharingRecipe(recipe);
+    setSharingRecipe(meal);
   };
 
   const handleShareClose = () => {
