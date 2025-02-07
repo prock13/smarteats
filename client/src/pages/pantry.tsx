@@ -90,65 +90,7 @@ export default function PantryPage() {
     },
   });
 
-  const addToCalendarMutation = useMutation({
-    mutationFn: async ({ meal, mealType }: { meal: any; mealType: string }) => {
-      const today = new Date().toISOString();
-      const mealPlan = {
-        date: today,
-        meal: {
-          name: meal.name,
-          description: meal.description,
-          macros: meal.macros,
-        },
-        mealType,
-      };
-      const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "Meal added to today's calendar",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const favoriteMutation = useMutation({
-    mutationFn: async (meal: any) => {
-      const favorite = {
-        name: meal.name,
-        description: meal.description,
-        instructions: meal.instructions,
-        carbs: meal.macros.carbs,
-        protein: meal.macros.protein,
-        fats: meal.macros.fats,
-        dietaryRestriction: form.getValues("dietaryPreference"),
-      };
-      const res = await apiRequest("POST", "/api/favorites", favorite);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      toast({
-        title: "Success!",
-        description: "Recipe saved to favorites",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  
 
   const mutation = useMutation({
     mutationFn: async (data: PantryInput) => {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -47,15 +47,7 @@ interface ExpandMoreProps extends IconButtonProps {
 
 import { IconButton } from "@mui/material";
 
-const ExpandMoreButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== 'expand'
-})<ExpandMoreProps>(({ theme, expand }) => ({
-  transform: expand ? 'rotate(180deg)' : 'rotate(0deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
+
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },

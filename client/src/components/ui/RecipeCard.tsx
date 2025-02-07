@@ -36,7 +36,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Recipe } from "@shared/schema";
+import type { Recipe, Favorite } from "@shared/schema";
 
 interface Macros {
   carbs: number;
@@ -79,7 +79,7 @@ interface RecipeCardProps {
     protein: number;
     fats: number;
   };
-  favorites?: Recipe[];
+  favorites?: Favorite[];
   showAddToCalendar?: boolean;
   showDelete?: boolean;
   onDelete?: () => void;
