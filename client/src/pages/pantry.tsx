@@ -72,7 +72,7 @@ export default function PantryPage() {
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
-  const queryClient = useQueryClient();
+  
 
   const { data: favorites } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],

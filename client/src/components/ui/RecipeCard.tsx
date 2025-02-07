@@ -35,7 +35,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Recipe } from "@shared/schema";
+import type { Recipe as SchemaRecipe } from "@shared/schema";
+import { Chip } from "@mui/material";
 
 interface Macros {
   carbs: number;

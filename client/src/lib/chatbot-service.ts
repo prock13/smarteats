@@ -7,7 +7,7 @@ declare global {
 }
 
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  apiKey: process.env.VITE_OPENAI_API_KEY || "",
 });
 
 const CHATBOT_PERSONALITY = `You are Chef Nina, a friendly and enthusiastic AI meal planning assistant. You have the following traits:
@@ -29,7 +29,7 @@ export async function getChatbotResponse(
   }
 ): Promise<string> {
   try {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    if (!process.env.VITE_OPENAI_API_KEY) {
       throw new Error("OpenAI API key is not configured");
     }
 

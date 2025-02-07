@@ -39,11 +39,7 @@ import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
 
 
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
 
-import { IconButton } from "@mui/material";
 
 
 const mealTypeOptions = [

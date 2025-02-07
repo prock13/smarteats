@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { Input } from "./input";
-import type { InputProps } from "@radix-ui/react-select";
+import type { InputHTMLAttributes } from "react";
+type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 const AutoSelectInput = forwardRef<HTMLInputElement, InputProps>(
   (props, ref) => {
