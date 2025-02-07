@@ -1,10 +1,11 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-declare global {
-  interface ImportMetaEnv {
-    VITE_OPENAI_API_KEY: string;
-  }
+interface ImportMetaEnv {
+  readonly VITE_OPENAI_API_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
 
 const openai = new OpenAI({

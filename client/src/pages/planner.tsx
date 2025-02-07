@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   macroInputSchema,
   type MacroInput,
-  mealTypeEnum,
 } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +45,9 @@ interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
 
-const ExpandMore = styled(IconButton, {
+import { IconButton } from "@mui/material";
+
+const ExpandMoreButton = styled(IconButton, {
   shouldForwardProp: (prop) => prop !== 'expand'
 })<ExpandMoreProps>(({ theme, expand }) => ({
   transform: expand ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -79,7 +80,6 @@ const dietaryOptions = [
 export default function Planner() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
-  const [selectedMealType, setSelectedMealType] = useState<string>("breakfast");
   const [showingMore, setShowingMore] = useState(false);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
@@ -87,7 +87,6 @@ export default function Planner() {
     [key: number]: boolean;
   }>({});
 
-  const queryClient = useQueryClient();
   const { data: favorites } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
     queryFn: () =>

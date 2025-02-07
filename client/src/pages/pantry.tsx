@@ -31,7 +31,7 @@ import {
   Facebook as FacebookIcon,
   LinkedIn as LinkedInIcon,
 } from "@mui/icons-material";
-import { mealTypeEnum } from "@shared/schema";
+
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import type { Recipe } from "@shared/schema";
 
