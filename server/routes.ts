@@ -13,6 +13,7 @@ import { insertFavoriteSchema } from "@shared/schema";
 import crypto from "crypto";
 
 export function registerRoutes(app: Express): Server {
+  const server = createServer(app); // Create the server instance
   // Set up authentication routes and middleware
   setupAuth(app);
 
@@ -433,4 +434,5 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to generate response" });
     }
   });
+  return server; // Return the server instance
 }
