@@ -653,17 +653,17 @@ export function RecipeCard({
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
+                  {meal.macros.servingSize !== undefined && meal.macros.servingSize !== null && (
+                    <Grid item xs={12}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                        Serving Size: {meal.macros.servingSize}
+                      </Typography>
+                    </Grid>
+                  )}
                   {meal.macros.calories !== undefined && meal.macros.calories !== null && (
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Calories: {meal.macros.calories}kcal
-                      </Typography>
-                    </Grid>
-                  )}
-                  {meal.macros.servingSize !== undefined && meal.macros.servingSize !== null && (
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Serving Size: {meal.macros.servingSize}
                       </Typography>
                     </Grid>
                   )}

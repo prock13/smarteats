@@ -275,7 +275,6 @@ export default function CalendarPage() {
                 </Typography>
                 <Grid container spacing={3}>
                   {mealsForDate.map((plan: any) => {
-                    // Find the matching favorite to get complete recipe details
                     const favorite = favorites?.find(f => f.name === plan.meal.name);
                     return (
                       <Grid item xs={12} md={6} lg={4} key={plan.id}>
@@ -288,12 +287,12 @@ export default function CalendarPage() {
                               carbs: plan.meal.macros.carbs,
                               protein: plan.meal.macros.protein,
                               fats: plan.meal.macros.fats,
-                              calories: favorite?.calories || plan.meal.calories || null,
-                              servingSize: favorite?.servingSize || plan.meal.servingSize || null,
-                              fiber: favorite?.fiber || plan.meal.fiber || null,
-                              sugar: favorite?.sugar || plan.meal.sugar || null,
-                              cholesterol: favorite?.cholesterol || plan.meal.cholesterol || null,
-                              sodium: favorite?.sodium || plan.meal.sodium || null
+                              calories: favorite?.calories || plan.meal.macros.calories || null,
+                              servingSize: favorite?.servingSize || plan.meal.macros.servingSize || null,
+                              fiber: favorite?.fiber || plan.meal.macros.fiber || null,
+                              sugar: favorite?.sugar || plan.meal.macros.sugar || null,
+                              cholesterol: favorite?.cholesterol || plan.meal.macros.cholesterol || null,
+                              sodium: favorite?.sodium || plan.meal.macros.sodium || null
                             },
                             cookingTime: favorite?.cookingTime || plan.meal.cookingTime || null,
                             nutrients: favorite?.nutrients || plan.meal.nutrients || null,

@@ -388,7 +388,9 @@ export default function PantryPage() {
                         calories: meal.macros.calories,
                         servingSize: meal.macros.servingSize,
                         fiber: meal.macros.fiber,
-                        sugar: meal.macros.sugar
+                        sugar: meal.macros.sugar,
+                        cholesterol: meal.macros.cholesterol,
+                        sodium: meal.macros.sodium
                       },
                       cookingTime: meal.cookingTime,
                       nutrients: meal.nutrients,

@@ -77,7 +77,7 @@ Format your response as a JSON object with this exact structure:
   }
 }
 
-Include detailed nutritional information, precise serving size, and cooking time. Ensure the serving size is specific and measurable. If you're unsure about any value, use null.`;
+Include detailed nutritional information, precise serving size, and cooking time. Always provide specific, measurable serving sizes (e.g., '2 cups' instead of 'medium portion'). If you're unsure about any value, use null.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -86,12 +86,9 @@ Include detailed nutritional information, precise serving size, and cooking time
           role: "system",
           content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios, serving sizes, and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients. Specify serving sizes in clear, measurable units."
         },
-        {
-          role: "user",
-          content: prompt
-        }
+        { role: "user", content: prompt },
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
     });
 
     const content = response.choices[0].message.content;
