@@ -91,16 +91,41 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      keepMounted={false}
+      disablePortal={false}
       PaperProps={{
         sx: {
           height: '80vh',
           maxHeight: '800px',
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
+          zIndex: 1300,
+        },
+      }}
+      sx={{
+        '& .MuiDialog-paper': {
+          margin: 2,
+          borderRadius: 1,
+        },
+        '& .MuiBackdrop-root': {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+        '& .MuiDialog-container': {
+          alignItems: 'center',
+          justifyContent: 'center',
         },
       }}
     >
-      <DialogTitle sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+      <DialogTitle sx={{ 
+        p: 2, 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 2, 
+        borderBottom: 1, 
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+      }}>
         <Avatar
           src="/chef-avatar.png"
           alt="Chef Nina"
@@ -117,9 +142,9 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
       </DialogTitle>
 
       <DialogContent sx={{ 
-        display: 'flex', 
-        flexDirection: 'column',
         p: 2,
+        display: 'flex',
+        flexDirection: 'column',
         gap: 2,
         overflow: 'hidden'
       }}>
@@ -129,6 +154,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           display: "flex",
           flexDirection: "column",
           gap: 2,
+          px: 2,
         }}>
           {messages.map((message, index) => (
             <Box
@@ -142,8 +168,9 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
                 sx={{
                   p: 2,
                   maxWidth: "70%",
-                  bgcolor: message.role === "user" ? "primary.main" : "background.default",
+                  bgcolor: message.role === "user" ? "primary.main" : "background.paper",
                   color: message.role === "user" ? "primary.contrastText" : "text.primary",
+                  boxShadow: 2,
                 }}
               >
                 <Typography variant="body1">{message.content}</Typography>
@@ -167,6 +194,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           pt: 2,
           borderTop: '1px solid',
           borderColor: 'divider',
+          bgcolor: 'background.paper',
           display: "flex",
           gap: 1,
         }}>

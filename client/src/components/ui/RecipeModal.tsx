@@ -67,18 +67,41 @@ export function RecipeModal({
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      keepMounted={false}
+      disablePortal={false}
       PaperProps={{
         sx: {
           minHeight: '50vh',
           maxHeight: '90vh',
+          overflowY: 'auto',
+          position: 'relative',
+          zIndex: 1300,
         }
       }}
+      sx={{
+        '& .MuiDialog-paper': {
+          margin: 2,
+          borderRadius: 1,
+        },
+        '& .MuiBackdrop-root': {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+        '& .MuiDialog-container': {
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      }}
     >
-      <DialogTitle>
+      <DialogTitle sx={{ 
+        p: 2, 
+        borderBottom: 1, 
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+      }}>
         {initialData ? "Edit Recipe" : "Create New Recipe"}
       </DialogTitle>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <DialogContent>
+        <DialogContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
               label="Recipe Name"
@@ -162,7 +185,7 @@ export function RecipeModal({
             </Grid>
           </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
           <Button onClick={onClose} color="inherit">
             Cancel
           </Button>
