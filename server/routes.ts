@@ -196,10 +196,34 @@ export function registerRoutes(app: Express): Server {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const recipe = insertRecipeSchema.parse(req.body);
+      console.log("Recipe creation request body:", req.body);
+
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ 
+          message: "Invalid request body format",
+          received: typeof req.body
+        });
+      }
+
+      const parseResult = insertRecipeSchema.safeParse(req.body);
+
+      if (!parseResult.success) {
+        console.error("Recipe validation error:", parseResult.error);
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: parseResult.error.errors,
+          received: req.body
+        });
+      }
+
+      const recipe = parseResult.data;
+      console.log("Validated recipe data:", recipe);
+
       const saved = await storage.saveRecipe(recipe);
+      console.log("Recipe saved successfully:", saved);
       res.json(saved);
     } catch (error) {
+      console.error("Error in recipe creation:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
@@ -447,6 +471,11 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { message, userPreferences } = req.body;
+      console.log("Chat request received:", { message, userPreferences });
+
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -470,11 +499,20 @@ export function registerRoutes(app: Express): Server {
         max_tokens: 300,
       });
 
-      res.json({ message: response.choices[0].message.content || "I'm not sure how to respond to that." });
+      const content = response.choices[0].message.content;
+      console.log("Chat response generated:", content);
+
+      if (!content) {
+        throw new Error("No content received from OpenAI");
+      }
+
+      res.json({ message: content });
     } catch (error) {
       console.error("Chat API error:", error);
-      res.status(500).json({ message: "Failed to generate response" });
+      const message = error instanceof Error ? error.message : "Failed to generate response";
+      res.status(500).json({ message });
     }
   });
+
   return server;
 }

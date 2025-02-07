@@ -63,6 +63,14 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Failed to get chatbot response:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "I apologize, but I'm having trouble processing your request. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }

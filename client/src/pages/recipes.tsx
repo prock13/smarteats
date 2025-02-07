@@ -28,10 +28,12 @@ export default function Recipes() {
 
   const { data: recipes, isLoading } = useQuery<Recipe[]>({
     queryKey: ['/api/recipes'],
+    retry: false,
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertRecipe) => {
+      console.log("Creating recipe with data:", data);
       const response = await apiRequest("POST", "/api/recipes", data);
       if (!response.ok) {
         const errorData = await response.json();
@@ -48,6 +50,7 @@ export default function Recipes() {
       handleCloseModal();
     },
     onError: (error: Error) => {
+      console.error("Error creating recipe:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -58,6 +61,7 @@ export default function Recipes() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: InsertRecipe & { id: number }) => {
+      console.log("Updating recipe with data:", data);
       const { id, ...recipe } = data;
       const response = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
       if (!response.ok) {
@@ -75,6 +79,7 @@ export default function Recipes() {
       handleCloseModal();
     },
     onError: (error: Error) => {
+      console.error("Error updating recipe:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -85,11 +90,13 @@ export default function Recipes() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log("Deleting recipe with id:", id);
       const response = await apiRequest("DELETE", `/api/recipes/${id}`);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete recipe');
       }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
@@ -99,6 +106,7 @@ export default function Recipes() {
       });
     },
     onError: (error: Error) => {
+      console.error("Error deleting recipe:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -108,6 +116,7 @@ export default function Recipes() {
   });
 
   const handleEdit = (recipe: Recipe) => {
+    console.log("Editing recipe:", recipe);
     setEditingRecipe(recipe);
     setIsModalOpen(true);
   };
@@ -117,11 +126,21 @@ export default function Recipes() {
     setEditingRecipe(null);
   };
 
-  const handleSubmit = (data: InsertRecipe) => {
-    if (editingRecipe) {
-      updateMutation.mutate({ ...data, id: editingRecipe.id });
-    } else {
-      createMutation.mutate(data);
+  const handleSubmit = async (data: InsertRecipe) => {
+    console.log("Submitting recipe data:", data);
+    try {
+      if (editingRecipe) {
+        await updateMutation.mutateAsync({ ...data, id: editingRecipe.id });
+      } else {
+        await createMutation.mutateAsync(data);
+      }
+    } catch (error) {
+      console.error("Error submitting recipe:", error);
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -129,8 +148,8 @@ export default function Recipes() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ maxWidth: '6xl', mx: 'auto', mb: 8 }}>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h3" component="h1" 
-            sx={{ 
+          <Typography variant="h3" component="h1"
+            sx={{
               background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -144,9 +163,9 @@ export default function Recipes() {
         </Box>
 
         <Paper elevation={2} sx={{ p: 3 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             mb: 3
           }}>
@@ -174,9 +193,9 @@ export default function Recipes() {
           ) : recipes && recipes.length > 0 ? (
             <Box sx={{ mt: 2 }}>
               {recipes?.map((recipe: Recipe) => (
-                <Paper 
-                  key={recipe.id} 
-                  elevation={1} 
+                <Paper
+                  key={recipe.id}
+                  elevation={1}
                   sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}
                 >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -187,14 +206,14 @@ export default function Recipes() {
                       </Typography>
                     </Box>
                     <Box>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => handleEdit(recipe)}
                         sx={{ mr: 1 }}
                       >
                         <EditIcon />
                       </IconButton>
-                      <IconButton 
+                      <IconButton
                         size="small"
                         onClick={() => {
                           if (confirm('Are you sure you want to delete this recipe?')) {

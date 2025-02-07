@@ -20,10 +20,12 @@ export async function getChatbotResponse(
         message,
         userPreferences,
       }),
+      credentials: 'include', // Add this to ensure cookies are sent
     });
 
     if (!response.ok) {
-      throw new Error('Failed to get chatbot response');
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to get chatbot response');
     }
 
     const data: ChatbotResponse = await response.json();
