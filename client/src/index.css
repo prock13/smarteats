@@ -5,7 +5,7 @@
 
 @layer base {
   * {
-    @apply border-border-color;
+    @apply border-[hsl(var(--border))];
   }
 
   body {
