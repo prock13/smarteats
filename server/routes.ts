@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import OpenAI from "openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
+import { ZodError } from "zod";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -47,6 +48,9 @@ export function registerRoutes(app: Express): Server {
       res.json({ suggestions });
     } catch (error) {
       console.error("Error in meal suggestions:", error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
@@ -328,7 +332,9 @@ export function registerRoutes(app: Express): Server {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const { carbSource, proteinSource, fatSource, mealType, dietaryPreference, includeUserRecipes } = req.body;
+      console.log("Received pantry request body:", req.body);
+
+      const { carbSource, proteinSource, fatSource, mealType, dietaryPreference = "none", includeUserRecipes = false } = req.body;
 
       // Validate required fields
       if (!carbSource || !proteinSource || !fatSource || !mealType) {
@@ -347,25 +353,33 @@ export function registerRoutes(app: Express): Server {
         dietaryPreference
       });
 
-      const suggestions = await generateMealSuggestions(
-        0, // Not using specific macro targets for pantry suggestions
-        0,
-        0,
-        [mealType],
-        dietaryPreference,
-        1,
-        excludeRecipes,
-        includeUserRecipes,
-        { // Add pantry items as additional context
-          carbSource,
-          proteinSource,
-          fatSource
-        }
-      );
+      try {
+        const suggestions = await generateMealSuggestions(
+          0, // Not using specific macro targets for pantry suggestions
+          0,
+          0,
+          [mealType],
+          dietaryPreference,
+          1,
+          excludeRecipes,
+          includeUserRecipes,
+          { // Add pantry items as additional context
+            carbSource,
+            proteinSource,
+            fatSource
+          }
+        );
 
-      console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
-      res.json({ suggestions });
-    } catch (error) {
+        console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
+        res.json({ suggestions });
+      } catch (error: any) {
+        console.error("Error generating meal suggestions:", error);
+        if (error instanceof ZodError) {
+          return res.status(400).json({ message: error.errors });
+        }
+        throw error;
+      }
+    } catch (error: any) {
       console.error("Error in pantry suggestions:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
@@ -412,12 +426,12 @@ export function registerRoutes(app: Express): Server {
           { 
             role: "system", 
             content: `You are Chef Nina, a friendly and enthusiastic AI meal planning assistant. You have the following traits:
-- Passionate about healthy eating and balanced nutrition
-- Encouraging and supportive of users' dietary goals
-- Knowledgeable about various cuisines and cooking techniques
-- Considerate of dietary restrictions and preferences
-- Uses emojis occasionally to keep the conversation engaging
-- Provides practical, actionable meal suggestions`
+            - Passionate about healthy eating and balanced nutrition
+            - Encouraging and supportive of users' dietary goals
+            - Knowledgeable about various cuisines and cooking techniques
+            - Considerate of dietary restrictions and preferences
+            - Uses emojis occasionally to keep the conversation engaging
+            - Provides practical, actionable meal suggestions`
           },
           {
             role: "user",

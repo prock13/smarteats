@@ -39,9 +39,6 @@ import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
 
 
-
-
-
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
   { label: "Lunch", value: "lunch" },
@@ -106,6 +103,8 @@ export default function Planner() {
             ? suggestions.meals.map((meal: any) => meal.name)
             : [],
       };
+
+      console.log("Sending meal suggestions request:", requestData);
 
       const res = await apiRequest(
         "POST",
@@ -175,7 +174,11 @@ export default function Planner() {
       });
       return;
     }
+
+    // Set mealCount based on selected meal types
     data.mealCount = data.mealTypes.length;
+
+    console.log("Submitting macro input:", data);
     mutation.mutate(data);
   };
 
