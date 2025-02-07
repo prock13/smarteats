@@ -29,6 +29,7 @@ import {
   Menu as MenuIcon,
   Kitchen as KitchenIcon,
   MenuBook as MenuBookIcon,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -165,7 +166,7 @@ export default function Navigation() {
         position="static"
         color="primary"
         elevation={1}
-        sx={{ height: { xs: 56, md: 64 }, mb: { xs: 1, md: 3 } }}
+        sx={{ height: { xs: 56, md: 64 } }}
       >
         <Container maxWidth="lg">
           <Toolbar

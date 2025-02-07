@@ -1,91 +1,101 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import path from "path";
+import { fileURLToPath } from "url";
 import { setupVite, serveStatic, log } from "./vite";
+import { Server as HttpServer } from "http";
 
-// Set Vite environment variables for proper host binding and HMR
-process.env.VITE_DEV_SERVER_HOST = '0.0.0.0';
-process.env.VITE_DEV_SERVER_PORT = '3000';
-process.env.VITE_HMR_HOST = '0.0.0.0';
-process.env.VITE_HMR_PROTOCOL = 'ws';
-process.env.VITE_ALLOW_HOSTS = '*,b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev';
-process.env.VITE_CONFIG_FILE = 'vite.config.ts'; // Explicitly tell Vite to use the TypeScript config
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+async function createServer(): Promise<HttpServer> {
+  const app = express();
 
-// Add CORS headers for Replit domains
-app.use((req, res, next) => {
-  const host = req.headers.host || '';
-  if (host.includes('.replit.dev') || host.includes('.repl.co')) {
-    res.header('Access-Control-Allow-Origin', `https://${host}`);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-
-  // Handle OPTIONS requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// Logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  // Enhanced error logging
+  const logError = (err: Error) => {
+    console.error('Detailed error:', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    });
   };
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+  // Basic middleware setup
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
+  // Enable CORS for development
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-      log(logLine);
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
     }
+    next();
   });
 
-  next();
-});
-
-(async () => {
-  const server = registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+  // Request logging middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    log(`${req.method} ${req.url}`, 'express');
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      log(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`, 'express');
+    });
+    next();
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+  let server: HttpServer;
+  try {
+    // Register routes and create HTTP server
+    log('Registering routes...', 'express');
+    server = registerRoutes(app);
+    log('Routes registered successfully', 'express');
+
+    // Set up development middleware
+    if (process.env.NODE_ENV !== 'production') {
+      log('Setting up development Vite middleware...', 'express');
+      await setupVite(app, server);
+      log('Vite middleware setup completed', 'express');
+    } else {
+      log('Setting up production static serving...', 'express');
+      serveStatic(app);
+    }
+
+    // Global error handler
+    app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+      logError(err);
+      res.status(500).json({
+        message: process.env.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : err.message
+      });
+    });
+
+    // Start server
+    const port = Number(process.env.PORT) || 5000;
+    const host = '0.0.0.0';
+
+    return new Promise((resolve, reject) => {
+      server.listen(port, host, () => {
+        log(`Express server running on http://${host}:${port} (${process.env.NODE_ENV || 'development'} mode)`, 'express');
+        resolve(server);
+      }).on('error', (error: NodeJS.ErrnoException) => {
+        logError(error);
+        reject(error);
+      });
+    });
+  } catch (error) {
+    logError(error as Error);
+    throw error;
   }
+}
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
-})();
+// Start the server with better error handling
+createServer().catch((error: Error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
