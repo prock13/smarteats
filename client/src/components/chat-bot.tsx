@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Box, TextField, Typography, IconButton, Paper, Avatar } from "@mui/material";
-import { Send as SendIcon, Close as CloseIcon } from "@mui/icons-material";
-import { Drawer } from "@/components/ui/drawer";
+import { Box, TextField, Typography, Paper, Avatar } from "@mui/material";
+import { Send as SendIcon } from "@mui/icons-material";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { getChatbotResponse } from "@/lib/chatbot-service";
 
@@ -69,107 +69,99 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   };
 
   return (
-    <Drawer open={open} onClose={onClose} side="right">
-      <Box sx={{ 
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
         <Box sx={{ 
-          p: 2,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          height: '100vh',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
+          flexDirection: 'column',
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar
-              src="/chef-avatar.png"
-              alt="Chef Nina"
-              sx={{ width: 40, height: 40 }}
-            />
-            <Typography variant="h6">Chat with Chef Nina</Typography>
-          </Box>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
+          <SheetHeader className="border-b pb-2">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar
+                src="/chef-avatar.png"
+                alt="Chef Nina"
+                sx={{ width: 40, height: 40 }}
+              />
+              <SheetTitle>Chat with Chef Nina</SheetTitle>
+            </Box>
+          </SheetHeader>
 
-        <Box sx={{ 
-          flex: 1, 
-          overflowY: "auto", 
-          p: 2, 
-          display: "flex", 
-          flexDirection: "column", 
-          gap: 2,
-          bgcolor: 'background.paper',
-        }}>
-          {messages.map((message, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                justifyContent: message.role === "user" ? "flex-end" : "flex-start",
-              }}
-            >
-              <Paper
+          <Box sx={{ 
+            flex: 1, 
+            overflowY: "auto", 
+            p: 2, 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 2,
+            bgcolor: 'background.paper',
+          }}>
+            {messages.map((message, index) => (
+              <Box
+                key={index}
                 sx={{
-                  p: 2,
-                  maxWidth: "70%",
-                  bgcolor: message.role === "user" ? "primary.main" : "background.default",
-                  color: message.role === "user" ? "primary.contrastText" : "text.primary",
+                  display: "flex",
+                  justifyContent: message.role === "user" ? "flex-end" : "flex-start",
                 }}
               >
-                <Typography variant="body1">{message.content}</Typography>
-                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                  {message.timestamp.toLocaleTimeString()}
+                <Paper
+                  sx={{
+                    p: 2,
+                    maxWidth: "70%",
+                    bgcolor: message.role === "user" ? "primary.main" : "background.default",
+                    color: message.role === "user" ? "primary.contrastText" : "text.primary",
+                  }}
+                >
+                  <Typography variant="body1">{message.content}</Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                    {message.timestamp.toLocaleTimeString()}
+                  </Typography>
+                </Paper>
+              </Box>
+            ))}
+            {isTyping && (
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Chef Nina is typing...
                 </Typography>
-              </Paper>
-            </Box>
-          ))}
-          {isTyping && (
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <Typography variant="body2" color="text.secondary">
-                Chef Nina is typing...
-              </Typography>
-            </Box>
-          )}
-          <div ref={messagesEndRef} />
-        </Box>
+              </Box>
+            )}
+            <div ref={messagesEndRef} />
+          </Box>
 
-        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <TextField
-              fullWidth
-              placeholder="Ask Chef Nina about meal suggestions..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              size="small"
-              sx={{
-                '& .MuiInputBase-input': {
-                  color: 'text.primary',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'divider',
+          <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <TextField
+                fullWidth
+                placeholder="Ask Chef Nina about meal suggestions..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-input': {
+                    color: 'text.primary',
                   },
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'divider',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main',
+                    },
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'primary.main',
-                  },
-                },
-              }}
-            />
-            <Button onClick={handleSend} disabled={!input.trim() || isTyping}>
-              <SendIcon />
-            </Button>
+                }}
+              />
+              <Button onClick={handleSend} disabled={!input.trim() || isTyping}>
+                <SendIcon />
+              </Button>
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }

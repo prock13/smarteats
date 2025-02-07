@@ -32,7 +32,7 @@ interface RecipeModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: InsertRecipe) => void;
-  initialData?: InsertRecipe;
+  initialData?: Partial<InsertRecipe>;
   isSubmitting?: boolean;
 }
 
@@ -45,19 +45,31 @@ export function RecipeModal({
 }: RecipeModalProps) {
   const form = useForm<InsertRecipe>({
     resolver: zodResolver(insertRecipeSchema),
-    defaultValues: initialData || {
-      name: "",
-      description: "",
-      instructions: "",
-      carbs: 0,
-      protein: 0,
-      fats: 0,
-      dietaryRestriction: "none",
+    defaultValues: {
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      instructions: initialData?.instructions || "",
+      carbs: initialData?.carbs || 0,
+      protein: initialData?.protein || 0,
+      fats: initialData?.fats || 0,
+      calories: initialData?.calories || null,
+      fiber: initialData?.fiber || null,
+      sugar: initialData?.sugar || null,
+      cholesterol: initialData?.cholesterol || null,
+      sodium: initialData?.sodium || null,
+      cookingTime: initialData?.cookingTime || null,
+      nutrients: initialData?.nutrients || null,
+      dietaryRestriction: initialData?.dietaryRestriction || "none",
     },
   });
 
-  const handleSubmit = (data: InsertRecipe) => {
-    onSubmit(data);
+  const handleSubmit = async (data: InsertRecipe) => {
+    try {
+      await onSubmit(data);
+      form.reset(); // Reset form after successful submission
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
   };
 
   return (

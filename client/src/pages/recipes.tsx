@@ -32,12 +32,19 @@ export default function Recipes() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertRecipe) => {
-      const res = await apiRequest("POST", "/api/recipes", data);
-      return res.json();
+      const response = await apiRequest("POST", "/api/recipes", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create recipe');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-      toast("Recipe saved successfully");
+      toast({
+        title: "Success",
+        description: "Recipe saved successfully",
+      });
       handleCloseModal();
     },
     onError: (error: Error) => {
@@ -52,8 +59,12 @@ export default function Recipes() {
   const updateMutation = useMutation({
     mutationFn: async (data: InsertRecipe & { id: number }) => {
       const { id, ...recipe } = data;
-      const res = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
-      return res.json();
+      const response = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update recipe');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
@@ -74,7 +85,11 @@ export default function Recipes() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/recipes/${id}`);
+      const response = await apiRequest("DELETE", `/api/recipes/${id}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete recipe');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
