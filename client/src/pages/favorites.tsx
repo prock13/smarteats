@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Recipe as SchemaRecipe } from "@shared/schema";
+
 import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useToast } from "@/hooks/use-toast";

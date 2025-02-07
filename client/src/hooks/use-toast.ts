@@ -9,6 +9,12 @@ interface ToastState {
     variant?: 'default' | 'destructive';
   };
   severity?: 'success' | 'info' | 'warning' | 'error';
+  toasts?: Array<{
+    id: string;
+    title?: string;
+    description?: string;
+    action?: React.ReactNode;
+  }>;
 }
 
 interface ToastOptions {
