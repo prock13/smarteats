@@ -28,7 +28,7 @@ export const recipes = pgTable("recipes", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
-  servingSize: text("serving_size"),
+  servingSize: text("serving_size"),  
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),

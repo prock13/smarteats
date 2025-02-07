@@ -55,7 +55,7 @@ Format your response as a JSON object with this exact structure:
   "name": "Recipe name",
   "description": "Brief description",
   "instructions": "Step-by-step instructions",
-  "servingSize": "Serving size (e.g., '1 cup' or '2 servings')",
+  "servingSize": "Serving size in detail (e.g., '2 cups', '1 large portion', '4 servings')",
   "macros": {
     "carbs": number,
     "protein": number,
@@ -77,14 +77,14 @@ Format your response as a JSON object with this exact structure:
   }
 }
 
-Include detailed nutritional information, serving size, and cooking time. If you're unsure about any value, use null.`;
+Include detailed nutritional information, precise serving size, and cooking time. Ensure the serving size is specific and measurable. If you're unsure about any value, use null.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios, serving sizes, and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients."
+          content: "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios, serving sizes, and complete nutritional information. Always provide measurements in grams for macros and milligrams for micronutrients. Specify serving sizes in clear, measurable units."
         },
         {
           role: "user",
@@ -253,7 +253,7 @@ ${format}`;
         name: recipe.name,
         description: recipe.description,
         instructions: recipe.instructions,
-        servingSize: recipe.servingSize, // Added servingSize here
+        servingSize: recipe.servingSize,
         macros: {
           carbs: recipe.carbs,
           protein: recipe.protein,
