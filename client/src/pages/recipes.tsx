@@ -156,9 +156,9 @@ export default function Recipes() {
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
             </Box>
-          ) : recipes?.length > 0 ? (
+          ) : recipes && recipes.length > 0 ? (
             <Box sx={{ mt: 2 }}>
-              {recipes.map((recipe: Recipe) => (
+              {recipes?.map((recipe: Recipe) => (
                 <Paper 
                   key={recipe.id} 
                   elevation={1} 
