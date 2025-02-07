@@ -2,9 +2,11 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Set Vite environment variables
+// Set Vite environment variables for proper host binding and HMR
 process.env.VITE_DEV_SERVER_HOST = '0.0.0.0';
-process.env.VITE_DEV_SERVER_HMRHOST = '0.0.0.0';
+process.env.VITE_DEV_SERVER_PORT = '3000';
+process.env.VITE_HMR_HOST = '0.0.0.0';
+process.env.VITE_HMR_PROTOCOL = 'ws';
 process.env.VITE_ALLOW_HOSTS = '*';
 
 const app = express();
