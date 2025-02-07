@@ -3,36 +3,58 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import OpenAI from "openai";
-import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
+import { macroInputSchema, mealPlanSchema, insertRecipeSchema, insertFavoriteSchema } from "@shared/schema";
 import { ZodError } from "zod";
+import { setupAuth } from "./auth";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-import { setupAuth, comparePasswords, hashPassword } from "./auth";
-import { insertFavoriteSchema } from "@shared/schema";
-import crypto from "crypto";
 
 export function registerRoutes(app: Express): Server {
-  const server = createServer(app); // Create the server instance
-  // Set up authentication routes and middleware
+  const server = createServer(app);
+
+  // Set up authentication routes and middleware first
   setupAuth(app);
 
+  // Protected Routes - These require authentication
   app.post("/api/meal-suggestions", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      console.log("Received meal suggestions request:", JSON.stringify(req.body, null, 2));
+      console.log("Raw meal suggestions request body:", req.body);
 
-      const input = macroInputSchema.parse(req.body);
-      console.log("Parsed input:", JSON.stringify(input, null, 2));
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ 
+          message: "Invalid request body format - expected an object",
+          received: typeof req.body
+        });
+      }
 
-      const excludeRecipes = req.body.excludeRecipes || [];
+      const parseResult = macroInputSchema.safeParse(req.body);
 
-      // Generate fresh suggestions every time - no caching
-      console.log("Generating new suggestions via OpenAI");
+      if (!parseResult.success) {
+        console.error("Meal suggestions validation error:", parseResult.error);
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: parseResult.error.errors,
+          received: req.body
+        });
+      }
+
+      const input = parseResult.data;
+      console.log("Parsed meal suggestions input:", JSON.stringify(input, null, 2));
+
+      // Extract excludeRecipes safely
+      const excludeRecipes = Array.isArray(req.body.excludeRecipes) ? req.body.excludeRecipes : [];
+
+      console.log("Generating meal suggestions with input:", {
+        ...input,
+        excludeRecipes
+      });
+
       const suggestions = await generateMealSuggestions(
         input.targetCarbs,
         input.targetProtein,
@@ -44,15 +66,21 @@ export function registerRoutes(app: Express): Server {
         input.includeUserRecipes
       );
 
-      console.log("Generated suggestions from OpenAI:", JSON.stringify(suggestions, null, 2));
+      console.log("Generated suggestions:", JSON.stringify(suggestions, null, 2));
       res.json({ suggestions });
     } catch (error) {
-      console.error("Error in meal suggestions:", error);
+      console.error("Error in meal suggestions endpoint:", error);
+
       if (error instanceof ZodError) {
-        return res.status(400).json({ message: error.errors });
+        return res.status(400).json({ 
+          message: "Validation error",
+          errors: error.errors,
+          received: req.body
+        });
       }
+
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
+      res.status(500).json({ message });
     }
   });
 
@@ -126,9 +154,9 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Recipe routes
-  app.get("/api/recipes", async (_req, res) => {
+  app.get("/api/recipes", async (req, res) => {
     try {
-      if (!_req.isAuthenticated()) {
+      if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -448,5 +476,5 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to generate response" });
     }
   });
-  return server; // Return the server instance
+  return server;
 }

@@ -104,7 +104,7 @@ export default function Planner() {
             : [],
       };
 
-      console.log("Sending meal suggestions request:", requestData);
+      console.log("Sending meal suggestions request with data:", requestData);
 
       const res = await apiRequest(
         "POST",
@@ -114,6 +114,7 @@ export default function Planner() {
 
       if (!res.ok) {
         const errorData = await res.json();
+        console.error("Meal suggestions request failed:", errorData);
         throw new Error(errorData.message || "Failed to get meal suggestions");
       }
 
