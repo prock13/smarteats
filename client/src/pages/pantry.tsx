@@ -160,7 +160,6 @@ export default function PantryPage() {
           "POST",
           "/api/pantry-suggestions",
           data,
-          { signal: controller.signal },
         );
 
         if (!response.ok) {

@@ -6,6 +6,36 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from 'react';
 import { Twitter as TwitterIcon, Facebook as FacebookIcon, LinkedIn as LinkedInIcon } from "@mui/icons-material";
 
+interface Recipe {
+  id: number;
+  name: string;
+  description: string;
+  cookingTime: {
+    prep: number;
+    cook: number;
+    total: number;
+  };
+  nutrients: {
+    vitamins: string[];
+    minerals: string[];
+  };
+  carbs: number;
+  protein: number;
+  fats: number;
+  calories?: number;
+  fiber?: number;
+  sugar?: number;
+  instructions: string;
+  cooking_time?: {
+    prep: number;
+    cook: number;
+    total: number;
+  };
+  dietaryRestriction?: string[];
+  tags?: string[];
+}
+
+
 export default function Favorites() {
   const { toast } = useToast();
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);

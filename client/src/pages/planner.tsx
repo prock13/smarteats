@@ -46,18 +46,15 @@ interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
 
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})({
-  transform: (props: ExpandMoreProps) =>
-    props.expand ? "rotate(180deg)" : "rotate(0deg)",
-  marginLeft: "auto",
-  transition: (theme) =>
-    theme.transitions.create("transform", {
-      duration: theme.transitions.duration.shortest,
-    }),
-});
+const ExpandMore = styled(IconButton, {
+  shouldForwardProp: (prop) => prop !== 'expand'
+})<ExpandMoreProps>(({ theme, expand }) => ({
+  transform: expand ? 'rotate(180deg)' : 'rotate(0deg)',
+  marginLeft: 'auto',
+  transition: theme.transitions.create('transform', {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },

@@ -4,7 +4,6 @@ import { Send as SendIcon, Close as CloseIcon } from "@mui/icons-material";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { getChatbotResponse } from "@/lib/chatbot-service";
-import { useAuth } from "@/hooks/use-auth";
 
 interface Message {
   role: "user" | "assistant";
@@ -28,7 +27,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  //const { user } = useAuth();  Removed useAuth import and variable
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
