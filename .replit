@@ -34,9 +34,5 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev -- --host"
-waitForPort = 5000
+args = "npm run dev"
