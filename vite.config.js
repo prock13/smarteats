@@ -12,13 +12,16 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: '0.0.0.0',
-    strictPort: true,
+    host: true,
     port: 5173,
+    strictPort: true,
     hmr: {
-      host: 'b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev'
+      clientPort: 443,
+      path: "ws",
     },
-    allowedHosts: ['b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev']
+    watch: {
+      usePolling: true,
+    }
   },
   resolve: {
     alias: {
