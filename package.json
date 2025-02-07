@@ -17,6 +17,7 @@
     "@jest/globals": "^29.7.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@mui/icons-material": "^6.4.2",
+    "@mui/lab": "^6.0.0-beta.26",
     "@mui/material": "^6.4.2",
     "@mui/x-date-pickers": "^7.25.0",
     "@neondatabase/serverless": "^0.10.4",

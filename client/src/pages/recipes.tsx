@@ -121,6 +121,11 @@ export default function Recipes() {
     setIsModalOpen(true);
   };
 
+  const handleOpenModal = () => {
+    setEditingRecipe(null);
+    setIsModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRecipe(null);
@@ -173,7 +178,7 @@ export default function Recipes() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenModal}
               sx={{
                 background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                 color: "white",

@@ -56,6 +56,14 @@ export default function Navigation() {
     setMobileOpen(false);
   };
 
+  const handleOpenChat = () => {
+    setChatOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setChatOpen(false);
+  };
+
   const navigationItems = [
     { icon: <MenuBookIcon />, text: "Macro Match", path: "/planner" },
     { icon: <KitchenIcon />, text: "Pantry Pal", path: "/pantry" },
@@ -246,7 +254,13 @@ export default function Navigation() {
             >
               <IconButton
                 color="inherit"
-                onClick={() => setChatOpen(true)}
+                onClick={handleOpenChat}
+                aria-label="Open chat"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
               >
                 <ChatIcon />
               </IconButton>
@@ -285,7 +299,7 @@ export default function Navigation() {
       </AppBar>
 
       {drawer}
-      <ChatBot open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatBot open={chatOpen} onClose={handleCloseChat} />
     </>
   );
 }

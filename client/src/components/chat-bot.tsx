@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { Box, TextField, Typography, Paper, Avatar } from "@mui/material";
-import { Send as SendIcon } from "@mui/icons-material";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { 
+  Box, 
+  TextField, 
+  Typography, 
+  Paper, 
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Button
+} from "@mui/material";
+import { Send as SendIcon, Close as CloseIcon } from "@mui/icons-material";
 import { getChatbotResponse } from "@/lib/chatbot-service";
 
 interface Message {
@@ -77,99 +86,108 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-        <Box sx={{ 
-          height: '100vh',
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          height: '80vh',
+          maxHeight: '800px',
           display: 'flex',
           flexDirection: 'column',
-        }}>
-          <SheetHeader className="border-b pb-2">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar
-                src="/chef-avatar.png"
-                alt="Chef Nina"
-                sx={{ width: 40, height: 40 }}
-              />
-              <SheetTitle>Chat with Chef Nina</SheetTitle>
-            </Box>
-          </SheetHeader>
+        },
+      }}
+    >
+      <DialogTitle sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar
+          src="/chef-avatar.png"
+          alt="Chef Nina"
+          sx={{ width: 40, height: 40 }}
+        />
+        <Typography variant="h6">Chat with Chef Nina</Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{ marginLeft: 'auto' }}
+          aria-label="close"
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-          <Box sx={{ 
-            flex: 1, 
-            overflowY: "auto", 
-            p: 2, 
-            display: "flex", 
-            flexDirection: "column", 
-            gap: 2,
-            bgcolor: 'background.paper',
-          }}>
-            {messages.map((message, index) => (
-              <Box
-                key={index}
+      <DialogContent sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        p: 2,
+        gap: 2,
+        overflow: 'hidden'
+      }}>
+        <Box sx={{ 
+          flex: 1,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}>
+          {messages.map((message, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: message.role === "user" ? "flex-end" : "flex-start",
+              }}
+            >
+              <Paper
                 sx={{
-                  display: "flex",
-                  justifyContent: message.role === "user" ? "flex-end" : "flex-start",
+                  p: 2,
+                  maxWidth: "70%",
+                  bgcolor: message.role === "user" ? "primary.main" : "background.default",
+                  color: message.role === "user" ? "primary.contrastText" : "text.primary",
                 }}
               >
-                <Paper
-                  sx={{
-                    p: 2,
-                    maxWidth: "70%",
-                    bgcolor: message.role === "user" ? "primary.main" : "background.default",
-                    color: message.role === "user" ? "primary.contrastText" : "text.primary",
-                  }}
-                >
-                  <Typography variant="body1">{message.content}</Typography>
-                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                    {message.timestamp.toLocaleTimeString()}
-                  </Typography>
-                </Paper>
-              </Box>
-            ))}
-            {isTyping && (
-              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <Typography variant="body2" color="text.secondary">
-                  Chef Nina is typing...
+                <Typography variant="body1">{message.content}</Typography>
+                <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                  {message.timestamp.toLocaleTimeString()}
                 </Typography>
-              </Box>
-            )}
-            <div ref={messagesEndRef} />
-          </Box>
-
-          <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <TextField
-                fullWidth
-                placeholder="Ask Chef Nina about meal suggestions..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                size="small"
-                sx={{
-                  '& .MuiInputBase-input': {
-                    color: 'text.primary',
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'divider',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'primary.main',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'primary.main',
-                    },
-                  },
-                }}
-              />
-              <Button onClick={handleSend} disabled={!input.trim() || isTyping}>
-                <SendIcon />
-              </Button>
+              </Paper>
             </Box>
-          </Box>
+          ))}
+          {isTyping && (
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                Chef Nina is typing...
+              </Typography>
+            </Box>
+          )}
+          <div ref={messagesEndRef} />
         </Box>
-      </SheetContent>
-    </Sheet>
+
+        <Box sx={{ 
+          pt: 2,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          display: "flex",
+          gap: 1,
+        }}>
+          <TextField
+            fullWidth
+            placeholder="Ask Chef Nina about meal suggestions..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            size="small"
+          />
+          <Button
+            variant="contained"
+            onClick={handleSend}
+            disabled={!input.trim() || isTyping}
+            sx={{ minWidth: 'auto', px: 2 }}
+          >
+            <SendIcon />
+          </Button>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 }
