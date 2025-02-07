@@ -1,4 +1,4 @@
-# smarteats
+# SmartEats
 
 ![SmartEats-Logo-128x128](https://github.com/user-attachments/assets/9566c78c-b816-4144-a2aa-e9f6cea45eee)
 
