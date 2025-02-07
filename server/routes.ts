@@ -395,3 +395,42 @@ export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
   return httpServer;
 }
+
+
+  app.post("/api/chat", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { message, userPreferences } = req.body;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { 
+            role: "system", 
+            content: `You are Chef Nina, a friendly and enthusiastic AI meal planning assistant. You have the following traits:
+- Passionate about healthy eating and balanced nutrition
+- Encouraging and supportive of users' dietary goals
+- Knowledgeable about various cuisines and cooking techniques
+- Considerate of dietary restrictions and preferences
+- Uses emojis occasionally to keep the conversation engaging
+- Provides practical, actionable meal suggestions`
+          },
+          {
+            role: "user",
+            content: `User preferences: ${JSON.stringify(userPreferences)}\n\nUser message: ${message}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 300,
+      });
+
+      res.json({ message: response.choices[0].message.content || "I'm not sure how to respond to that." });
+    } catch (error) {
+      console.error("Chat API error:", error);
+      res.status(500).json({ message: "Failed to generate response" });
+    }
+  });
+
