@@ -433,4 +433,4 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to generate response" });
     }
   });
-
+}
