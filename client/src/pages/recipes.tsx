@@ -37,10 +37,7 @@ export default function Recipes() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-      toast({
-        title: "Success",
-        description: "Recipe saved successfully",
-      });
+      toast("Recipe saved successfully");
       handleCloseModal();
     },
     onError: (error: Error) => {
@@ -237,7 +234,22 @@ export default function Recipes() {
         open={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-        initialData={editingRecipe || undefined}
+        initialData={editingRecipe ? {
+          name: editingRecipe.name,
+          description: editingRecipe.description,
+          instructions: editingRecipe.instructions,
+          carbs: editingRecipe.carbs,
+          protein: editingRecipe.protein,
+          fats: editingRecipe.fats,
+          calories: editingRecipe.calories,
+          fiber: editingRecipe.fiber,
+          sugar: editingRecipe.sugar,
+          cholesterol: editingRecipe.cholesterol,
+          sodium: editingRecipe.sodium,
+          cookingTime: editingRecipe.cookingTime as any,
+          nutrients: editingRecipe.nutrients as any,
+          dietaryRestriction: editingRecipe.dietaryRestriction
+        } : undefined}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
       />
     </Container>
