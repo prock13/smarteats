@@ -1,22 +1,32 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRecipeSchema, type InsertRecipe } from "@shared/schema";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Grid,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
   FormControl,
-  InputLabel,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Select,
-  MenuItem,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 interface RecipeModalProps {
   open: boolean;
@@ -51,126 +61,155 @@ export function RecipeModal({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle>
-        {initialData ? "Edit Recipe" : "Create New Recipe"}
-      </DialogTitle>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Recipe Name"
-              {...form.register("name")}
-              error={!!form.formState.errors.name}
-              helperText={form.formState.errors.name?.message}
-              fullWidth
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>
+            {initialData ? "Edit Recipe" : "Create New Recipe"}
+          </DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Recipe Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            <TextField
-              label="Short Description"
-              {...form.register("description")}
-              error={!!form.formState.errors.description}
-              helperText={form.formState.errors.description?.message}
-              multiline
-              rows={2}
-              fullWidth
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={2} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            <TextField
-              label="Cooking Instructions"
-              {...form.register("instructions")}
-              error={!!form.formState.errors.instructions}
-              helperText={form.formState.errors.instructions?.message}
-              multiline
-              rows={4}
-              fullWidth
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instructions</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={4} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            <FormControl fullWidth>
-              <InputLabel>Dietary Restriction</InputLabel>
-              <Select
-                {...form.register("dietaryRestriction")}
-                error={!!form.formState.errors.dietaryRestriction}
-                label="Dietary Restriction"
-                defaultValue="none"
-              >
-                <MenuItem value="none">No Restrictions</MenuItem>
-                <MenuItem value="vegetarian">Vegetarian</MenuItem>
-                <MenuItem value="vegan">Vegan</MenuItem>
-                <MenuItem value="pescatarian">Pescatarian</MenuItem>
-                <MenuItem value="keto">Keto</MenuItem>
-                <MenuItem value="paleo">Paleo</MenuItem>
-                <MenuItem value="gluten-free">Gluten-Free</MenuItem>
-                <MenuItem value="dairy-free">Dairy-Free</MenuItem>
-                <MenuItem value="halal">Halal</MenuItem>
-                <MenuItem value="kosher">Kosher</MenuItem>
-              </Select>
-            </FormControl>
+            <FormField
+              control={form.control}
+              name="dietaryRestriction"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Dietary Restriction</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select dietary restriction" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">No Restrictions</SelectItem>
+                      <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                      <SelectItem value="vegan">Vegan</SelectItem>
+                      <SelectItem value="pescatarian">Pescatarian</SelectItem>
+                      <SelectItem value="keto">Keto</SelectItem>
+                      <SelectItem value="paleo">Paleo</SelectItem>
+                      <SelectItem value="gluten-free">Gluten-Free</SelectItem>
+                      <SelectItem value="dairy-free">Dairy-Free</SelectItem>
+                      <SelectItem value="halal">Halal</SelectItem>
+                      <SelectItem value="kosher">Kosher</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <TextField
-                  label="Carbs (g)"
-                  type="number"
-                  {...form.register("carbs", { valueAsNumber: true })}
-                  error={!!form.formState.errors.carbs}
-                  helperText={form.formState.errors.carbs?.message}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  label="Protein (g)"
-                  type="number"
-                  {...form.register("protein", { valueAsNumber: true })}
-                  error={!!form.formState.errors.protein}
-                  helperText={form.formState.errors.protein?.message}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  label="Fats (g)"
-                  type="number"
-                  {...form.register("fats", { valueAsNumber: true })}
-                  error={!!form.formState.errors.fats}
-                  helperText={form.formState.errors.fats?.message}
-                  fullWidth
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-            sx={{
-              background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-              color: "white",
-              "&:hover": {
-                background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
-              },
-            }}
-          >
-            {isSubmitting ? (
-              <>
-                <CircularProgress size={24} sx={{ mr: 1 }} />
-                Saving...
-              </>
-            ) : (
-              initialData ? "Update Recipe" : "Create Recipe"
-            )}
-          </Button>
-        </DialogActions>
-      </form>
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="carbs"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Carbs (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="protein"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Protein (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fats"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fats (g)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {initialData ? "Update Recipe" : "Create Recipe"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Box, TextField, Typography, IconButton, Paper, Avatar } from "@mui/material";
 import { Send as SendIcon, Close as CloseIcon } from "@mui/icons-material";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
+import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { getChatbotResponse } from "@/lib/chatbot-service";
 
@@ -27,7 +27,6 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  //const { user } = useAuth();  Removed useAuth import and variable
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,29 +69,32 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
   };
 
   return (
-    <Drawer open={open} onClose={onClose}>
-      <DrawerContent className="h-[80vh]">
-        <DrawerHeader className="relative border-b">
+    <Drawer open={open} onClose={onClose} side="right">
+      <Box sx={{ 
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <Box sx={{ 
+          p: 2,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               src="/chef-avatar.png"
               alt="Chef Nina"
               sx={{ width: 40, height: 40 }}
             />
-            <DrawerTitle>Chat with Chef Nina</DrawerTitle>
+            <Typography variant="h6">Chat with Chef Nina</Typography>
           </Box>
-          <IconButton 
-            onClick={onClose} 
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-            }}
-          >
+          <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
-        </DrawerHeader>
+        </Box>
 
         <Box sx={{ 
           flex: 1, 
@@ -102,7 +104,6 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           flexDirection: "column", 
           gap: 2,
           bgcolor: 'background.paper',
-          color: 'text.primary'
         }}>
           {messages.map((message, index) => (
             <Box
@@ -137,7 +138,7 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           <div ref={messagesEndRef} />
         </Box>
 
-        <DrawerFooter>
+        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               fullWidth
@@ -167,8 +168,8 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
               <SendIcon />
             </Button>
           </Box>
-        </DrawerFooter>
-      </DrawerContent>
+        </Box>
+      </Box>
     </Drawer>
   );
 }

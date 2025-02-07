@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 import { storage } from "./storage";
 import session from "express-session";
 import passport from "passport";
@@ -96,9 +96,13 @@ if (process.env.NODE_ENV === "development") {
     }
   });
 } else {
-  app.use((req, res, next) => {
+  // Serve static files from the dist/public directory
+  app.use(express.static('dist/public'));
+
+  // Handle client-side routing by serving index.html for non-API routes
+  app.get('*', (req, res, next) => {
     if (!req.path.startsWith('/api/')) {
-      serveStatic(app)(req, res, next);
+      res.sendFile('index.html', { root: 'dist/public' });
     } else {
       next();
     }
