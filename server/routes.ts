@@ -2,7 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
+import OpenAI from "openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema } from "@shared/schema";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { insertFavoriteSchema } from "@shared/schema";
 import crypto from "crypto";
@@ -390,11 +395,6 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message });
     }
   });
-
-
-  const httpServer = createServer(app);
-  return httpServer;
-}
 
 
   app.post("/api/chat", async (req, res) => {
