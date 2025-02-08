@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-
 import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useToast } from "@/hooks/use-toast";
@@ -11,25 +10,25 @@ interface Recipe {
   name: string;
   description: string;
   cookingTime: {
-    prep: number;
-    cook: number;
-    total: number;
+    prep: number | null;
+    cook: number | null;
+    total: number | null;
   };
   nutrients: {
-    vitamins: string[];
-    minerals: string[];
+    vitamins: string[] | null;
+    minerals: string[] | null;
   };
   carbs: number;
   protein: number;
   fats: number;
-  calories?: number;
-  fiber?: number;
-  sugar?: number;
-  cholesterol?: number;
-  sodium?: number;
+  calories: number | null;
+  fiber: number | null;
+  sugar: number | null;
+  cholesterol: number | null;
+  sodium: number | null;
   instructions: string;
-  servingSize?: string;
-  dietaryRestriction?: string[];
+  servingSize: string | null;
+  dietaryRestriction: string;
   tags?: string[];
 }
 
@@ -43,9 +42,9 @@ export default function Favorites() {
     queryKey: ["/api/favorites"],
   });
 
-  const handleShare = (event: React.MouseEvent<HTMLElement>, meal: any) => {
+  const handleShare = (event: React.MouseEvent<HTMLElement>, recipe: Recipe) => {
     setShareAnchorEl(event.currentTarget);
-    setSharingRecipe(meal);
+    setSharingRecipe(recipe);
   };
 
   const handleShareClose = () => {
@@ -77,24 +76,6 @@ export default function Favorites() {
       case "linkedin":
         platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
         break;
-      default:
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: `${sharingRecipe.name} - Smart Meal Planner`,
-              text: shareText,
-              url: baseUrl,
-            });
-            toast({
-              title: "Success!",
-              description: "Recipe shared successfully",
-            });
-          } catch (error) {
-            console.error("Error sharing:", error);
-          }
-          handleShareClose();
-          return;
-        }
     }
 
     if (platformUrl) {
@@ -160,30 +141,22 @@ export default function Favorites() {
                         cholesterol: recipe.cholesterol || null,
                         sodium: recipe.sodium || null
                       },
-                      cookingTime: recipe.cookingTime || {
-                        prep: null,
-                        cook: null,
-                        total: null
-                      },
-                      nutrients: recipe.nutrients || {
-                        vitamins: null,
-                        minerals: null
-                      },
-                      dietaryRestriction: Array.isArray(recipe.dietaryRestriction) ? recipe.dietaryRestriction[0] : recipe.dietaryRestriction || "none",
-                      servingSize: recipe.servingSize || null,
-                      isStoredRecipe: false 
+                      cookingTime: recipe.cookingTime,
+                      nutrients: recipe.nutrients,
+                      dietaryRestriction: recipe.dietaryRestriction || "none",
+                      servingSize: recipe.servingSize
                     }}
+                    onShare={handleShare}
                     targetMacros={{
                       carbs: recipe.carbs,
                       protein: recipe.protein,
                       fats: recipe.fats
                     }}
-                    onShare={handleShare}
-                    onExpandClick={() => handleExpandClick(index)}
+                    favorites={favorites}
                     expanded={expandedCards[index] || false}
+                    onExpandClick={() => handleExpandClick(index)}
                     showAddToCalendar={true}
                     showDelete={true}
-                    favorites={favorites}
                   />
                 </Grid>
               ))}

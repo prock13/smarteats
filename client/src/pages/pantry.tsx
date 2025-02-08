@@ -401,7 +401,7 @@ export default function PantryPage() {
                         minerals: null,
                       },
                       dietaryRestriction: meal.dietaryRestriction || "none",
-                      servingSize: meal.servingSize || null,
+                      servingSize: meal.servingSize || null
                     }}
                     onShare={handleShareClick}
                     targetMacros={{

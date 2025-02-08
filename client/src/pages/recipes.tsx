@@ -34,7 +34,10 @@ export default function Recipes() {
   const createMutation = useMutation({
     mutationFn: async (data: InsertRecipe) => {
       console.log("Creating recipe with data:", data);
-      const response = await apiRequest("POST", "/api/recipes", data);
+      const response = await apiRequest("POST", "/api/recipes", {
+        ...data,
+        servingSize: data.servingSize || null
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create recipe');
@@ -63,7 +66,10 @@ export default function Recipes() {
     mutationFn: async (data: InsertRecipe & { id: number }) => {
       console.log("Updating recipe with data:", data);
       const { id, ...recipe } = data;
-      const response = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
+      const response = await apiRequest("PUT", `/api/recipes/${id}`, {
+        ...recipe,
+        servingSize: recipe.servingSize || null
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update recipe');
@@ -135,9 +141,16 @@ export default function Recipes() {
     console.log("Submitting recipe data:", data);
     try {
       if (editingRecipe) {
-        await updateMutation.mutateAsync({ ...data, id: editingRecipe.id });
+        await updateMutation.mutateAsync({ 
+          ...data, 
+          id: editingRecipe.id,
+          servingSize: data.servingSize || null 
+        });
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync({
+          ...data,
+          servingSize: data.servingSize || null 
+        });
       }
     } catch (error) {
       console.error("Error submitting recipe:", error);

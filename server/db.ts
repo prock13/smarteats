@@ -6,8 +6,8 @@ import * as schema from '@shared/schema';
 // Configure WebSocket for Neon serverless
 neonConfig.webSocketConstructor = ws;
 neonConfig.useSecureWebSocket = true;
-neonConfig.pipelineTLS = false; 
-neonConfig.pipelineConnect = false; 
+neonConfig.pipelineTLS = false;  // Changed to false to avoid SSL/TLS pipeline issues
+neonConfig.pipelineConnect = false;  // Changed to false to avoid connection pipeline issues
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
@@ -27,12 +27,14 @@ export const pool = new Pool({
 export const db = drizzle(pool, { schema });
 
 // Test the connection on startup and retry if needed
-const connectWithRetry = async (retries = 3, delay = 2000) => {
+const connectWithRetry = async (retries = 5, delay = 2000) => {  
   for (let i = 0; i < retries; i++) {
     try {
-      await pool.connect();
+      const client = await pool.connect();
+      await client.query('SELECT NOW()'); // Test query
       console.log('Successfully connected to the database');
-      return;
+      client.release();
+      return true;
     } catch (err) {
       console.error(`Failed to connect to the database (attempt ${i + 1}/${retries}):`, err);
       if (i < retries - 1) {
@@ -43,7 +45,10 @@ const connectWithRetry = async (retries = 3, delay = 2000) => {
   throw new Error('Failed to connect to the database after multiple attempts');
 };
 
+// Initialize connection with proper error handling
 connectWithRetry().catch(err => {
   console.error('Database connection failed:', err);
   process.exit(1);
 });
+
+export default db;
