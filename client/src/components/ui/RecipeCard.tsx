@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Chip,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -36,17 +37,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-import { Chip } from "@mui/material";
-
 interface Macros {
   carbs: number;
   protein: number;
   fats: number;
-  calories?: number | null;
-  fiber?: number | null;
-  sugar?: number | null;
-  cholesterol?: number | null;
-  sodium?: number | null;
+  calories: number | null;
+  fiber: number | null;
+  sugar: number | null;
+  cholesterol: number | null;
+  sodium: number | null;
 }
 
 interface CookingTime {
@@ -60,16 +59,16 @@ interface Nutrients {
   minerals: string[] | null;
 }
 
-interface Meal {
+export interface Meal {
   name: string;
   description: string;
   instructions: string;
   macros: Macros;
-  cookingTime?: CookingTime | null;
-  nutrients?: Nutrients | null;
+  cookingTime: CookingTime | null;
+  nutrients: Nutrients | null;
   isStoredRecipe?: boolean;
-  dietaryRestriction?: string;
-  servingSize?: string | null;
+  dietaryRestriction: string;
+  servingSize: string | null;
 }
 
 interface RecipeCardProps {

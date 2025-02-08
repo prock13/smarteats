@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { RecipeCard } from "@/components/ui/RecipeCard";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from 'react';
 import { Twitter as TwitterIcon, Facebook as FacebookIcon, LinkedIn as LinkedInIcon } from "@mui/icons-material";
+import type { Meal } from "@/components/ui/RecipeCard";
 
 interface Recipe {
   id: number;
@@ -33,7 +33,6 @@ interface Recipe {
 }
 
 export default function Favorites() {
-  const { toast } = useToast();
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
@@ -42,9 +41,12 @@ export default function Favorites() {
     queryKey: ["/api/favorites"],
   });
 
-  const handleShare = (event: React.MouseEvent<HTMLElement>, recipe: Recipe) => {
-    setShareAnchorEl(event.currentTarget);
-    setSharingRecipe(recipe);
+  const handleShare = (event: React.MouseEvent<HTMLElement>, meal: Meal) => {
+    const recipe = favorites?.find(r => r.name === meal.name);
+    if (recipe) {
+      setShareAnchorEl(event.currentTarget);
+      setSharingRecipe(recipe);
+    }
   };
 
   const handleShareClose = () => {
@@ -135,15 +137,15 @@ export default function Favorites() {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
                         fats: recipe.fats,
-                        calories: recipe.calories || null,
-                        fiber: recipe.fiber || null,
-                        sugar: recipe.sugar || null,
-                        cholesterol: recipe.cholesterol || null,
-                        sodium: recipe.sodium || null
+                        calories: recipe.calories,
+                        fiber: recipe.fiber,
+                        sugar: recipe.sugar,
+                        cholesterol: recipe.cholesterol,
+                        sodium: recipe.sodium
                       },
                       cookingTime: recipe.cookingTime,
                       nutrients: recipe.nutrients,
-                      dietaryRestriction: recipe.dietaryRestriction || "none",
+                      dietaryRestriction: recipe.dietaryRestriction,
                       servingSize: recipe.servingSize
                     }}
                     onShare={handleShare}
