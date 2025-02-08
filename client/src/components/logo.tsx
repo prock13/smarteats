@@ -32,7 +32,7 @@ export const Logo = (props: LogoProps) => {
 
   return (
     <img
-      src="/logo.png"
+      src="/smarteats-logo.png"
       alt="SmartEats Logo"
       style={{
         width: size,
