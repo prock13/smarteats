@@ -20,37 +20,7 @@ export interface IStorage {
 
   // Meal plan operations
   getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]>;
-  saveMealPlan(plan: {
-    date: Date;
-    meal: {
-      name: string;
-      description: string;
-      servingSize: string | null;
-      instructions?: string;
-      macros: {
-        carbs: number;
-        protein: number;
-        fats: number;
-        calories?: number | null;
-        fiber?: number | null;
-        sugar?: number | null;
-        cholesterol?: number | null;
-        sodium?: number | null;
-      };
-      cookingTime?: {
-        prep: number | null;
-        cook: number | null;
-        total: number | null;
-      } | null;
-      nutrients?: {
-        vitamins: string[] | null;
-        minerals: string[] | null;
-      } | null;
-      dietaryRestriction?: string;
-    };
-    mealType: string;
-    userId: number;
-  }): Promise<MealPlan>;
+  saveMealPlan(plan: MealPlan): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
 
   // Recipe operations
@@ -149,61 +119,23 @@ export class DatabaseStorage implements IStorage {
     return plans;
   }
 
-  async saveMealPlan(plan: {
-    date: Date;
-    meal: {
-      name: string;
-      description: string;
-      servingSize: string | null;
-      instructions?: string;
-      macros: {
-        carbs: number;
-        protein: number;
-        fats: number;
-        calories?: number | null;
-        fiber?: number | null;
-        sugar?: number | null;
-        cholesterol?: number | null;
-        sodium?: number | null;
-      };
-      cookingTime?: {
-        prep: number | null;
-        cook: number | null;
-        total: number | null;
-      } | null;
-      nutrients?: {
-        vitamins: string[] | null;
-        minerals: string[] | null;
-      } | null;
-      dietaryRestriction?: string;
-    };
-    mealType: string;
-    userId: number;
-  }): Promise<MealPlan> {
+  async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
 
+    // Ensure meal object has all required fields with proper null handling
     const meal = {
       ...plan.meal,
       servingSize: plan.meal.servingSize ?? null,
-      instructions: plan.meal.instructions ?? "",
       cookingTime: plan.meal.cookingTime ?? null,
       nutrients: plan.meal.nutrients ?? { vitamins: null, minerals: null },
       dietaryRestriction: plan.meal.dietaryRestriction ?? "none",
-      macros: {
-        ...plan.meal.macros,
-        calories: plan.meal.macros.calories ?? null,
-        fiber: plan.meal.macros.fiber ?? null,
-        sugar: plan.meal.macros.sugar ?? null,
-        cholesterol: plan.meal.macros.cholesterol ?? null,
-        sodium: plan.meal.macros.sodium ?? null
-      }
     };
 
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
         date: plan.date,
-        meal,
+        meal: meal,
         mealType: plan.mealType,
         userId: plan.userId
       })
@@ -266,22 +198,11 @@ export class DatabaseStorage implements IStorage {
     // Map the results to include all required Recipe properties
     const favoritesWithServingSize = result.map(favorite => ({
       ...favorite,
-      servingSize: favorite.servingSize || null,  // Ensure servingSize is properly handled
-      cookingTime: favorite.cookingTime || {
-        prep: null,
-        cook: null,
-        total: null
-      },
-      nutrients: favorite.nutrients || {
-        vitamins: null,
-        minerals: null
-      },
-      // Make sure all macro-related fields are properly passed through
-      calories: favorite.calories || null,
-      fiber: favorite.fiber || null,
-      sugar: favorite.sugar || null,
-      cholesterol: favorite.cholesterol || null,
-      sodium: favorite.sodium || null
+      // Ensure servingSize is properly passed through
+      servingSize: favorite.servingSize ?? null,
+      // Add any other required fields with proper null fallbacks
+      cookingTime: favorite.cookingTime ?? null,
+      nutrients: favorite.nutrients ?? { vitamins: null, minerals: null }
     }));
 
     console.log("Found favorites:", favoritesWithServingSize);
@@ -292,12 +213,7 @@ export class DatabaseStorage implements IStorage {
     console.log("Adding favorite for user:", userId, "recipe:", favorite);
     const [savedFavorite] = await db
       .insert(favorites)
-      .values({
-        ...favorite,
-        userId,
-        servingSize: favorite.servingSize || null,  // Ensure servingSize is included
-        tags: favorite.tags || []
-      })
+      .values({ ...favorite, userId, tags: [] })
       .returning();
     console.log("Added favorite:", savedFavorite);
     return savedFavorite;

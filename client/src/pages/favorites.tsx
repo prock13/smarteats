@@ -1,38 +1,40 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { RecipeCard } from "@/components/ui/RecipeCard";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from 'react';
 import { Twitter as TwitterIcon, Facebook as FacebookIcon, LinkedIn as LinkedInIcon } from "@mui/icons-material";
-import type { Meal } from "@/components/ui/RecipeCard";
 
 interface Recipe {
   id: number;
   name: string;
   description: string;
   cookingTime: {
-    prep: number | null;
-    cook: number | null;
-    total: number | null;
+    prep: number;
+    cook: number;
+    total: number;
   };
   nutrients: {
-    vitamins: string[] | null;
-    minerals: string[] | null;
+    vitamins: string[];
+    minerals: string[];
   };
   carbs: number;
   protein: number;
   fats: number;
-  calories: number | null;
-  fiber: number | null;
-  sugar: number | null;
-  cholesterol: number | null;
-  sodium: number | null;
+  calories?: number;
+  fiber?: number;
+  sugar?: number;
+  cholesterol?: number;
+  sodium?: number;
   instructions: string;
-  servingSize: string | null;
-  dietaryRestriction: string;
+  servingSize?: string;
+  dietaryRestriction?: string[];
   tags?: string[];
 }
 
 export default function Favorites() {
+  const { toast } = useToast();
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
@@ -41,12 +43,9 @@ export default function Favorites() {
     queryKey: ["/api/favorites"],
   });
 
-  const handleShare = (event: React.MouseEvent<HTMLElement>, meal: Meal) => {
-    const recipe = favorites?.find(r => r.name === meal.name);
-    if (recipe) {
-      setShareAnchorEl(event.currentTarget);
-      setSharingRecipe(recipe);
-    }
+  const handleShare = (event: React.MouseEvent<HTMLElement>, meal: any) => {
+    setShareAnchorEl(event.currentTarget);
+    setSharingRecipe(meal);
   };
 
   const handleShareClose = () => {
@@ -78,6 +77,24 @@ export default function Favorites() {
       case "linkedin":
         platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
         break;
+      default:
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `${sharingRecipe.name} - Smart Meal Planner`,
+              text: shareText,
+              url: baseUrl,
+            });
+            toast({
+              title: "Success!",
+              description: "Recipe shared successfully",
+            });
+          } catch (error) {
+            console.error("Error sharing:", error);
+          }
+          handleShareClose();
+          return;
+        }
     }
 
     if (platformUrl) {
@@ -137,28 +154,36 @@ export default function Favorites() {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
                         fats: recipe.fats,
-                        calories: recipe.calories,
-                        fiber: recipe.fiber,
-                        sugar: recipe.sugar,
-                        cholesterol: recipe.cholesterol,
-                        sodium: recipe.sodium
+                        calories: recipe.calories || null,
+                        servingSize: recipe.servingSize || null,
+                        fiber: recipe.fiber || null,
+                        sugar: recipe.sugar || null,
+                        cholesterol: recipe.cholesterol || null,
+                        sodium: recipe.sodium || null
                       },
-                      cookingTime: recipe.cookingTime,
-                      nutrients: recipe.nutrients,
-                      dietaryRestriction: recipe.dietaryRestriction,
-                      servingSize: recipe.servingSize
+                      cookingTime: recipe.cookingTime || {
+                        prep: 15,
+                        cook: 20,
+                        total: 35
+                      },
+                      nutrients: recipe.nutrients || {
+                        vitamins: null,
+                        minerals: null
+                      },
+                      dietaryRestriction: Array.isArray(recipe.dietaryRestriction) ? recipe.dietaryRestriction[0] : recipe.dietaryRestriction || "none",
+                      isStoredRecipe: false 
                     }}
-                    onShare={handleShare}
                     targetMacros={{
                       carbs: recipe.carbs,
                       protein: recipe.protein,
                       fats: recipe.fats
                     }}
-                    favorites={favorites}
-                    expanded={expandedCards[index] || false}
+                    onShare={handleShare}
                     onExpandClick={() => handleExpandClick(index)}
+                    expanded={expandedCards[index] || false}
                     showAddToCalendar={true}
                     showDelete={true}
+                    favorites={favorites}
                   />
                 </Grid>
               ))}

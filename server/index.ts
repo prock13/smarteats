@@ -1,6 +1,3 @@
-// Set production mode
-process.env.NODE_ENV = 'production';
-
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
@@ -22,15 +19,16 @@ const sessionSettings: session.SessionOptions = {
   saveUninitialized: false,
   store: storage.sessionStore,
   cookie: {
-    secure: true, // Always use secure cookies in production
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   }
 };
 
-// In production, trust first proxy
-app.set("trust proxy", 1);
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 app.use(session(sessionSettings));
 
@@ -89,7 +87,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(async (req, res, next) => {
     try {
       if (!req.path.startsWith('/api/')) {
-        await setupVite(); 
+        await setupVite(app, server);
       }
       next();
     } catch (e) {
@@ -121,5 +119,5 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 const PORT = 5000;
 server.listen(PORT, "0.0.0.0", () => {
-  log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  log(`Server running on port ${PORT}`);
 });

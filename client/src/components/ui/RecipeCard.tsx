@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Chip,
 } from "@mui/material";
 import {
   CalendarToday as CalendarIcon,
@@ -37,15 +36,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+import { Chip } from "@mui/material";
+
 interface Macros {
   carbs: number;
   protein: number;
   fats: number;
-  calories: number | null;
-  fiber: number | null;
-  sugar: number | null;
-  cholesterol: number | null;
-  sodium: number | null;
+  calories?: number | null;
+  servingSize?: string | null;
+  fiber?: number | null;
+  sugar?: number | null;
+  cholesterol?: number | null;
+  sodium?: number | null;
 }
 
 interface CookingTime {
@@ -59,16 +61,15 @@ interface Nutrients {
   minerals: string[] | null;
 }
 
-export interface Meal {
+interface Meal {
   name: string;
   description: string;
   instructions: string;
   macros: Macros;
-  cookingTime: CookingTime | null;
-  nutrients: Nutrients | null;
+  cookingTime?: CookingTime | null;
+  nutrients?: Nutrients | null;
   isStoredRecipe?: boolean;
-  dietaryRestriction: string;
-  servingSize: string | null;
+  dietaryRestriction?: string;
 }
 
 interface RecipeCardProps {
@@ -189,6 +190,7 @@ export function RecipeCard({
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
             fats: meal.macros.fats,
+            servingSize: meal.macros.servingSize || null
           },
         },
         mealType,
@@ -231,7 +233,7 @@ export function RecipeCard({
         sugar: meal.macros.sugar,
         cholesterol: meal.macros.cholesterol,
         sodium: meal.macros.sodium,
-        servingSize: meal.servingSize,
+        servingSize: meal.macros.servingSize,
         cookingTime: meal.cookingTime,
         nutrients: meal.nutrients,
         dietaryRestriction: meal.dietaryRestriction || "none",
@@ -653,10 +655,10 @@ export function RecipeCard({
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
-                  {meal.servingSize && (
+                  {meal.macros.servingSize && (
                     <Grid item xs={12}>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "medium" }}>
-                        Serving Size: {meal.servingSize}
+                        Serving Size: {meal.macros.servingSize}
                       </Typography>
                     </Grid>
                   )}

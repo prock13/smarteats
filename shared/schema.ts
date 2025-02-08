@@ -28,7 +28,7 @@ export const recipes = pgTable("recipes", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
-  servingSize: text("serving_size"),  // Ensure this is properly defined
+  servingSize: text("serving_size"),  
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -50,7 +50,6 @@ export const favorites = pgTable("favorites", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
-  servingSize: text("serving_size"), // Add serving size to favorites table
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -164,7 +163,6 @@ export const mealPlanSchema = z.object({
     dietaryRestriction: dietaryPreferenceEnum.default("none"),
   }),
   mealType: mealTypeEnum,
-  userId: z.number(),
 });
 
 export const insertUserSchema = createInsertSchema(users).extend({
@@ -180,40 +178,13 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
   carbs: z.number().min(0, "Carbs must be 0 or greater"),
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
-  servingSize: z.string().nullable(),
   dietaryRestriction: dietaryPreferenceEnum.default("none"),
   tags: z.array(z.string()).optional().default([]),
 });
 
 // Types
 export type MacroInput = z.infer<typeof macroInputSchema>;
-export type Meal = {
-  name: string;
-  description: string;
-  instructions?: string;
-  macros: {
-    carbs: number;
-    protein: number;
-    fats: number;
-    calories?: number | null;
-    fiber?: number | null;
-    sugar?: number | null;
-    cholesterol?: number | null;
-    sodium?: number | null;
-  };
-  cookingTime?: {
-    prep: number | null;
-    cook: number | null;
-    total: number | null;
-  } | null;
-  nutrients?: {
-    vitamins: string[] | null;
-    minerals: string[] | null;
-  } | null;
-  dietaryRestriction?: string;
-  servingSize?: string | null;
-  isStoredRecipe?: boolean;
-};
+export type Meal = typeof meals.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect & { servingSize: string | null };
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type MealSuggestion = typeof mealSuggestions.$inferSelect;

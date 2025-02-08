@@ -288,6 +288,7 @@ export default function CalendarPage() {
                               protein: plan.meal.macros.protein,
                               fats: plan.meal.macros.fats,
                               calories: favorite?.calories || plan.meal.macros.calories || null,
+                              servingSize: favorite?.servingSize || plan.meal.servingSize || null,
                               fiber: favorite?.fiber || plan.meal.macros.fiber || null,
                               sugar: favorite?.sugar || plan.meal.macros.sugar || null,
                               cholesterol: favorite?.cholesterol || plan.meal.macros.cholesterol || null,
@@ -303,8 +304,7 @@ export default function CalendarPage() {
                               minerals: null
                             },
                             isStoredRecipe: true,
-                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none",
-                            servingSize: favorite?.servingSize || plan.meal.servingSize || null
+                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
                           }}
                           mealType={plan.mealType}
                           showAddToCalendar={false}
