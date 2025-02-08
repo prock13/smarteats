@@ -22,16 +22,15 @@ const sessionSettings: session.SessionOptions = {
   saveUninitialized: false,
   store: storage.sessionStore,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: true, // Always use secure cookies in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   }
 };
 
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
-}
+// In production, trust first proxy
+app.set("trust proxy", 1);
 
 app.use(session(sessionSettings));
 
@@ -90,7 +89,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(async (req, res, next) => {
     try {
       if (!req.path.startsWith('/api/')) {
-        await setupVite(app, server);
+        await setupVite(); 
       }
       next();
     } catch (e) {
@@ -122,5 +121,5 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 const PORT = 5000;
 server.listen(PORT, "0.0.0.0", () => {
-  log(`Server running on port ${PORT}`);
+  log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
