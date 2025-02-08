@@ -45,9 +45,14 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
+    // Configure session store with error handling and retries
     this.sessionStore = new PostgresSessionStore({
       pool,
       createTableIfMissing: true,
+      schemaName: 'public',
+      tableName: 'session',
+      pruneSessionInterval: false, // Disable automatic pruning
+      errorLog: console.error.bind(console),
     });
   }
 
