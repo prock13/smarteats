@@ -386,7 +386,6 @@ export default function PantryPage() {
                         protein: meal.macros.protein,
                         fats: meal.macros.fats,
                         calories: meal.macros.calories || null,
-                        servingSize: meal.servingSize || null,
                         fiber: meal.macros.fiber || null,
                         sugar: meal.macros.sugar || null,
                         cholesterol: meal.macros.cholesterol || null,

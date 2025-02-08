@@ -43,7 +43,6 @@ interface Macros {
   protein: number;
   fats: number;
   calories?: number | null;
-  servingSize?: string | null;
   fiber?: number | null;
   sugar?: number | null;
   cholesterol?: number | null;
@@ -70,6 +69,7 @@ interface Meal {
   nutrients?: Nutrients | null;
   isStoredRecipe?: boolean;
   dietaryRestriction?: string;
+  servingSize?: string | null;
 }
 
 interface RecipeCardProps {
@@ -190,7 +190,6 @@ export function RecipeCard({
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
             fats: meal.macros.fats,
-            servingSize: meal.macros.servingSize || null
           },
         },
         mealType,
@@ -233,7 +232,7 @@ export function RecipeCard({
         sugar: meal.macros.sugar,
         cholesterol: meal.macros.cholesterol,
         sodium: meal.macros.sodium,
-        servingSize: meal.macros.servingSize,
+        servingSize: meal.servingSize,
         cookingTime: meal.cookingTime,
         nutrients: meal.nutrients,
         dietaryRestriction: meal.dietaryRestriction || "none",
@@ -655,10 +654,10 @@ export function RecipeCard({
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
-                  {meal.macros.servingSize && (
+                  {meal.servingSize && (
                     <Grid item xs={12}>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "medium" }}>
-                        Serving Size: {meal.macros.servingSize}
+                        Serving Size: {meal.servingSize}
                       </Typography>
                     </Grid>
                   )}
