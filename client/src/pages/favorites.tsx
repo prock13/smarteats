@@ -162,15 +162,16 @@ export default function Favorites() {
                         sodium: recipe.sodium || null
                       },
                       cookingTime: recipe.cookingTime || {
-                        prep: 15,
-                        cook: 20,
-                        total: 35
+                        prep: null,
+                        cook: null,
+                        total: null
                       },
                       nutrients: recipe.nutrients || {
                         vitamins: null,
                         minerals: null
                       },
                       dietaryRestriction: Array.isArray(recipe.dietaryRestriction) ? recipe.dietaryRestriction[0] : recipe.dietaryRestriction || "none",
+                      servingSize: recipe.servingSize || null,
                       isStoredRecipe: false 
                     }}
                     targetMacros={{

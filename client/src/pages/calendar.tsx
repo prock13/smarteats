@@ -304,7 +304,8 @@ export default function CalendarPage() {
                               minerals: null
                             },
                             isStoredRecipe: true,
-                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
+                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none",
+                            servingSize: favorite?.servingSize || plan.meal.servingSize || null
                           }}
                           mealType={plan.mealType}
                           showAddToCalendar={false}
