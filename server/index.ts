@@ -1,3 +1,6 @@
+// Set production mode
+process.env.NODE_ENV = 'production';
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
