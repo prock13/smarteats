@@ -295,9 +295,9 @@ export default function CalendarPage() {
                               sodium: favorite?.sodium || plan.meal.macros.sodium || null
                             },
                             cookingTime: favorite?.cookingTime || plan.meal.cookingTime || {
-                              prep: 15,
-                              cook: 20,
-                              total: 35
+                              prep: null,
+                              cook: null,
+                              total: null
                             },
                             nutrients: favorite?.nutrients || plan.meal.nutrients || {
                               vitamins: null,

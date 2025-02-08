@@ -121,15 +121,26 @@ export class DatabaseStorage implements IStorage {
 
   async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
+
+    // Ensure meal object has all required fields with proper null handling
+    const meal = {
+      ...plan.meal,
+      servingSize: plan.meal.servingSize ?? null,
+      cookingTime: plan.meal.cookingTime ?? null,
+      nutrients: plan.meal.nutrients ?? { vitamins: null, minerals: null },
+      dietaryRestriction: plan.meal.dietaryRestriction ?? "none",
+    };
+
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
         date: plan.date,
-        meal: plan.meal,
+        meal: meal,
         mealType: plan.mealType,
         userId: plan.userId
       })
       .returning();
+
     console.log('Saved meal plan:', JSON.stringify(savedPlan, null, 2));
     return savedPlan;
   }
@@ -184,13 +195,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt));
 
-    // Map the results to include servingSize as required by Recipe type
+    // Map the results to include all required Recipe properties
     const favoritesWithServingSize = result.map(favorite => ({
       ...favorite,
-      servingSize: favorite.servingSize || null
+      // Ensure servingSize is properly passed through
+      servingSize: favorite.servingSize ?? null,
+      // Add any other required fields with proper null fallbacks
+      cookingTime: favorite.cookingTime ?? null,
+      nutrients: favorite.nutrients ?? { vitamins: null, minerals: null }
     }));
 
-    console.log("Found favorites:", result);
+    console.log("Found favorites:", favoritesWithServingSize);
     return favoritesWithServingSize;
   }
 

@@ -146,11 +146,21 @@ export const mealPlanSchema = z.object({
   meal: z.object({
     name: z.string(),
     description: z.string(),
+    instructions: z.string().optional(),
+    servingSize: z.string().nullable(),
     macros: z.object({
       carbs: z.number(),
       protein: z.number(),
       fats: z.number(),
+      calories: z.number().nullable(),
+      fiber: z.number().nullable(),
+      sugar: z.number().nullable(),
+      cholesterol: z.number().nullable(),
+      sodium: z.number().nullable(),
     }),
+    cookingTime: cookingTimeSchema.nullable(),
+    nutrients: nutrientsSchema.nullable(),
+    dietaryRestriction: dietaryPreferenceEnum.default("none"),
   }),
   mealType: mealTypeEnum,
 });

@@ -190,6 +190,7 @@ export function RecipeCard({
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
             fats: meal.macros.fats,
+            servingSize: meal.macros.servingSize || null
           },
         },
         mealType,
@@ -232,6 +233,7 @@ export function RecipeCard({
         sugar: meal.macros.sugar,
         cholesterol: meal.macros.cholesterol,
         sodium: meal.macros.sodium,
+        servingSize: meal.macros.servingSize,
         cookingTime: meal.cookingTime,
         nutrients: meal.nutrients,
         dietaryRestriction: meal.dietaryRestriction || "none",
