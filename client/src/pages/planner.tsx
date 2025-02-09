@@ -1,10 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  macroInputSchema,
-  type MacroInput,
-} from "@shared/schema";
+import { macroInputSchema, type MacroInput } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -37,7 +34,6 @@ import {
 import type { Recipe } from "@shared/schema";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
-
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
@@ -335,12 +331,20 @@ export default function Planner() {
                               checked={form
                                 .watch("mealTypes")
                                 ?.includes(
-                                  option.value as "breakfast" | "lunch" | "dinner" | "snack",
+                                  option.value as
+                                    | "breakfast"
+                                    | "lunch"
+                                    | "dinner"
+                                    | "snack",
                                 )}
                               onChange={(e) => {
                                 handleMealTypeChange(
                                   e.target.checked,
-                                  option.value as "breakfast" | "lunch" | "dinner" | "snack",
+                                  option.value as
+                                    | "breakfast"
+                                    | "lunch"
+                                    | "dinner"
+                                    | "snack",
                                 );
                               }}
                             />
@@ -426,21 +430,6 @@ export default function Planner() {
           </CardContent>
         </Card>
 
-        {mutation.isPending && (
-          <Box sx={{ width: "100%", mt: 4 }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              align="center"
-              sx={{ mb: 2 }}
-            >
-              Please wait while we generate your personalized recipe
-              suggestions...
-            </Typography>
-            <LinearProgress />
-          </Box>
-        )}
-
         {suggestions?.meals && suggestions.meals.length > 0 && (
           <Box sx={{ mt: 4 }}>
             <Grid container spacing={3}>
@@ -460,18 +449,18 @@ export default function Planner() {
                         fiber: meal.macros.fiber || null,
                         sugar: meal.macros.sugar || null,
                         cholesterol: meal.macros.cholesterol || null,
-                        sodium: meal.macros.sodium || null
+                        sodium: meal.macros.sodium || null,
                       },
                       cookingTime: meal.cookingTime || {
                         prep: 15,
                         cook: 20,
-                        total: 35
+                        total: 35,
                       },
                       nutrients: meal.nutrients || {
                         vitamins: null,
-                        minerals: null
+                        minerals: null,
                       },
-                      dietaryRestriction: meal.dietaryRestriction || "none"
+                      dietaryRestriction: meal.dietaryRestriction || "none",
                     }}
                     onShare={handleShareClick}
                     targetMacros={{
@@ -486,6 +475,21 @@ export default function Planner() {
                 </Grid>
               ))}
             </Grid>
+
+            {mutation.isPending && (
+              <Box sx={{ width: "100%", mt: 4 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ mb: 2 }}
+                >
+                  Please wait while we generate your personalized recipe
+                  suggestions...
+                </Typography>
+                <LinearProgress />
+              </Box>
+            )}
 
             {!showingMore && suggestions.meals.length > 0 && (
               <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
