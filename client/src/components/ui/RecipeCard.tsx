@@ -186,20 +186,20 @@ export function RecipeCard({
         meal: {
           name: meal.name,
           description: meal.description,
-          servingSize: meal.macros.servingSize,
           instructions: meal.instructions || "",
+          servingSize: meal.macros.servingSize || "", //Added default value
           macros: {
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
             fats: meal.macros.fats,
-            calories: meal.macros.calories || null,
-            fiber: meal.macros.fiber || null,
-            sugar: meal.macros.sugar || null,
-            cholesterol: meal.macros.cholesterol || null,
-            sodium: meal.macros.sodium || null,
+            calories: meal.macros.calories,
+            fiber: meal.macros.fiber,
+            sugar: meal.macros.sugar,
+            cholesterol: meal.macros.cholesterol,
+            sodium: meal.macros.sodium,
           },
-          cookingTime: meal.cookingTime || null,
-          nutrients: meal.nutrients || { vitamins: null, minerals: null },
+          cookingTime: meal.cookingTime,
+          nutrients: meal.nutrients || { vitamins: [], minerals: [] }, //Added default value
           dietaryRestriction: meal.dietaryRestriction || "none",
         },
         mealType,
@@ -218,7 +218,7 @@ export function RecipeCard({
         title: "Success",
         description: "Meal added to calendar",
       });
-      handleCalendarDialogClose();
+      
     },
     onError: (error: Error) => {
       toast({
@@ -324,10 +324,12 @@ export function RecipeCard({
       mealType: selectedMealType,
       date: selectedDate,
     });
-    addToCalendarMutation.mutate({
+    await addToCalendarMutation.mutateAsync({
       meal,
       mealType: selectedMealType,
       date: selectedDate,
+    }).then(() => {
+      handleCalendarDialogClose();
     });
   };
 

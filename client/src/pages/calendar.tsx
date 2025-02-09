@@ -274,54 +274,44 @@ export default function CalendarPage() {
                   {format(displayDate, "EEEE, MMMM d, yyyy")}
                 </Typography>
                 <Grid container spacing={3}>
-                  {mealsForDate.map((plan: any) => {
-                    const favorite = favorites?.find(f => f.name === plan.meal.name);
-                    return (
-                      <Grid item xs={12} md={6} lg={4} key={plan.id}>
-                        <RecipeCard
-                          meal={{
-                            name: plan.meal.name,
-                            description: plan.meal.description,
-                            instructions: favorite?.instructions || plan.meal.instructions || "",
-                            macros: {
-                              carbs: plan.meal.macros.carbs,
-                              protein: plan.meal.macros.protein,
-                              fats: plan.meal.macros.fats,
-                              calories: favorite?.calories || plan.meal.macros.calories || null,
-                              servingSize: plan.meal.servingSize || favorite?.servingSize || null,
-                              fiber: favorite?.fiber || plan.meal.macros.fiber || null,
-                              sugar: favorite?.sugar || plan.meal.macros.sugar || null,
-                              cholesterol: favorite?.cholesterol || plan.meal.macros.cholesterol || null,
-                              sodium: favorite?.sodium || plan.meal.macros.sodium || null
-                            },
-                            cookingTime: favorite?.cookingTime || plan.meal.cookingTime || {
-                              prep: null,
-                              cook: null,
-                              total: null
-                            },
-                            nutrients: favorite?.nutrients || plan.meal.nutrients || {
-                              vitamins: null,
-                              minerals: null
-                            },
-                            isStoredRecipe: true,
-                            dietaryRestriction: favorite?.dietaryRestriction || plan.meal.dietaryRestriction || "none"
-                          }}
-                          mealType={plan.mealType}
-                          showAddToCalendar={false}
-                          showDelete={true}
-                          favorites={favorites}
-                          expanded={expandedCards[plan.id] || false}
-                          onExpandClick={() => handleExpandClick(plan.id)}
-                          onShare={handleShareClick}
-                          onDelete={() => {
-                            if (confirm('Are you sure you want to remove this meal from the calendar?')) {
-                              deleteMealPlan.mutate(plan.id);
-                            }
-                          }}
-                        />
-                      </Grid>
-                    );
-                  })}
+                  {mealsForDate.map((plan: any) => (
+                    <Grid item xs={12} md={6} lg={4} key={plan.id}>
+                      <RecipeCard
+                        meal={{
+                          name: plan.meal.name,
+                          description: plan.meal.description,
+                          instructions: plan.meal.instructions || "",
+                          macros: {
+                            carbs: plan.meal.macros.carbs,
+                            protein: plan.meal.macros.protein,
+                            fats: plan.meal.macros.fats,
+                            calories: plan.meal.macros.calories ?? null,
+                            fiber: plan.meal.macros.fiber ?? null,
+                            sugar: plan.meal.macros.sugar ?? null,
+                            cholesterol: plan.meal.macros.cholesterol ?? null,
+                            sodium: plan.meal.macros.sodium ?? null,
+                            servingSize: plan.meal.servingSize ?? null
+                          },
+                          cookingTime: plan.meal.cookingTime ?? null,
+                          nutrients: plan.meal.nutrients ?? { vitamins: [], minerals: [] },
+                          isStoredRecipe: true,
+                          dietaryRestriction: plan.meal.dietaryRestriction ?? "none"
+                        }}
+                        mealType={plan.mealType}
+                        showAddToCalendar={false}
+                        showDelete={true}
+                        favorites={favorites}
+                        expanded={expandedCards[plan.id] || false}
+                        onExpandClick={() => handleExpandClick(plan.id)}
+                        onShare={handleShareClick}
+                        onDelete={() => {
+                          if (confirm('Are you sure you want to remove this meal from the calendar?')) {
+                            deleteMealPlan.mutate(plan.id);
+                          }
+                        }}
+                      />
+                    </Grid>
+                  ))}
                 </Grid>
               </Box>
             ) : viewType === 'day' ? (

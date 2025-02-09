@@ -24,11 +24,11 @@ export const recipes = pgTable("recipes", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   instructions: text("instructions").notNull(),
+  servingSize: text("serving_size"),
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
-  servingSize: text("serving_size"),  
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -46,11 +46,11 @@ export const favorites = pgTable("favorites", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   instructions: text("instructions").notNull(),
+  servingSize: text("serving_size"),
   carbs: integer("carbs").notNull(),
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
-  servingSize: text("serving_size"),  // Added servingSize field
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -147,7 +147,7 @@ export const mealPlanSchema = z.object({
   meal: z.object({
     name: z.string(),
     description: z.string(),
-    instructions: z.string().optional(),
+    instructions: z.string(),
     servingSize: z.string().nullable(),
     macros: z.object({
       carbs: z.number(),
@@ -179,7 +179,7 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
   carbs: z.number().min(0, "Carbs must be 0 or greater"),
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
-  servingSize: z.string().nullable(),  // Added servingSize validation
+  servingSize: z.string().nullable(),
   dietaryRestriction: dietaryPreferenceEnum.default("none"),
   tags: z.array(z.string()).optional().default([]),
 });
