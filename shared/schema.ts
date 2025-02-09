@@ -50,6 +50,7 @@ export const favorites = pgTable("favorites", {
   protein: integer("protein").notNull(),
   fats: integer("fats").notNull(),
   calories: integer("calories"),
+  servingSize: text("serving_size"),  // Added servingSize field
   fiber: integer("fiber"),
   sugar: integer("sugar"),
   cholesterol: integer("cholesterol"),
@@ -178,6 +179,7 @@ export const insertFavoriteSchema = createInsertSchema(favorites).extend({
   carbs: z.number().min(0, "Carbs must be 0 or greater"),
   protein: z.number().min(0, "Protein must be 0 or greater"),
   fats: z.number().min(0, "Fats must be 0 or greater"),
+  servingSize: z.string().nullable(),  // Added servingSize validation
   dietaryRestriction: dietaryPreferenceEnum.default("none"),
   tags: z.array(z.string()).optional().default([]),
 });

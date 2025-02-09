@@ -127,20 +127,31 @@ export class DatabaseStorage implements IStorage {
   async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
 
-    // Ensure meal object has all required fields with proper null handling
     const meal = {
-      ...plan.meal,
-      servingSize: plan.meal.servingSize ?? null,
-      cookingTime: plan.meal.cookingTime ?? null,
-      nutrients: plan.meal.nutrients ?? { vitamins: null, minerals: null },
-      dietaryRestriction: plan.meal.dietaryRestriction ?? "none",
+      name: plan.meal.name,
+      description: plan.meal.description,
+      instructions: plan.meal.instructions || '',
+      servingSize: plan.meal.servingSize || null,
+      macros: {
+        carbs: plan.meal.carbs,
+        protein: plan.meal.protein,
+        fats: plan.meal.fats,
+        calories: plan.meal.calories || null,
+        fiber: plan.meal.fiber || null,
+        sugar: plan.meal.sugar || null,
+        cholesterol: plan.meal.cholesterol || null,
+        sodium: plan.meal.sodium || null,
+      },
+      cookingTime: plan.meal.cookingTime || null,
+      nutrients: plan.meal.nutrients || { vitamins: null, minerals: null },
+      dietaryRestriction: plan.meal.dietaryRestriction || "none",
     };
 
     const [savedPlan] = await db
       .insert(mealPlans)
       .values({
         date: plan.date,
-        meal: meal,
+        meal,
         mealType: plan.mealType,
         userId: plan.userId
       })
@@ -201,17 +212,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(favorites.createdAt));
 
     // Map the results to include all required Recipe properties
-    const favoritesWithServingSize = result.map(favorite => ({
+    const favoritesWithFullData = result.map(favorite => ({
       ...favorite,
-      // Ensure servingSize is properly passed through
       servingSize: favorite.servingSize ?? null,
-      // Add any other required fields with proper null fallbacks
       cookingTime: favorite.cookingTime ?? null,
-      nutrients: favorite.nutrients ?? { vitamins: null, minerals: null }
+      nutrients: favorite.nutrients ?? { vitamins: null, minerals: null },
+      dietaryRestriction: favorite.dietaryRestriction ?? "none"
     }));
 
-    console.log("Found favorites:", favoritesWithServingSize);
-    return favoritesWithServingSize;
+    console.log("Found favorites:", favoritesWithFullData);
+    return favoritesWithFullData;
   }
 
   async addFavorite(userId: number, favorite: Omit<InsertFavorite, "userId">): Promise<Favorite> {
