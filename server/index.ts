@@ -84,16 +84,10 @@ app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
 
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
-  app.use(async (req, res, next) => {
-    try {
-      if (!req.path.startsWith('/api/')) {
-        await setupVite(app, server);
-      }
-      next();
-    } catch (e) {
-      console.error('Vite setup error:', e);
-      next(e);
-    }
+  // Setup Vite middleware for development
+  setupVite(app).catch(err => {
+    console.error('Vite setup error:', err);
+    process.exit(1);
   });
 } else {
   // Serve static files from the dist/public directory

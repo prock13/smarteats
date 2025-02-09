@@ -27,6 +27,10 @@ export async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+interface AuthInfo {
+  message?: string;
+}
+
 export function setupAuth(app: Express) {
   // Initialize Passport strategies
   passport.use(
@@ -106,7 +110,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: Express.User | false, info: AuthInfo) => {
       if (err) {
         console.error("Login error:", err);
         return next(err);

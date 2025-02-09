@@ -6,6 +6,7 @@ import OpenAI from "openai";
 import { macroInputSchema, mealPlanSchema, insertRecipeSchema, insertFavoriteSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { setupAuth } from "./auth";
+import { comparePasswords, hashPassword } from "./auth";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -123,7 +124,8 @@ export function registerRoutes(app: Express): Server {
 
       const saved = await storage.saveMealPlan({
         ...plan,
-        userId: req.user!.id
+        userId: req.user!.id,
+        id: Date.now(), // Temporary ID for new meal plans
       });
 
       console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
