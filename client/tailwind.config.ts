@@ -1,13 +1,18 @@
 import type { Config } from "tailwindcss";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default {
   darkMode: ["class"],
   content: [
-    "./client/src/**/*.{js,ts,jsx,tsx}",
-    "./client/index.html",
-    "./client/src/components/**/*.{js,ts,jsx,tsx}",
-    "./client/src/pages/**/*.{js,ts,jsx,tsx}",
-    "./shared/**/*.{js,ts,jsx,tsx}"
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./index.html",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "../shared/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {

@@ -7,6 +7,7 @@ import passport from "passport";
 import { setupAuth } from "./auth";
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Basic middleware
 app.use(express.json());
@@ -39,20 +40,22 @@ app.use(passport.session());
 // Set up authentication
 setupAuth(app);
 
-// CORS middleware - make sure this doesn't interfere with cookies
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// CORS middleware - only applied in development
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+}
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -85,10 +88,14 @@ app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
   // Setup Vite middleware for development
-  setupVite(app).catch(err => {
-    console.error('Vite setup error:', err);
-    process.exit(1);
-  });
+  setupVite(app)
+    .then(() => {
+      log('Vite middleware setup complete');
+    })
+    .catch(err => {
+      console.error('Vite setup error:', err);
+      process.exit(1);
+    });
 } else {
   // Serve static files from the dist/public directory
   app.use(express.static('dist/public'));
@@ -111,7 +118,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-const PORT = 5000;
 server.listen(PORT, "0.0.0.0", () => {
   log(`Server running on port ${PORT}`);
 });
