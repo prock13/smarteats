@@ -41,14 +41,39 @@ const pantryInputSchema = z.object({
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
-  dietaryPreferences: z.array(z.enum(["none", "vegetarian", "vegan", "pescatarian", "keto", "paleo", "gluten-free", "dairy-free", "halal", "kosher"])).default(["none"]),
+  dietaryPreferences: z
+    .array(
+      z.enum([
+        "none",
+        "vegetarian",
+        "vegan",
+        "pescatarian",
+        "keto",
+        "paleo",
+        "gluten-free",
+        "dairy-free",
+        "halal",
+        "kosher",
+      ]),
+    )
+    .default(["none"]),
   includeUserRecipes: z.boolean().default(false),
 });
 
 type PantryInput = z.infer<typeof pantryInputSchema>;
-type DietaryPreference = "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher";
+type DietaryPreference =
+  | "none"
+  | "vegetarian"
+  | "vegan"
+  | "pescatarian"
+  | "keto"
+  | "paleo"
+  | "gluten-free"
+  | "dairy-free"
+  | "halal"
+  | "kosher";
 
-const dietaryOptions = [
+const dietaryOptions: { value: DietaryPreference; label: string }[] = [
   { value: "none", label: "No Restrictions" },
   { value: "vegetarian", label: "Vegetarian" },
   { value: "vegan", label: "Vegan" },
@@ -74,7 +99,9 @@ export default function PantryPage() {
   const [showingMore, setShowingMore] = useState(false);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
-  const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
+  const [expandedCards, setExpandedCards] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   const { data: favorites } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
@@ -100,9 +127,10 @@ export default function PantryPage() {
       try {
         const requestData = {
           ...data,
-          excludeRecipes: data.appendResults && suggestions?.meals
-            ? suggestions.meals.map((meal: any) => meal.name)
-            : [],
+          excludeRecipes:
+            data.appendResults && suggestions?.meals
+              ? suggestions.meals.map((meal: any) => meal.name)
+              : [],
         };
 
         const response = await apiRequest(
@@ -178,7 +206,10 @@ export default function PantryPage() {
     },
   });
 
-  const handleDietaryPreferenceChange = (value: DietaryPreference, checked: boolean) => {
+  const handleDietaryPreferenceChange = (
+    value: DietaryPreference,
+    checked: boolean,
+  ) => {
     const currentPreferences = form.watch("dietaryPreferences") || ["none"];
     let newPreferences: DietaryPreference[];
 
@@ -186,10 +217,13 @@ export default function PantryPage() {
       if (value === "none") {
         newPreferences = ["none"];
       } else {
-        newPreferences = [...currentPreferences.filter(p => p !== "none"), value] as DietaryPreference[];
+        newPreferences = [
+          ...currentPreferences.filter((p) => p !== "none"),
+          value,
+        ];
       }
     } else {
-      newPreferences = currentPreferences.filter(p => p !== value);
+      newPreferences = currentPreferences.filter((p) => p !== value);
       if (newPreferences.length === 0) {
         newPreferences = ["none"];
       }
@@ -272,7 +306,8 @@ export default function PantryPage() {
             Pantry Pal
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Enter the ingredients you have on hand and get AI-powered recipe suggestions
+            Enter the ingredients you have on hand and get AI-powered recipe
+            suggestions
           </Typography>
         </Box>
 
@@ -340,17 +375,32 @@ export default function PantryPage() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FormControl component="fieldset">
-                    <FormLabel component="legend">Dietary Preferences</FormLabel>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                    <FormLabel component="legend">
+                      Dietary Preferences
+                    </FormLabel>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        mt: 1,
+                      }}
+                    >
                       {dietaryOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form.watch("dietaryPreferences")?.includes(option.value)}
+                              checked={form
+                                .watch("dietaryPreferences")
+                                ?.includes(option.value)}
                               onChange={(e) => {
-                                handleDietaryPreferenceChange(option.value, e.target.checked);
+                                handleDietaryPreferenceChange(
+                                  option.value,
+                                  e.target.checked,
+                                );
                               }}
+                              disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
@@ -407,21 +457,6 @@ export default function PantryPage() {
           </CardContent>
         </Card>
 
-        {mutation.isPending && (
-          <Box sx={{ width: "100%", mt: 4 }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              align="center"
-              sx={{ mb: 2 }}
-            >
-              Please wait while we generate your personalized recipe
-              suggestions...
-            </Typography>
-            <LinearProgress />
-          </Box>
-        )}
-
         {suggestions?.meals && suggestions.meals.length > 0 && (
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>
@@ -444,18 +479,18 @@ export default function PantryPage() {
                         fiber: meal.macros.fiber || null,
                         sugar: meal.macros.sugar || null,
                         cholesterol: meal.macros.cholesterol || null,
-                        sodium: meal.macros.sodium || null
+                        sodium: meal.macros.sodium || null,
                       },
                       cookingTime: meal.cookingTime || {
                         prep: 15,
                         cook: 20,
-                        total: 35
+                        total: 35,
                       },
                       nutrients: meal.nutrients || {
                         vitamins: null,
-                        minerals: null
+                        minerals: null,
                       },
-                      dietaryRestriction: meal.dietaryRestriction || "none"
+                      dietaryRestriction: meal.dietaryRestriction || "none",
                     }}
                     onShare={handleShareClick}
                     targetMacros={{
