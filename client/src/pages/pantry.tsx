@@ -15,8 +15,6 @@ import {
   CardContent,
   CardHeader,
   Grid,
-  MenuItem,
-  Select,
   TextField,
   FormControl,
   FormLabel,
@@ -26,6 +24,7 @@ import {
   CircularProgress,
   LinearProgress,
   Menu,
+  MenuItem,
 } from "@mui/material";
 import {
   Twitter as TwitterIcon,
@@ -40,7 +39,9 @@ const pantryInputSchema = z.object({
   carbSource: z.string().min(1, "Carbohydrate source is required"),
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
-  mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+  mealTypes: z
+    .array(z.enum(["breakfast", "lunch", "dinner", "snack"]))
+    .min(1, "Select at least one meal type"),
   dietaryPreferences: z
     .array(
       z.enum([
@@ -86,7 +87,9 @@ const dietaryOptions: { value: DietaryPreference; label: string }[] = [
   { value: "kosher", label: "Kosher" },
 ];
 
-const mealTypeOptions = [
+type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+
+const mealTypeOptions: { value: MealType; label: string }[] = [
   { label: "Breakfast", value: "breakfast" },
   { label: "Lunch", value: "lunch" },
   { label: "Dinner", value: "dinner" },
@@ -113,7 +116,7 @@ export default function PantryPage() {
       carbSource: "",
       proteinSource: "",
       fatSource: "",
-      mealType: "breakfast",
+      mealTypes: ["dinner"],
       dietaryPreferences: ["none"],
       includeUserRecipes: false,
     },
@@ -217,10 +220,7 @@ export default function PantryPage() {
       if (value === "none") {
         newPreferences = ["none"];
       } else {
-        newPreferences = [
-          ...currentPreferences.filter((p) => p !== "none"),
-          value,
-        ];
+        newPreferences = [...currentPreferences.filter((p) => p !== "none"), value];
       }
     } else {
       newPreferences = currentPreferences.filter((p) => p !== value);
@@ -232,9 +232,43 @@ export default function PantryPage() {
     form.setValue("dietaryPreferences", newPreferences);
   };
 
+  const handleMealTypeChange = (value: MealType, checked: boolean) => {
+    const currentMealTypes = form.watch("mealTypes") || [];
+    let newMealTypes: MealType[];
+
+    if (checked) {
+      newMealTypes = [...currentMealTypes, value];
+    } else {
+      newMealTypes = currentMealTypes.filter((type) => type !== value);
+    }
+
+    form.setValue("mealTypes", newMealTypes);
+  };
+
   const onSubmit = (data: PantryInput) => {
     console.log("Submitting form data:", data);
     setSuggestions(null);
+
+    // Ensure at least one meal type is selected
+    if (!data.mealTypes || data.mealTypes.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one meal type",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Ensure all required fields are filled
+    if (!data.carbSource || !data.proteinSource || !data.fatSource) {
+      toast({
+        title: "Error",
+        description: "Please fill in all ingredient sources",
+        variant: "destructive",
+      });
+      return;
+    }
+
     mutation.mutate(data);
   };
 
@@ -353,22 +387,40 @@ export default function PantryPage() {
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth required>
-                    <FormLabel>Meal Type</FormLabel>
-                    <Select
-                      {...form.register("mealType")}
-                      defaultValue="dinner"
-                      disabled={mutation.isPending}
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">Meal Types</FormLabel>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        mt: 1,
+                      }}
                     >
                       {mealTypeOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
+                        <FormControlLabel
+                          key={option.value}
+                          control={
+                            <Checkbox
+                              checked={form
+                                .watch("mealTypes")
+                                ?.includes(option.value)}
+                              onChange={(e) =>
+                                handleMealTypeChange(
+                                  option.value,
+                                  e.target.checked,
+                                )
+                              }
+                              disabled={mutation.isPending}
+                            />
+                          }
+                          label={option.label}
+                        />
                       ))}
-                    </Select>
-                    {form.formState.errors.mealType && (
+                    </Box>
+                    {form.formState.errors.mealTypes && (
                       <FormHelperText error>
-                        {form.formState.errors.mealType.message}
+                        {form.formState.errors.mealTypes.message}
                       </FormHelperText>
                     )}
                   </FormControl>
