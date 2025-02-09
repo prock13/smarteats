@@ -390,15 +390,15 @@ export function registerRoutes(app: Express): Server {
         carbSource, 
         proteinSource, 
         fatSource, 
-        mealType, 
+        mealTypes, 
         dietaryPreferences = ["none"], 
         includeUserRecipes = false 
       } = req.body;
 
       // Validate required fields
-      if (!carbSource || !proteinSource || !fatSource || !mealType) {
+      if (!carbSource || !proteinSource || !fatSource || !mealTypes || !Array.isArray(mealTypes) || mealTypes.length === 0) {
         return res.status(400).json({
-          message: "All ingredient sources and meal type are required"
+          message: "All ingredient sources and at least one meal type are required"
         });
       }
 
@@ -408,21 +408,21 @@ export function registerRoutes(app: Express): Server {
         carbSource,
         proteinSource,
         fatSource,
-        mealType,
+        mealTypes,
         dietaryPreferences
       });
 
       try {
         const suggestions = await generateMealSuggestions(
-          0, // Not using specific macro targets for pantry suggestions
+          0, 
           0,
           0,
-          [mealType],
+          mealTypes,
           dietaryPreferences,
           1,
           excludeRecipes,
           includeUserRecipes,
-          { // Add pantry items as additional context
+          { 
             carbSource,
             proteinSource,
             fatSource
@@ -469,7 +469,6 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message });
     }
   });
-
 
 
   app.post("/api/chat", async (req, res) => {

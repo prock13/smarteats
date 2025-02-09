@@ -55,7 +55,7 @@ const pantryInputSchema = z.object({
         "dairy-free",
         "halal",
         "kosher",
-      ]),
+      ])
     )
     .default(["none"]),
   includeUserRecipes: z.boolean().default(false),
@@ -129,23 +129,26 @@ export default function PantryPage() {
 
       try {
         const requestData = {
-          ...data,
-          excludeRecipes:
-            data.appendResults && suggestions?.meals
-              ? suggestions.meals.map((meal: any) => meal.name)
-              : [],
+          carbSource: data.carbSource.trim(),
+          proteinSource: data.proteinSource.trim(),
+          fatSource: data.fatSource.trim(),
+          mealTypes: data.mealTypes,
+          dietaryPreferences: data.dietaryPreferences || ["none"],
+          includeUserRecipes: data.includeUserRecipes || false,
         };
+
+        console.log("Sending pantry suggestions request:", requestData);
 
         const response = await apiRequest(
           "POST",
           "/api/pantry-suggestions",
-          requestData,
+          requestData
         );
 
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.message || "Failed to get pantry suggestions",
+            errorData.message || "Failed to get pantry suggestions"
           );
         }
 
@@ -211,7 +214,7 @@ export default function PantryPage() {
 
   const handleDietaryPreferenceChange = (
     value: DietaryPreference,
-    checked: boolean,
+    checked: boolean
   ) => {
     const currentPreferences = form.watch("dietaryPreferences") || ["none"];
     let newPreferences: DietaryPreference[];
@@ -239,9 +242,14 @@ export default function PantryPage() {
     if (checked) {
       newMealTypes = [...currentMealTypes, value];
     } else {
-      newMealTypes = currentMealTypes.filter((type) => type !== value);
+      if (currentMealTypes.length > 1) {
+        newMealTypes = currentMealTypes.filter((type) => type !== value);
+      } else {
+        return;
+      }
     }
 
+    console.log("Updated meal types:", newMealTypes);
     form.setValue("mealTypes", newMealTypes);
   };
 
@@ -249,17 +257,6 @@ export default function PantryPage() {
     console.log("Submitting form data:", data);
     setSuggestions(null);
 
-    // Ensure at least one meal type is selected
-    if (!data.mealTypes || data.mealTypes.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please select at least one meal type",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Ensure all required fields are filled
     if (!data.carbSource || !data.proteinSource || !data.fatSource) {
       toast({
         title: "Error",
@@ -268,6 +265,16 @@ export default function PantryPage() {
       });
       return;
     }
+
+
+    console.log("Submitting to API with data:", {
+      carbSource: data.carbSource,
+      proteinSource: data.proteinSource,
+      fatSource: data.fatSource,
+      mealTypes: data.mealTypes,
+      dietaryPreferences: data.dietaryPreferences,
+      includeUserRecipes: data.includeUserRecipes,
+    });
 
     mutation.mutate(data);
   };
@@ -280,7 +287,7 @@ export default function PantryPage() {
 
   const handleShareClick = (
     event: React.MouseEvent<HTMLElement>,
-    meal: any,
+    meal: any
   ) => {
     setShareAnchorEl(event.currentTarget);
     setSharingMeal(meal);
@@ -307,13 +314,19 @@ export default function PantryPage() {
     let platformUrl = "";
     switch (platform) {
       case "twitter":
-        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(baseUrl)}`;
+        platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          shareText
+        )}&url=${encodeURIComponent(baseUrl)}`;
         break;
       case "facebook":
-        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl)}&quote=${encodeURIComponent(shareText)}`;
+        platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          baseUrl
+        )}&quote=${encodeURIComponent(shareText)}`;
         break;
       case "linkedin":
-        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(baseUrl)}`;
+        platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          baseUrl
+        )}`;
         break;
     }
 
@@ -408,10 +421,14 @@ export default function PantryPage() {
                               onChange={(e) =>
                                 handleMealTypeChange(
                                   option.value,
-                                  e.target.checked,
+                                  e.target.checked
                                 )
                               }
-                              disabled={mutation.isPending}
+                              disabled={
+                                mutation.isPending ||
+                                (form.watch("mealTypes")?.length === 1 &&
+                                  form.watch("mealTypes")?.includes(option.value))
+                              }
                             />
                           }
                           label={option.label}
@@ -446,12 +463,12 @@ export default function PantryPage() {
                               checked={form
                                 .watch("dietaryPreferences")
                                 ?.includes(option.value)}
-                              onChange={(e) => {
+                              onChange={(e) =>
                                 handleDietaryPreferenceChange(
                                   option.value,
-                                  e.target.checked,
-                                );
-                              }}
+                                  e.target.checked
+                                )
+                              }
                               disabled={mutation.isPending}
                             />
                           }
@@ -518,32 +535,7 @@ export default function PantryPage() {
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
                   <RecipeCard
-                    meal={{
-                      name: meal.name,
-                      description: meal.description,
-                      instructions: meal.instructions,
-                      macros: {
-                        carbs: meal.macros.carbs,
-                        protein: meal.macros.protein,
-                        fats: meal.macros.fats,
-                        calories: meal.macros.calories,
-                        servingSize: meal.servingSize || null,
-                        fiber: meal.macros.fiber || null,
-                        sugar: meal.macros.sugar || null,
-                        cholesterol: meal.macros.cholesterol || null,
-                        sodium: meal.macros.sodium || null,
-                      },
-                      cookingTime: meal.cookingTime || {
-                        prep: 15,
-                        cook: 20,
-                        total: 35,
-                      },
-                      nutrients: meal.nutrients || {
-                        vitamins: null,
-                        minerals: null,
-                      },
-                      dietaryRestriction: meal.dietaryRestriction || "none",
-                    }}
+                    meal={meal}
                     onShare={handleShareClick}
                     targetMacros={{
                       carbs: meal.macros.carbs,

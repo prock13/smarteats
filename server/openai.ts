@@ -34,12 +34,14 @@ export async function generateRecipe({
   targetCarbs,
   targetProtein,
   targetFats,
-  dietaryPreference
+  dietaryPreferences,
+  mealTypes
 }: {
   targetCarbs: number;
   targetProtein: number;
   targetFats: number;
-  dietaryPreference: string;
+  dietaryPreferences: string[];
+  mealTypes: string[];
 }) {
   try {
     checkRateLimit();
@@ -48,7 +50,8 @@ export async function generateRecipe({
 - Carbohydrates: ${targetCarbs}g
 - Protein: ${targetProtein}g
 - Fats: ${targetFats}g
-${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
+${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` : ''}
+${mealTypes.length > 0 ? `\nMeal Types: ${mealTypes.join(", ")}` : ''}
 
 Format your response as a JSON object with this exact structure:
 {
@@ -112,7 +115,7 @@ Include detailed nutritional information, precise serving size, and cooking time
       sodium: parsedContent.macros.sodium,
       cookingTime: parsedContent.cookingTime,
       nutrients: parsedContent.nutrients,
-      dietaryRestriction: dietaryPreference
+      dietaryRestrictions: dietaryPreferences
     };
   } catch (error: any) {
     console.error("Error in generateRecipe:", error);
