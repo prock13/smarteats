@@ -20,7 +20,7 @@ export interface IStorage {
 
   // Meal plan operations
   getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]>;
-  saveMealPlan(plan: MealPlan): Promise<MealPlan>;
+  saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; } }): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
 
   // Recipe operations
@@ -124,7 +124,7 @@ export class DatabaseStorage implements IStorage {
     return plans;
   }
 
-  async saveMealPlan(plan: MealPlan): Promise<MealPlan> {
+  async saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; } }): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
 
     const meal = {
@@ -211,7 +211,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(favorites.userId, userId))
       .orderBy(desc(favorites.createdAt));
 
-    // Map the results to include all required Recipe properties
     const favoritesWithFullData = result.map(favorite => ({
       ...favorite,
       servingSize: favorite.servingSize ?? null,
@@ -228,7 +227,12 @@ export class DatabaseStorage implements IStorage {
     console.log("Adding favorite for user:", userId, "recipe:", favorite);
     const [savedFavorite] = await db
       .insert(favorites)
-      .values({ ...favorite, userId, tags: [] })
+      .values({
+        ...favorite,
+        userId,
+        servingSize: favorite.servingSize || null,
+        tags: favorite.tags || []
+      })
       .returning();
     console.log("Added favorite:", savedFavorite);
     return savedFavorite;

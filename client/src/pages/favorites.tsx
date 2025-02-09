@@ -155,7 +155,7 @@ export default function Favorites() {
                         protein: recipe.protein,
                         fats: recipe.fats,
                         calories: recipe.calories || null,
-                        servingSize: recipe.servingSize || null,
+                        servingSize: recipe.servingSize,
                         fiber: recipe.fiber || null,
                         sugar: recipe.sugar || null,
                         cholesterol: recipe.cholesterol || null,

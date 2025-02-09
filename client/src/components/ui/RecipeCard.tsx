@@ -186,15 +186,25 @@ export function RecipeCard({
         meal: {
           name: meal.name,
           description: meal.description,
+          servingSize: meal.macros.servingSize,
+          instructions: meal.instructions || "",
           macros: {
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
             fats: meal.macros.fats,
-            servingSize: meal.macros.servingSize || null
+            calories: meal.macros.calories || null,
+            fiber: meal.macros.fiber || null,
+            sugar: meal.macros.sugar || null,
+            cholesterol: meal.macros.cholesterol || null,
+            sodium: meal.macros.sodium || null,
           },
+          cookingTime: meal.cookingTime || null,
+          nutrients: meal.nutrients || { vitamins: null, minerals: null },
+          dietaryRestriction: meal.dietaryRestriction || "none",
         },
         mealType,
       };
+
       const res = await apiRequest("POST", "/api/meal-plans", mealPlan);
       if (!res.ok) {
         const errorData = await res.json();
@@ -208,7 +218,7 @@ export function RecipeCard({
         title: "Success",
         description: "Meal added to calendar",
       });
-      setIsCalendarDialogOpen(false);
+      handleCalendarDialogClose();
     },
     onError: (error: Error) => {
       toast({
@@ -308,7 +318,7 @@ export function RecipeCard({
     setIsCalendarDialogOpen(false);
   };
 
-  const handleCalendarSubmit = () => {
+  const handleCalendarSubmit = async () => {
     console.log("Submitting calendar entry:", {
       meal,
       mealType: selectedMealType,
