@@ -57,10 +57,11 @@ function ThemedApp() {
         {!isAuthPage && <Footer />}
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          autoHideDuration={6000}
+          autoHideDuration={null}
+          open={true}
         >
-          <Alert severity="info" variant="filled">
-            Message
+          <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
+            This is a test Snackbar message for hot reload.
           </Alert>
         </Snackbar>
       </Box>
