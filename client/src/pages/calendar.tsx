@@ -282,18 +282,25 @@ export default function CalendarPage() {
                           description: plan.meal.description,
                           instructions: plan.meal.instructions || "",
                           macros: {
-                            carbs: plan.meal.macros.carbs,
-                            protein: plan.meal.macros.protein,
-                            fats: plan.meal.macros.fats,
-                            calories: plan.meal.macros.calories ?? null,
-                            fiber: plan.meal.macros.fiber ?? null,
-                            sugar: plan.meal.macros.sugar ?? null,
-                            cholesterol: plan.meal.macros.cholesterol ?? null,
-                            sodium: plan.meal.macros.sodium ?? null,
-                            servingSize: plan.meal.servingSize ?? null
+                            carbs: plan.meal.carbs,
+                            protein: plan.meal.protein,
+                            fats: plan.meal.fats,
+                            calories: plan.meal.macros?.calories || plan.meal.calories || null,
+                            fiber: plan.meal.macros?.fiber || plan.meal.fiber || null,
+                            sugar: plan.meal.macros?.sugar || plan.meal.sugar || null,
+                            cholesterol: plan.meal.macros?.cholesterol || plan.meal.cholesterol || null,
+                            sodium: plan.meal.macros?.sodium || plan.meal.sodium || null,
+                            servingSize: plan.meal.servingSize || null
                           },
-                          cookingTime: plan.meal.cookingTime ?? null,
-                          nutrients: plan.meal.nutrients ?? { vitamins: [], minerals: [] },
+                          cookingTime: plan.meal.cookingTime ?? {
+                            prep: 15,
+                            cook: 20,
+                            total: 35
+                          },
+                          nutrients: plan.meal.nutrients ?? {
+                            vitamins: [],
+                            minerals: []
+                          },
                           isStoredRecipe: true,
                           dietaryRestriction: plan.meal.dietaryRestriction ?? "none"
                         }}

@@ -20,7 +20,7 @@ export interface IStorage {
 
   // Meal plan operations
   getMealPlans(startDate: Date, endDate: Date): Promise<MealPlan[]>;
-  saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; } }): Promise<MealPlan>;
+  saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; macros?: { calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; } } }): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
 
   // Recipe operations
@@ -124,7 +124,7 @@ export class DatabaseStorage implements IStorage {
     return plans;
   }
 
-  async saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; } }): Promise<MealPlan> {
+  async saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; macros?: { calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; } } }): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
 
     const meal = {
@@ -136,11 +136,11 @@ export class DatabaseStorage implements IStorage {
         carbs: plan.meal.carbs,
         protein: plan.meal.protein,
         fats: plan.meal.fats,
-        calories: plan.meal.calories || null,
-        fiber: plan.meal.fiber || null,
-        sugar: plan.meal.sugar || null,
-        cholesterol: plan.meal.cholesterol || null,
-        sodium: plan.meal.sodium || null,
+        calories: plan.meal.macros?.calories || plan.meal.calories || null,
+        fiber: plan.meal.macros?.fiber || plan.meal.fiber || null,
+        sugar: plan.meal.macros?.sugar || plan.meal.sugar || null,
+        cholesterol: plan.meal.macros?.cholesterol || plan.meal.cholesterol || null,
+        sodium: plan.meal.macros?.sodium || plan.meal.sodium || null,
       },
       cookingTime: plan.meal.cookingTime || null,
       nutrients: plan.meal.nutrients || { vitamins: null, minerals: null },
