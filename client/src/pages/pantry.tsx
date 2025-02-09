@@ -40,8 +40,7 @@ const pantryInputSchema = z.object({
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
   mealTypes: z
-    .array(z.enum(["breakfast", "lunch", "dinner", "snack"]))
-    .min(1, "Select at least one meal type"),
+    .array(z.enum(["breakfast", "lunch", "dinner", "snack"])),
   dietaryPreferences: z
     .array(
       z.enum([
@@ -116,7 +115,7 @@ export default function PantryPage() {
       carbSource: "",
       proteinSource: "",
       fatSource: "",
-      mealTypes: ["dinner"],
+      mealTypes: [], // Remove default selection
       dietaryPreferences: ["none"],
       includeUserRecipes: false,
     },
@@ -242,11 +241,7 @@ export default function PantryPage() {
     if (checked) {
       newMealTypes = [...currentMealTypes, value];
     } else {
-      if (currentMealTypes.length > 1) {
-        newMealTypes = currentMealTypes.filter((type) => type !== value);
-      } else {
-        return;
-      }
+      newMealTypes = currentMealTypes.filter((type) => type !== value);
     }
 
     console.log("Updated meal types:", newMealTypes);
@@ -405,7 +400,8 @@ export default function PantryPage() {
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "column",
+                        flexDirection: "row",
+                        flexWrap: "wrap",
                         gap: 1,
                         mt: 1,
                       }}
@@ -424,11 +420,7 @@ export default function PantryPage() {
                                   e.target.checked
                                 )
                               }
-                              disabled={
-                                mutation.isPending ||
-                                (form.watch("mealTypes")?.length === 1 &&
-                                  form.watch("mealTypes")?.includes(option.value))
-                              }
+                              disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
@@ -450,7 +442,8 @@ export default function PantryPage() {
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "column",
+                        flexDirection: "row",
+                        flexWrap: "wrap",
                         gap: 1,
                         mt: 1,
                       }}

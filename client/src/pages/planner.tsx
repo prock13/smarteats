@@ -345,9 +345,9 @@ export default function Planner() {
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
+                  <FormControl>
                     <FormLabel>Meal Types</FormLabel>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                    <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
                       {mealTypeOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
@@ -388,7 +388,7 @@ export default function Planner() {
                 <Grid item xs={12} md={6}>
                   <FormControl component="fieldset">
                     <FormLabel component="legend">Dietary Preferences</FormLabel>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                       {dietaryOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
