@@ -100,7 +100,7 @@ export const macroInputSchema = z.object({
   targetProtein: z.number().min(0).max(1000),
   targetFats: z.number().min(0).max(1000),
   mealCount: z.number().min(1).max(10),
-  dietaryPreference: dietaryPreferenceEnum.default("none"),
+  dietaryPreferences: z.array(dietaryPreferenceEnum).default(["none"]),
   mealTypes: z.array(mealTypeEnum).min(1, "Select at least one meal type"),
   includeUserRecipes: z.boolean().default(false)
 });

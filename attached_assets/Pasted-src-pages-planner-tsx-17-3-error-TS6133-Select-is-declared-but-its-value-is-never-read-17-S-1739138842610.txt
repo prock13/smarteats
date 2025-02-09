@@ -1,0 +1,56 @@
+src/pages/planner.tsx:17:3 - error TS6133: 'Select' is declared but its value is never read.
+
+17   Select,
+     ~~~~~~
+
+src/pages/planner.tsx:81:7 - error TS2353: Object literal may only specify known properties, and 'dietaryPreferences' does not exist in type 'AsyncDefaultValues<{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes:...'.
+
+81       dietaryPreferences: [],
+         ~~~~~~~~~~~~~~~~~~
+
+src/pages/planner.tsx:94:34 - error TS2551: Property 'dietaryPreferences' does not exist on type '{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes: boolean; } & { ......'. Did you mean 'dietaryPreference'?
+
+94         dietaryPreferences: data.dietaryPreferences,
+                                    ~~~~~~~~~~~~~~~~~~
+
+src/pages/planner.tsx:372:51 - error TS2769: No overload matches this call.
+  Overload 1 of 4, '(names: readonly ("targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`)[], defaultValue?: { targetCarbs?: number | undefined; ... 5 more ...; includeUserRecipes?: boolean | undefined; } | undefined): readonly (number | ... 15 more ... | ("breakfast" | ... 2 more ... | "snack")[])[]', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'readonly ("targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`)[]'.
+  Overload 2 of 4, '(name: "targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`, defaultValue?: number | boolean | "none" | "vegetarian" | ... 13 more ... | undefined): number | ... 15 more ... | ("breakfast" | ... 2 more ... | "snack")[]', gave the following error.
+    Argument of type '"dietaryPreferences"' is not assignable to parameter of type '"targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`'.
+  Overload 3 of 4, '(callback: WatchObserver<{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes: boolean; }>, defaultValues?: { ...; } | undefined): Subscription', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'WatchObserver<{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes: bool...'.
+
+372                               checked={form.watch('dietaryPreferences')?.includes(option.value)}
+                                                      ~~~~~~~~~~~~~~~~~~~~
+
+
+src/pages/planner.tsx:372:83 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number | boolean | "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher" | "breakfast" | "lunch" | "dinner" | "snack" | ("breakfast" | ... 2 more ... | "snack")[]'.
+
+372                               checked={form.watch('dietaryPreferences')?.includes(option.value)}
+                                                                                      ~~~~~~~~~~~~
+
+src/pages/planner.tsx:374:71 - error TS2769: No overload matches this call.
+  Overload 1 of 4, '(names: readonly ("targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`)[], defaultValue?: { targetCarbs?: number | undefined; ... 5 more ...; includeUserRecipes?: boolean | undefined; } | undefined): readonly (number | ... 15 more ... | ("breakfast" | ... 2 more ... | "snack")[])[]', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'readonly ("targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`)[]'.
+  Overload 2 of 4, '(name: "targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`, defaultValue?: number | boolean | "none" | "vegetarian" | ... 13 more ... | undefined): number | ... 15 more ... | ("breakfast" | ... 2 more ... | "snack")[]', gave the following error.
+    Argument of type '"dietaryPreferences"' is not assignable to parameter of type '"targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`'.
+  Overload 3 of 4, '(callback: WatchObserver<{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes: boolean; }>, defaultValues?: { ...; } | undefined): Subscription', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'WatchObserver<{ targetCarbs: number; targetProtein: number; targetFats: number; mealCount: number; dietaryPreference: "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"; mealTypes: ("breakfast" | ... 2 more ... | "snack")[]; includeUserRecipes: bool...'.
+
+374                                 const currentPreferences = form.watch('dietaryPreferences') || [];
+                                                                          ~~~~~~~~~~~~~~~~~~~~
+
+
+src/pages/planner.tsx:376:49 - error TS2345: Argument of type '"dietaryPreferences"' is not assignable to parameter of type '"targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`'.
+
+376                                   form.setValue('dietaryPreferences', [...currentPreferences, option.value]);
+                                                    ~~~~~~~~~~~~~~~~~~~~
+
+src/pages/planner.tsx:379:37 - error TS2345: Argument of type '"dietaryPreferences"' is not assignable to parameter of type '"targetCarbs" | "targetProtein" | "targetFats" | "mealCount" | "dietaryPreference" | "mealTypes" | "includeUserRecipes" | `mealTypes.${number}`'.
+
+379                                     'dietaryPreferences',
+                                        ~~~~~~~~~~~~~~~~~~~~
+
+
+Found 8 errors in the same file, starting at: src/pages/planner.tsx:17

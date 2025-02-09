@@ -60,7 +60,7 @@ export function registerRoutes(app: Express): Server {
         input.targetProtein,
         input.targetFats,
         input.mealTypes,
-        input.dietaryPreference,
+        input.dietaryPreferences,
         input.mealCount,
         excludeRecipes,
         input.includeUserRecipes
@@ -386,7 +386,14 @@ export function registerRoutes(app: Express): Server {
 
       console.log("Received pantry request body:", req.body);
 
-      const { carbSource, proteinSource, fatSource, mealType, dietaryPreference = "none", includeUserRecipes = false } = req.body;
+      const { 
+        carbSource, 
+        proteinSource, 
+        fatSource, 
+        mealType, 
+        dietaryPreferences = ["none"], 
+        includeUserRecipes = false 
+      } = req.body;
 
       // Validate required fields
       if (!carbSource || !proteinSource || !fatSource || !mealType) {
@@ -402,7 +409,7 @@ export function registerRoutes(app: Express): Server {
         proteinSource,
         fatSource,
         mealType,
-        dietaryPreference
+        dietaryPreferences
       });
 
       try {
@@ -411,7 +418,7 @@ export function registerRoutes(app: Express): Server {
           0,
           0,
           [mealType],
-          dietaryPreference,
+          dietaryPreferences,
           1,
           excludeRecipes,
           includeUserRecipes,
@@ -462,6 +469,7 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message });
     }
   });
+
 
 
   app.post("/api/chat", async (req, res) => {

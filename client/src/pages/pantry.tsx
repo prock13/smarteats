@@ -5,6 +5,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { PlusCircle } from "lucide-react";
 import {
   Box,
   Container,
@@ -40,11 +41,12 @@ const pantryInputSchema = z.object({
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
-  dietaryPreference: z.string(),
+  dietaryPreferences: z.array(z.enum(["none", "vegetarian", "vegan", "pescatarian", "keto", "paleo", "gluten-free", "dairy-free", "halal", "kosher"])).default(["none"]),
   includeUserRecipes: z.boolean().default(false),
 });
 
 type PantryInput = z.infer<typeof pantryInputSchema>;
+type DietaryPreference = "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher";
 
 const dietaryOptions = [
   { value: "none", label: "No Restrictions" },
@@ -69,6 +71,7 @@ const mealTypeOptions = [
 export default function PantryPage() {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<any>(null);
+  const [showingMore, setShowingMore] = useState(false);
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingMeal, setSharingMeal] = useState<any>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
@@ -84,22 +87,28 @@ export default function PantryPage() {
       proteinSource: "",
       fatSource: "",
       mealType: "breakfast",
-      dietaryPreference: "none",
+      dietaryPreferences: ["none"],
       includeUserRecipes: false,
     },
   });
 
-
   const mutation = useMutation({
-    mutationFn: async (data: PantryInput) => {
+    mutationFn: async (data: PantryInput & { appendResults?: boolean }) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 75000); // 75 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 75000);
 
       try {
+        const requestData = {
+          ...data,
+          excludeRecipes: data.appendResults && suggestions?.meals
+            ? suggestions.meals.map((meal: any) => meal.name)
+            : [],
+        };
+
         const response = await apiRequest(
           "POST",
           "/api/pantry-suggestions",
-          data,
+          requestData,
         );
 
         if (!response.ok) {
@@ -111,15 +120,17 @@ export default function PantryPage() {
 
         const responseData = await response.json();
         clearTimeout(timeoutId);
-        return responseData;
+        return { response: responseData, appendResults: data.appendResults };
       } catch (error) {
         clearTimeout(timeoutId);
         throw error;
       }
     },
     onSuccess: (data) => {
-      console.log("Received response:", data);
-      if (!data?.suggestions?.meals?.length) {
+      const { response, appendResults } = data;
+      console.log("Received response:", response);
+
+      if (!response?.suggestions?.meals?.length) {
         toast({
           title: "Error",
           description: "No meal suggestions found",
@@ -128,14 +139,26 @@ export default function PantryPage() {
         return;
       }
 
-      setSuggestions(data.suggestions);
+      if (appendResults && suggestions?.meals) {
+        setSuggestions({
+          ...response.suggestions,
+          meals: [...suggestions.meals, ...response.suggestions.meals],
+        });
+      } else {
+        setSuggestions(response.suggestions);
+      }
+
+      setShowingMore(false);
       toast({
         title: "Success",
-        description: "Found meal suggestions based on your pantry items",
+        description: appendResults
+          ? "Found more meal suggestions based on your pantry items"
+          : "Found meal suggestions based on your pantry items",
       });
     },
     onError: (error: Error) => {
       console.error("Mutation error:", error);
+      setShowingMore(false);
       let errorMessage = error.message;
 
       if (error.name === "AbortError") {
@@ -155,10 +178,36 @@ export default function PantryPage() {
     },
   });
 
+  const handleDietaryPreferenceChange = (value: DietaryPreference, checked: boolean) => {
+    const currentPreferences = form.watch("dietaryPreferences") || ["none"];
+    let newPreferences: DietaryPreference[];
+
+    if (checked) {
+      if (value === "none") {
+        newPreferences = ["none"];
+      } else {
+        newPreferences = [...currentPreferences.filter(p => p !== "none"), value] as DietaryPreference[];
+      }
+    } else {
+      newPreferences = currentPreferences.filter(p => p !== value);
+      if (newPreferences.length === 0) {
+        newPreferences = ["none"];
+      }
+    }
+
+    form.setValue("dietaryPreferences", newPreferences);
+  };
+
   const onSubmit = (data: PantryInput) => {
     console.log("Submitting form data:", data);
     setSuggestions(null);
     mutation.mutate(data);
+  };
+
+  const handleShowMore = () => {
+    setShowingMore(true);
+    const currentData = form.getValues();
+    mutation.mutate({ ...currentData, appendResults: true });
   };
 
   const handleShareClick = (
@@ -290,19 +339,24 @@ export default function PantryPage() {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <FormLabel>Dietary Preference</FormLabel>
-                    <Select
-                      {...form.register("dietaryPreference")}
-                      defaultValue="none"
-                      disabled={mutation.isPending}
-                    >
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">Dietary Preferences</FormLabel>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
                       {dietaryOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
+                        <FormControlLabel
+                          key={option.value}
+                          control={
+                            <Checkbox
+                              checked={form.watch("dietaryPreferences")?.includes(option.value)}
+                              onChange={(e) => {
+                                handleDietaryPreferenceChange(option.value, e.target.checked);
+                              }}
+                            />
+                          }
+                          label={option.label}
+                        />
                       ))}
-                    </Select>
+                    </Box>
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
@@ -386,7 +440,7 @@ export default function PantryPage() {
                         protein: meal.macros.protein,
                         fats: meal.macros.fats,
                         calories: meal.macros.calories,
-                        servingSize: meal.servingSize || null, 
+                        servingSize: meal.servingSize || null,
                         fiber: meal.macros.fiber || null,
                         sugar: meal.macros.sugar || null,
                         cholesterol: meal.macros.cholesterol || null,
@@ -416,6 +470,40 @@ export default function PantryPage() {
                 </Grid>
               ))}
             </Grid>
+
+            {mutation.isPending && (
+              <Box sx={{ width: "100%", mt: 4 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ mb: 2 }}
+                >
+                  Please wait while we generate your personalized recipe
+                  suggestions...
+                </Typography>
+                <LinearProgress />
+              </Box>
+            )}
+
+            {!showingMore && suggestions.meals.length > 0 && (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                <Button
+                  onClick={handleShowMore}
+                  variant="outlined"
+                  disabled={mutation.isPending}
+                  startIcon={
+                    mutation.isPending ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <PlusCircle />
+                    )
+                  }
+                >
+                  {mutation.isPending ? "Loading..." : "Show More Options"}
+                </Button>
+              </Box>
+            )}
           </Box>
         )}
 

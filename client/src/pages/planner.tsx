@@ -14,7 +14,6 @@ import {
   CardHeader,
   Grid,
   MenuItem,
-  Select,
   TextField,
   FormControl,
   FormLabel,
@@ -35,25 +34,28 @@ import type { Recipe } from "@shared/schema";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
 
+type DietaryPreference = "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher";
+
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
   { label: "Lunch", value: "lunch" },
   { label: "Dinner", value: "dinner" },
   { label: "Snack", value: "snack" },
-];
+] as const;
 
 const dietaryOptions = [
-  { value: "none", label: "No Restrictions" },
-  { value: "vegetarian", label: "Vegetarian" },
-  { value: "vegan", label: "Vegan" },
-  { value: "pescatarian", label: "Pescatarian" },
-  { value: "keto", label: "Keto" },
-  { value: "paleo", label: "Paleo" },
-  { value: "gluten-free", label: "Gluten-Free" },
-  { value: "dairy-free", label: "Dairy-Free" },
-  { value: "halal", label: "Halal" },
-  { value: "kosher", label: "Kosher" },
-];
+  { value: "none" as const, label: "No Restrictions" },
+  { value: "vegetarian" as const, label: "Vegetarian" },
+  { value: "vegan" as const, label: "Vegan" },
+  { value: "pescatarian" as const, label: "Pescatarian" },
+  { value: "keto" as const, label: "Keto" },
+  { value: "paleo" as const, label: "Paleo" },
+  { value: "gluten-free" as const, label: "Gluten-Free" },
+  { value: "dairy-free" as const, label: "Dairy-Free" },
+  { value: "halal" as const, label: "Halal" },
+  { value: "kosher" as const, label: "Kosher" },
+] as const;
+
 
 export default function Planner() {
   const { toast } = useToast();
@@ -78,7 +80,7 @@ export default function Planner() {
       targetProtein: 0,
       targetFats: 0,
       mealTypes: [],
-      dietaryPreference: "none",
+      dietaryPreferences: ["none"],
       mealCount: 1,
       includeUserRecipes: false,
     },
@@ -91,7 +93,7 @@ export default function Planner() {
         targetProtein: data.targetProtein,
         targetFats: data.targetFats,
         mealCount: data.mealCount,
-        dietaryPreference: data.dietaryPreference,
+        dietaryPreferences: data.dietaryPreferences,
         mealTypes: data.mealTypes,
         includeUserRecipes: data.includeUserRecipes,
         excludeRecipes:
@@ -256,6 +258,29 @@ export default function Planner() {
     }
   };
 
+  const handleDietaryPreferenceChange = (value: DietaryPreference, checked: boolean) => {
+    const currentPreferences = form.watch("dietaryPreferences") || ["none"];
+    let newPreferences: DietaryPreference[];
+
+    if (checked) {
+      // If "none" is being added, remove all other preferences
+      if (value === "none") {
+        newPreferences = ["none"];
+      } else {
+        // If adding a specific preference, remove "none" and add the new one
+        newPreferences = [...currentPreferences.filter(p => p !== "none"), value] as DietaryPreference[];
+      }
+    } else {
+      // If unchecking the last preference, set to "none"
+      newPreferences = currentPreferences.filter(p => p !== value);
+      if (newPreferences.length === 0) {
+        newPreferences = ["none"];
+      }
+    }
+
+    form.setValue("dietaryPreferences", newPreferences);
+  };
+
   const handleExpandClick = (index: number) => {
     setExpandedCards((prev) => ({
       ...prev,
@@ -361,42 +386,36 @@ export default function Planner() {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <FormLabel>Dietary Preference</FormLabel>
-                    <Select
-                      {...form.register("dietaryPreference")}
-                      defaultValue="none"
-                      fullWidth
-                    >
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">Dietary Preferences</FormLabel>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
                       {dietaryOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
+                        <FormControlLabel
+                          key={option.value}
+                          control={
+                            <Checkbox
+                              checked={form.watch("dietaryPreferences")?.includes(option.value)}
+                              onChange={(e) => {
+                                handleDietaryPreferenceChange(option.value, e.target.checked);
+                              }}
+                            />
+                          }
+                          label={option.label}
+                        />
                       ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <FormLabel>&nbsp;</FormLabel>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        height: "100%",
-                      }}
-                    >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            {...form.register("includeUserRecipes")}
-                            defaultChecked={false}
-                          />
-                        }
-                        label="Include My Recipes"
-                      />
                     </Box>
                   </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...form.register("includeUserRecipes")}
+                        defaultChecked={false}
+                      />
+                    }
+                    label="Include My Recipes"
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <Button

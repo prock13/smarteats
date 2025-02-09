@@ -125,7 +125,7 @@ export async function generateMealSuggestions(
   protein: number,
   fats: number,
   mealTypes: string[],
-  dietaryPreference: string = "none",
+  dietaryPreferences: string[] = ["none"],
   recipeLimit?: number,
   excludeRecipes: string[] = [],
   includeUserRecipes: boolean = false,
@@ -147,7 +147,12 @@ export async function generateMealSuggestions(
       const storedRecipes = await storage.getRecipes();
       matchingStoredRecipes = storedRecipes.filter(recipe => {
         if (excludeRecipes.includes(recipe.name)) return false;
-        if (dietaryPreference !== "none" && recipe.dietaryRestriction !== dietaryPreference) return false;
+
+        // Check if recipe meets any of the dietary preferences
+        if (!dietaryPreferences.includes("none") && 
+            !dietaryPreferences.includes(recipe.dietaryRestriction)) {
+          return false;
+        }
 
         // Basic macro matching (within 20% tolerance)
         const carbMatch = Math.abs(recipe.carbs - carbs) <= carbs * 0.2;
@@ -196,7 +201,9 @@ export async function generateMealSuggestions(
 - Main fat: ${pantryItems.fatSource}
 
 The recipe should be suitable for: ${mealTypes[0]}
-Dietary preference: ${dietaryPreference}
+${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") 
+  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` 
+  : ''}
 
 ${format}`;
       systemRole = "You are a professional nutritionist and chef. Create detailed recipes with precise macro ratios and complete nutritional information. Keep your response in valid JSON format. Do not combine or modify existing recipes.";
@@ -211,11 +218,13 @@ ${format}`;
 - Fats: ${fats}g
 
 ${excludeRecipes.length > 0 ? `\nDo not suggest these recipes: ${excludeRecipes.join(', ')}` : ''}
-${dietaryPreference !== "none" ? `\nDietary Restriction: ${dietaryPreference}` : ''}
+${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") 
+  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` 
+  : ''}
 ${mealTypes.length > 0 ? `\nMeal types: ${mealTypes.join(', ')}` : ''}
 
 ${format}`;
-      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. Create completely new recipes.";
+      systemRole = "You are a nutrition expert. Create recipes with precise macro ratios and complete nutritional information. Always respond with valid JSON format. Create completely new recipes that accommodate all specified dietary preferences.";
     }
 
     const response = await openai.chat.completions.create({
