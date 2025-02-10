@@ -14,8 +14,10 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     hmr: {
-      clientPort: 443,
-      host: "*.replit.dev",
+      port: 5173,
+      host: "0.0.0.0",
+      protocol: "ws",
+      clientPort: 5173,
     },
   },
   resolve: {

@@ -11,8 +11,8 @@ export const setupVite = async (
       server: {
         middlewareMode: true,
         hmr: {
-          port: 443,
-          host: "*.replit.dev",
+          port: 5173,
+          host: "0.0.0.0",
         },
       },
       appType: "custom",

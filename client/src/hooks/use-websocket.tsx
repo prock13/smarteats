@@ -11,11 +11,24 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const retryCount = useRef(0);
+  const maxRetries = 5;
+  const isClosingRef = useRef(false);
 
   const connect = useCallback(() => {
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
+    }
+
+    if (isClosingRef.current) {
+      console.log('WebSocket closing, skipping reconnection');
+      return;
+    }
+
+    if (retryCount.current >= maxRetries) {
+      console.log('Max reconnection attempts reached');
+      return;
     }
 
     // Use custom path for WebSocket connection
@@ -28,11 +41,16 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
     ws.onopen = () => {
       console.log('WebSocket connected');
       setIsConnected(true);
+      retryCount.current = 0;
       options.onOpen?.();
     };
 
     ws.onmessage = (event) => {
       try {
+        if (event.data === 'ping') {
+          ws.send('pong');
+          return;
+        }
         const data = JSON.parse(event.data);
         options.onMessage?.(data);
       } catch (error) {
@@ -50,8 +68,14 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
       setIsConnected(false);
       options.onClose?.();
 
-      // Simple reconnection with fixed delay
-      reconnectTimeoutRef.current = setTimeout(connect, 3000);
+      if (!isClosingRef.current) {
+        // Exponential backoff for reconnection
+        const timeout = Math.min(1000 * Math.pow(2, retryCount.current), 30000);
+        retryCount.current++;
+
+        console.log(`Attempting reconnect in ${timeout}ms (attempt ${retryCount.current})`);
+        reconnectTimeoutRef.current = setTimeout(connect, timeout);
+      }
     };
 
     wsRef.current = ws;
@@ -61,6 +85,7 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
     connect();
 
     return () => {
+      isClosingRef.current = true;
       if (wsRef.current) {
         wsRef.current.close();
       }

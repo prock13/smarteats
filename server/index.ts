@@ -47,7 +47,6 @@ setupAuth(app);
 // Create HTTP server and register routes first
 const server = registerRoutes(app);
 
-
 // API-specific error handling middleware
 app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('API Error:', err);
@@ -58,14 +57,17 @@ app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
 
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
-  // Setup Vite middleware for development
+  // Setup Vite middleware for development with error handling
+  let viteSetupComplete = false;
   setupVite(app)
     .then(() => {
-      log('Vite middleware setup complete');
-      // Start the server after Vite is ready
-      server.listen(Number(PORT), "0.0.0.0", () => {
-        log(`Server running on port ${PORT}`);
-      });
+      if (!viteSetupComplete) {
+        viteSetupComplete = true;
+        log('Vite middleware setup complete');
+        server.listen(Number(PORT), "0.0.0.0", () => {
+          log(`Server running on port ${PORT}`);
+        });
+      }
     })
     .catch(err => {
       console.error('Vite setup error:', err);
@@ -75,7 +77,7 @@ if (process.env.NODE_ENV === "development") {
   // Serve static files from the dist/public directory
   app.use(express.static('dist/public'));
 
-  // Handle client-side routing by serving index.html for non-API routes
+  // Handle client-side routing for non-API routes
   app.get('*', (req, res, next) => {
     if (!req.path.startsWith('/api/')) {
       res.sendFile('index.html', { root: 'dist/public' });
@@ -90,10 +92,21 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-// Generic error handling middleware
+// Global error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   const status = err.status || err.statusCode || 500;
   const message = err.message || "Internal Server Error";
   res.status(status).json({ message });
 });
+
+// Handle graceful shutdown
+const cleanup = () => {
+  server.close(() => {
+    console.log('Server shutting down...');
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', cleanup);
+process.on('SIGINT', cleanup);

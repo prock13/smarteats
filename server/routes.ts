@@ -25,7 +25,9 @@ export function registerRoutes(app: Express): Server {
     server,
     path: '/smarteats-ws', // Custom path that won't conflict with Vite
     perMessageDeflate: false, // Disable compression to reduce overhead
-    clientTracking: true // Enable client tracking for better connection management
+    clientTracking: true, // Enable client tracking
+    skipUTF8Validation: true, // Skip UTF8 validation for better performance
+    maxPayload: 65536 // Limit payload size for security
   });
 
   // Error handling for the WebSocket server
@@ -34,8 +36,54 @@ export function registerRoutes(app: Express): Server {
     // Don't crash the server on WebSocket errors
   });
 
-  wss.on('connection', (ws) => {
+  // Keep track of connected clients for cleanup
+  const clients = new Set<WebSocket>();
+
+  // Set up heartbeat to keep connections alive
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws: WebSocket & { isAlive?: boolean }) => {
+      if (ws.isAlive === false) {
+        clients.delete(ws);
+        return ws.terminate();
+      }
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  // Cleanup on server shutdown
+  const cleanup = () => {
+    clearInterval(interval);
+    clients.forEach(client => {
+      try {
+        client.close();
+      } catch (err) {
+        console.error('Error closing WebSocket connection:', err);
+      }
+    });
+    clients.clear();
+    wss.close();
+  };
+
+  // Handle server shutdown
+  server.on('close', cleanup);
+  process.on('SIGTERM', () => {
+    cleanup();
+    process.exit(0);
+  });
+  process.on('SIGINT', () => {
+    cleanup();
+    process.exit(0);
+  });
+
+  wss.on('connection', (ws: WebSocket & { isAlive?: boolean }) => {
     console.log('WebSocket client connected');
+    ws.isAlive = true;
+    clients.add(ws);
+
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
 
     ws.on('message', (message) => {
       try {
@@ -50,11 +98,12 @@ export function registerRoutes(app: Express): Server {
 
     ws.on('error', (error) => {
       console.error('WebSocket client error:', error);
-      // Don't crash on client errors
+      clients.delete(ws);
     });
 
     ws.on('close', () => {
       console.log('WebSocket client disconnected');
+      clients.delete(ws);
     });
   });
 
