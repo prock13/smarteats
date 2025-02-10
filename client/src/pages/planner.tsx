@@ -17,7 +17,6 @@ import {
   TextField,
   FormControl,
   FormLabel,
-  FormHelperText,
   Checkbox,
   CircularProgress,
   LinearProgress,
@@ -34,6 +33,7 @@ import type { Recipe } from "@shared/schema";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
 
+type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 type DietaryPreference =
   | "none"
   | "vegetarian"
@@ -46,25 +46,25 @@ type DietaryPreference =
   | "halal"
   | "kosher";
 
-const mealTypeOptions = [
+const mealTypeOptions: Array<{ label: string; value: MealType }> = [
   { label: "Breakfast", value: "breakfast" },
   { label: "Lunch", value: "lunch" },
   { label: "Dinner", value: "dinner" },
   { label: "Snack", value: "snack" },
-] as const;
+];
 
-const dietaryOptions = [
-  { value: "none" as const, label: "No Restrictions" },
-  { value: "vegetarian" as const, label: "Vegetarian" },
-  { value: "vegan" as const, label: "Vegan" },
-  { value: "pescatarian" as const, label: "Pescatarian" },
-  { value: "keto" as const, label: "Keto" },
-  { value: "paleo" as const, label: "Paleo" },
-  { value: "gluten-free" as const, label: "Gluten-Free" },
-  { value: "dairy-free" as const, label: "Dairy-Free" },
-  { value: "halal" as const, label: "Halal" },
-  { value: "kosher" as const, label: "Kosher" },
-] as const;
+const dietaryOptions: Array<{ value: DietaryPreference; label: string }> = [
+  { value: "none", label: "No Restrictions" },
+  { value: "vegetarian", label: "Vegetarian" },
+  { value: "vegan", label: "Vegan" },
+  { value: "pescatarian", label: "Pescatarian" },
+  { value: "keto", label: "Keto" },
+  { value: "paleo", label: "Paleo" },
+  { value: "gluten-free", label: "Gluten-Free" },
+  { value: "dairy-free", label: "Dairy-Free" },
+  { value: "halal", label: "Halal" },
+  { value: "kosher", label: "Kosher" },
+];
 
 export default function Planner() {
   const { toast } = useToast();
@@ -252,19 +252,12 @@ export default function Planner() {
     handleShareClose();
   };
 
-  const handleMealTypeChange = (
-    checked: boolean,
-    value: "breakfast" | "lunch" | "dinner" | "snack",
-  ) => {
+  const handleMealTypeChange = (value: MealType, checked: boolean) => {
     const currentValues = form.watch("mealTypes") || [];
-    if (checked) {
-      form.setValue("mealTypes", [...currentValues, value]);
-    } else {
-      form.setValue(
-        "mealTypes",
-        currentValues.filter((type) => type !== value),
-      );
-    }
+    const newValues = checked
+      ? [...currentValues, value]
+      : currentValues.filter((type) => type !== value);
+    form.setValue("mealTypes", newValues);
   };
 
   const handleDietaryPreferenceChange = (
@@ -283,7 +276,7 @@ export default function Planner() {
         newPreferences = [
           ...currentPreferences.filter((p) => p !== "none"),
           value,
-        ] as DietaryPreference[];
+        ];
       }
     } else {
       // If unchecking the last preference, set to "none"
@@ -359,13 +352,17 @@ export default function Planner() {
                     helperText={form.formState.errors.targetFats?.message}
                   />
                 </Grid>
+
+                {/* Meal Types */}
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                  <FormControl component="fieldset" fullWidth>
                     <FormLabel component="legend">Meal Types</FormLabel>
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(120px, 1fr))",
+                        maxWidth: "100%",
                         gap: 1,
                         mt: 1,
                       }}
@@ -381,25 +378,32 @@ export default function Planner() {
                               onChange={(e) =>
                                 handleMealTypeChange(
                                   option.value,
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
+                          sx={{ margin: 0, minHeight: "40px" }}
                         />
                       ))}
                     </Box>
                   </FormControl>
                 </Grid>
+
+                {/* Dietary Preferences */}
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
-                    <FormLabel component="legend">Dietary Preferences</FormLabel>
+                  <FormControl component="fieldset" fullWidth>
+                    <FormLabel component="legend">
+                      Dietary Preferences
+                    </FormLabel>
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(120px, 1fr))",
+                        maxWidth: "100%",
                         gap: 1,
                         mt: 1,
                       }}
@@ -415,22 +419,34 @@ export default function Planner() {
                               onChange={(e) =>
                                 handleDietaryPreferenceChange(
                                   option.value,
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
+                          sx={{ margin: 0, minHeight: "40px" }}
                         />
                       ))}
                     </Box>
                   </FormControl>
                 </Grid>
+
+                {/* My Recipes */}
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                  <FormControl component="fieldset" fullWidth>
                     <FormLabel component="legend">My Recipes</FormLabel>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        mt: 1,
+                        "& .MuiFormControlLabel-root": {
+                          margin: 0,
+                          minHeight: "48px",
+                        },
+                      }}
+                    >
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -440,10 +456,12 @@ export default function Planner() {
                           />
                         }
                         label="Include My Recipes"
+                        sx={{ margin: 0, minHeight: "40px" }}
                       />
                     </Box>
                   </FormControl>
                 </Grid>
+
                 <Grid item xs={12}>
                   <Button
                     fullWidth

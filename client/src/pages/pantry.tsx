@@ -18,7 +18,6 @@ import {
   TextField,
   FormControl,
   FormLabel,
-  FormHelperText,
   Checkbox,
   FormControlLabel,
   CircularProgress,
@@ -39,8 +38,7 @@ const pantryInputSchema = z.object({
   carbSource: z.string().min(1, "Carbohydrate source is required"),
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
-  mealTypes: z
-    .array(z.enum(["breakfast", "lunch", "dinner", "snack"])),
+  mealTypes: z.array(z.enum(["breakfast", "lunch", "dinner", "snack"])),
   dietaryPreferences: z
     .array(
       z.enum([
@@ -54,7 +52,7 @@ const pantryInputSchema = z.object({
         "dairy-free",
         "halal",
         "kosher",
-      ])
+      ]),
     )
     .default(["none"]),
   includeUserRecipes: z.boolean().default(false),
@@ -141,13 +139,13 @@ export default function PantryPage() {
         const response = await apiRequest(
           "POST",
           "/api/pantry-suggestions",
-          requestData
+          requestData,
         );
 
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.message || "Failed to get pantry suggestions"
+            errorData.message || "Failed to get pantry suggestions",
           );
         }
 
@@ -213,7 +211,7 @@ export default function PantryPage() {
 
   const handleDietaryPreferenceChange = (
     value: DietaryPreference,
-    checked: boolean
+    checked: boolean,
   ) => {
     const currentPreferences = form.watch("dietaryPreferences") || ["none"];
     let newPreferences: DietaryPreference[];
@@ -222,7 +220,10 @@ export default function PantryPage() {
       if (value === "none") {
         newPreferences = ["none"];
       } else {
-        newPreferences = [...currentPreferences.filter((p) => p !== "none"), value];
+        newPreferences = [
+          ...currentPreferences.filter((p) => p !== "none"),
+          value,
+        ];
       }
     } else {
       newPreferences = currentPreferences.filter((p) => p !== value);
@@ -236,15 +237,9 @@ export default function PantryPage() {
 
   const handleMealTypeChange = (value: MealType, checked: boolean) => {
     const currentMealTypes = form.watch("mealTypes") || [];
-    let newMealTypes: MealType[];
-
-    if (checked) {
-      newMealTypes = [...currentMealTypes, value];
-    } else {
-      newMealTypes = currentMealTypes.filter((type) => type !== value);
-    }
-
-    console.log("Updated meal types:", newMealTypes);
+    const newMealTypes = checked
+      ? [...currentMealTypes, value]
+      : currentMealTypes.filter((type) => type !== value);
     form.setValue("mealTypes", newMealTypes);
   };
 
@@ -260,7 +255,6 @@ export default function PantryPage() {
       });
       return;
     }
-
 
     console.log("Submitting to API with data:", {
       carbSource: data.carbSource,
@@ -282,7 +276,7 @@ export default function PantryPage() {
 
   const handleShareClick = (
     event: React.MouseEvent<HTMLElement>,
-    meal: any
+    meal: any,
   ) => {
     setShareAnchorEl(event.currentTarget);
     setSharingMeal(meal);
@@ -310,17 +304,17 @@ export default function PantryPage() {
     switch (platform) {
       case "twitter":
         platformUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-          shareText
+          shareText,
         )}&url=${encodeURIComponent(baseUrl)}`;
         break;
       case "facebook":
         platformUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-          baseUrl
+          baseUrl,
         )}&quote=${encodeURIComponent(shareText)}`;
         break;
       case "linkedin":
         platformUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-          baseUrl
+          baseUrl,
         )}`;
         break;
     }
@@ -394,15 +388,20 @@ export default function PantryPage() {
                     disabled={mutation.isPending}
                   />
                 </Grid>
+
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                  <FormControl component="fieldset" sx={{ width: "100%" }}>
                     <FormLabel component="legend">Meal Types</FormLabel>
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
                         gap: 1,
                         mt: 1,
+                        "& .MuiFormControlLabel-root": {
+                          margin: 0,
+                          minHeight: "48px",
+                        },
                       }}
                     >
                       {mealTypeOptions.map((option) => (
@@ -416,7 +415,7 @@ export default function PantryPage() {
                               onChange={(e) =>
                                 handleMealTypeChange(
                                   option.value,
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               disabled={mutation.isPending}
@@ -428,15 +427,22 @@ export default function PantryPage() {
                     </Box>
                   </FormControl>
                 </Grid>
+
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
-                    <FormLabel component="legend">Dietary Preferences</FormLabel>
+                  <FormControl component="fieldset" sx={{ width: "100%" }}>
+                    <FormLabel component="legend">
+                      Dietary Preferences
+                    </FormLabel>
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
                         gap: 1,
                         mt: 1,
+                        "& .MuiFormControlLabel-root": {
+                          margin: 0,
+                          minHeight: "48px",
+                        },
                       }}
                     >
                       {dietaryOptions.map((option) => (
@@ -450,7 +456,7 @@ export default function PantryPage() {
                               onChange={(e) =>
                                 handleDietaryPreferenceChange(
                                   option.value,
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               disabled={mutation.isPending}
@@ -462,10 +468,20 @@ export default function PantryPage() {
                     </Box>
                   </FormControl>
                 </Grid>
+
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                  <FormControl component="fieldset" sx={{ width: "100%" }}>
                     <FormLabel component="legend">My Recipes</FormLabel>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        mt: 1,
+                        "& .MuiFormControlLabel-root": {
+                          margin: 0,
+                          minHeight: "48px",
+                        },
+                      }}
+                    >
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -479,6 +495,7 @@ export default function PantryPage() {
                     </Box>
                   </FormControl>
                 </Grid>
+
                 <Grid item xs={12}>
                   <Button
                     fullWidth
