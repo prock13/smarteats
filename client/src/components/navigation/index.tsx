@@ -9,6 +9,8 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Avatar,
+  Box,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -21,10 +23,17 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import type { UserProfileForm } from "@/pages/profile";
 
 export default function Navigation() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { logoutMutation } = useAuth();
+  const { logoutMutation, user } = useAuth();
+
+  const { data: profile } = useQuery<UserProfileForm>({
+    queryKey: ["/api/user/profile"],
+    enabled: !!user,
+  });
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +67,23 @@ export default function Navigation() {
           open={Boolean(anchorEl)}
           onClose={handleClose}
           onClick={handleClose}
+          PaperProps={{
+            sx: {
+              mt: 1.5,
+              width: 280,
+            },
+          }}
         >
+          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar 
+              src={profile?.profilePicture}
+              alt={user?.username}
+              sx={{ width: 40, height: 40 }}
+            >
+              {user?.username?.[0]?.toUpperCase()}
+            </Avatar>
+            <Typography variant="subtitle1">{user?.username}</Typography>
+          </Box>
           <MenuItem component={Link} href="/calendar">
             <ListItemIcon>
               <CalendarMonth />

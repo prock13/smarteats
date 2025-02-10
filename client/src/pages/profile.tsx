@@ -23,8 +23,12 @@ import {
   Alert,
   ToggleButtonGroup,
   ToggleButton,
-} from '@mui/material';
-import React from 'react';
+} from "@mui/material";
+import React from "react";
+
+// Export the UserProfileForm type so it can be used by other components
+export type UserProfileForm = z.infer<typeof userProfileSchema>;
+type PasswordUpdateForm = z.infer<typeof passwordUpdateSchema>;
 
 const userProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -40,30 +44,49 @@ const userProfileSchema = z.object({
   heightUnit: z.enum(["imperial", "metric"]).default("imperial"),
 });
 
-const passwordUpdateSchema = z.object({
-  currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(6, "New password must be at least 6 characters"),
-  confirmPassword: z.string().min(1, "Please confirm your new password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordUpdateSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-type UserProfileForm = z.infer<typeof userProfileSchema>;
-type PasswordUpdateForm = z.infer<typeof passwordUpdateSchema>;
+// Define shared label props for form fields
+const commonInputLabelProps = {
+  shrink: true,
+  sx: {
+    position: "relative",
+    transform: "none",
+    mb: 1,
+    fontSize: {
+      xs: '0.813rem',
+      sm: '0.875rem'
+    }
+  }
+};
 
 export default function Profile(): JSX.Element {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: profile, isLoading: isProfileLoading, error: profileError } = useQuery<UserProfileForm>({
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    error: profileError,
+  } = useQuery<UserProfileForm>({
     queryKey: ["/api/user/profile"],
     retry: false,
     enabled: !!user,
   });
 
-  const [heightUnit, setHeightUnit] = React.useState<'imperial' | 'metric'>(
-    profile?.heightUnit || "imperial"
+  const [heightUnit, setHeightUnit] = React.useState<"imperial" | "metric">(
+    profile?.heightUnit || "imperial",
   );
 
   const profileForm = useForm<UserProfileForm>({
@@ -111,7 +134,7 @@ export default function Profile(): JSX.Element {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
       toast({
-        title: "Profile Updated",
+        title: "Success",
         description: "Your profile has been updated successfully",
         variant: "default",
       });
@@ -145,7 +168,7 @@ export default function Profile(): JSX.Element {
       toast({
         title: "Success",
         description: "Your password has been updated",
-        variant: "default"
+        variant: "default",
       });
       passwordForm.reset();
     },
@@ -158,7 +181,9 @@ export default function Profile(): JSX.Element {
     },
   });
 
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       toast({
@@ -181,7 +206,9 @@ export default function Profile(): JSX.Element {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to upload profile picture");
+        throw new Error(
+          errorData.message || "Failed to upload profile picture",
+        );
       }
 
       const { url } = await response.json();
@@ -197,13 +224,19 @@ export default function Profile(): JSX.Element {
       console.error("Profile picture upload error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload profile picture",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to upload profile picture",
         variant: "destructive",
       });
     }
   };
 
-  const handleHeightUnitChange = (_: React.MouseEvent<HTMLElement>, newUnit: 'imperial' | 'metric' | null) => {
+  const handleHeightUnitChange = (
+    _: React.MouseEvent<HTMLElement>,
+    newUnit: "imperial" | "metric" | null,
+  ) => {
     if (newUnit) {
       setHeightUnit(newUnit);
       profileForm.setValue("heightUnit", newUnit);
@@ -212,14 +245,18 @@ export default function Profile(): JSX.Element {
       if (currentHeight) {
         try {
           if (newUnit === "metric" && currentHeight.includes("'")) {
-            const [feet, inches = "0"] = currentHeight.split("'").map(part => 
-              parseInt(part.replace('"', '')) || 0
-            );
-            const totalInches = feet * 12 + inches;
+            // Convert from imperial to metric
+            const [feetStr, inchesStr = "0"] = currentHeight
+              .split("'")
+              .map((part) => part.replace('"', "").trim());
+            const feet = parseInt(feetStr, 10) || 0;
+            const inches = parseInt(inchesStr, 10) || 0;
+            const totalInches = (feet * 12) + Number(inches);
             const cm = Math.round(totalInches * 2.54);
             profileForm.setValue("height", `${cm}`);
           } else if (newUnit === "imperial" && !currentHeight.includes("'")) {
-            const cm = parseInt(currentHeight);
+            // Convert from metric to imperial
+            const cm = parseInt(currentHeight, 10) || 0;
             const totalInches = cm / 2.54;
             const feet = Math.floor(totalInches / 12);
             const inches = Math.round(totalInches % 12);
@@ -263,7 +300,10 @@ export default function Profile(): JSX.Element {
       <Box sx={{ py: 4 }}>
         <Container maxWidth="lg">
           <Alert severity="error">
-            Failed to load profile: {profileError instanceof Error ? profileError.message : 'Unknown error'}
+            Failed to load profile:{" "}
+            {profileError instanceof Error
+              ? profileError.message
+              : "Unknown error"}
           </Alert>
         </Container>
       </Box>
@@ -302,7 +342,13 @@ export default function Profile(): JSX.Element {
                   <Button
                     component="label"
                     variant="outlined"
-                    sx={{ mt: 2 }}
+                    size="small"
+                    sx={{
+                      mt: 2,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      padding: { xs: '4px 8px', sm: '6px 16px' },
+                      whiteSpace: 'nowrap'
+                    }}
                   >
                     Upload Picture
                     <input
@@ -322,10 +368,12 @@ export default function Profile(): JSX.Element {
                         fullWidth
                         label="First Name *"
                         required
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("firstName")}
                         error={!!profileForm.formState.errors.firstName}
-                        helperText={profileForm.formState.errors.firstName?.message}
+                        helperText={
+                          profileForm.formState.errors.firstName?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -333,10 +381,12 @@ export default function Profile(): JSX.Element {
                         fullWidth
                         label="Last Name *"
                         required
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("lastName")}
                         error={!!profileForm.formState.errors.lastName}
-                        helperText={profileForm.formState.errors.lastName?.message}
+                        helperText={
+                          profileForm.formState.errors.lastName?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -345,7 +395,7 @@ export default function Profile(): JSX.Element {
                         type="email"
                         label="Email Address *"
                         required
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("email")}
                         error={!!profileForm.formState.errors.email}
                         helperText={profileForm.formState.errors.email?.message}
@@ -353,7 +403,6 @@ export default function Profile(): JSX.Element {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
-                        <InputLabel shrink>Height Unit</InputLabel>
                         <ToggleButtonGroup
                           value={heightUnit}
                           exclusive
@@ -371,21 +420,35 @@ export default function Profile(): JSX.Element {
                         </ToggleButtonGroup>
                         <TextField
                           fullWidth
-                          label={heightUnit === 'imperial' ? "Height (e.g., 5'11\")" : "Height (cm)"}
-                          placeholder={heightUnit === 'imperial' ? "5'11\"" : "180"}
-                          InputLabelProps={{ shrink: true }}
+                          label={
+                            heightUnit === "imperial"
+                              ? "Height (e.g., 5'11\")"
+                              : "Height (cm)"
+                          }
+                          placeholder={
+                            heightUnit === "imperial" ? "5'11\"" : "180"
+                          }
+                          InputLabelProps={commonInputLabelProps}
                           {...profileForm.register("height")}
                           error={!!profileForm.formState.errors.height}
                           helperText={
                             profileForm.formState.errors.height?.message ||
-                            (heightUnit === 'imperial' ? "Enter in format: 5'11\"" : "Enter height in centimeters")
+                            (heightUnit === "imperial"
+                              ? "Enter in format: 5'11\""
+                              : "Enter height in centimeters")
                           }
                         />
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
-                        <InputLabel shrink id="sex-label">Sex</InputLabel>
+                        <InputLabel
+                          shrink
+                          id="sex-label"
+                          sx={commonInputLabelProps.sx}
+                        >
+                          Sex
+                        </InputLabel>
                         <Select
                           labelId="sex-label"
                           label="Sex"
@@ -396,7 +459,9 @@ export default function Profile(): JSX.Element {
                           <MenuItem value="male">Male</MenuItem>
                           <MenuItem value="female">Female</MenuItem>
                           <MenuItem value="other">Other</MenuItem>
-                          <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
+                          <MenuItem value="prefer_not_to_say">
+                            Prefer not to say
+                          </MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
@@ -405,40 +470,48 @@ export default function Profile(): JSX.Element {
                         fullWidth
                         type="date"
                         label="Date of Birth"
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("dateOfBirth")}
                         error={!!profileForm.formState.errors.dateOfBirth}
-                        helperText={profileForm.formState.errors.dateOfBirth?.message}
+                        helperText={
+                          profileForm.formState.errors.dateOfBirth?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
                         label="Country"
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("country")}
                         error={!!profileForm.formState.errors.country}
-                        helperText={profileForm.formState.errors.country?.message}
+                        helperText={
+                          profileForm.formState.errors.country?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
                         label="Zip Code"
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("zipCode")}
                         error={!!profileForm.formState.errors.zipCode}
-                        helperText={profileForm.formState.errors.zipCode?.message}
+                        helperText={
+                          profileForm.formState.errors.zipCode?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
                         label="Timezone"
-                        InputLabelProps={{ shrink: true }}
+                        InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("timezone")}
                         error={!!profileForm.formState.errors.timezone}
-                        helperText={profileForm.formState.errors.timezone?.message}
+                        helperText={
+                          profileForm.formState.errors.timezone?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -448,7 +521,9 @@ export default function Profile(): JSX.Element {
                         variant="contained"
                         disabled={updateProfileMutation.isPending}
                       >
-                        {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+                        {updateProfileMutation.isPending
+                          ? "Updating..."
+                          : "Update Profile"}
                       </Button>
                     </Grid>
                   </Grid>
@@ -461,16 +536,23 @@ export default function Profile(): JSX.Element {
             <Card>
               <CardHeader title="Update Password" />
               <CardContent>
-                <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
+                >
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
                         type="password"
                         label="Current Password"
+                        InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("currentPassword")}
-                        error={!!passwordForm.formState.errors.currentPassword}
-                        helperText={passwordForm.formState.errors.currentPassword?.message}
+                        error={
+                          !!passwordForm.formState.errors.currentPassword
+                        }
+                        helperText={
+                          passwordForm.formState.errors.currentPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -478,9 +560,12 @@ export default function Profile(): JSX.Element {
                         fullWidth
                         type="password"
                         label="New Password"
+                        InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("newPassword")}
                         error={!!passwordForm.formState.errors.newPassword}
-                        helperText={passwordForm.formState.errors.newPassword?.message}
+                        helperText={
+                          passwordForm.formState.errors.newPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -488,9 +573,14 @@ export default function Profile(): JSX.Element {
                         fullWidth
                         type="password"
                         label="Confirm New Password"
+                        InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("confirmPassword")}
-                        error={!!passwordForm.formState.errors.confirmPassword}
-                        helperText={passwordForm.formState.errors.confirmPassword?.message}
+                        error={
+                          !!passwordForm.formState.errors.confirmPassword
+                        }
+                        helperText={
+                          passwordForm.formState.errors.confirmPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -500,7 +590,9 @@ export default function Profile(): JSX.Element {
                         variant="contained"
                         disabled={updatePasswordMutation.isPending}
                       >
-                        {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                        {updatePasswordMutation.isPending
+                          ? "Updating..."
+                          : "Update Password"}
                       </Button>
                     </Grid>
                   </Grid>
