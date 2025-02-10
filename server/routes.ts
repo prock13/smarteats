@@ -1,6 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer, WebSocket } from 'ws';
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import OpenAI from "openai";
@@ -14,153 +13,10 @@ const openai = new OpenAI({
 });
 
 export function registerRoutes(app: Express): Server {
-  // Set up authentication routes and middleware first
-  setupAuth(app);
-
-  // Create HTTP server after middleware setup
   const server = createServer(app);
 
-  // Initialize WebSocket server with specific path and configuration
-  const wss = new WebSocketServer({ 
-    server,
-    path: '/smarteats-ws',
-    perMessageDeflate: false,
-    clientTracking: true,
-    skipUTF8Validation: true,
-    maxPayload: 65536,
-    handleProtocols: (protocols) => {
-      console.log('[WebSocket] Protocol negotiation:', protocols);
-      // Accept websocket protocol or fallback to no protocol
-      return protocols?.includes('websocket') ? 'websocket' : '';
-    },
-    verifyClient: (info, callback) => {
-      // Log verification attempt with more details
-      console.log('[WebSocket] Connection attempt:', {
-        origin: info.origin,
-        secure: info.secure,
-        req: {
-          url: info.req.url,
-          headers: info.req.headers,
-          upgrade: info.req.headers.upgrade,
-          connection: info.req.headers.connection
-        }
-      });
-
-      // Verify upgrade headers
-      const isValidUpgrade = 
-        info.req.headers.upgrade?.toLowerCase() === 'websocket' &&
-        info.req.headers.connection?.toLowerCase().includes('upgrade');
-
-      if (!isValidUpgrade) {
-        console.log('[WebSocket] Invalid upgrade headers:', info.req.headers);
-        callback(false, 400, 'Invalid upgrade request');
-        return;
-      }
-
-      // Add CORS headers to the upgrade response
-      const responseHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Accept',
-        'Access-Control-Allow-Credentials': 'true'
-      };
-
-      callback(true, 200, 'Connection accepted', responseHeaders);
-    }
-  });
-
-  // Error handling for the WebSocket server with improved logging
-  wss.on('error', (error) => {
-    console.error('[WebSocket] Server error:', error);
-  });
-
-  // Keep track of connected clients
-  const clients = new Set<WebSocket>();
-
-  // Set up heartbeat interval
-  const interval = setInterval(() => {
-    wss.clients.forEach((ws: WebSocket & { isAlive?: boolean }) => {
-      if (ws.isAlive === false) {
-        clients.delete(ws);
-        return ws.terminate();
-      }
-      ws.isAlive = false;
-      ws.ping();
-    });
-  }, 30000);
-
-  // Handle WebSocket connections
-  wss.on('connection', (ws: WebSocket & { isAlive?: boolean }, req) => {
-    console.log('WebSocket client connected from:', req.headers.origin, 'with protocol:', ws.protocol);
-    ws.isAlive = true;
-    clients.add(ws);
-
-    // Send initial connection success message
-    ws.send(JSON.stringify({ 
-      type: 'connection', 
-      status: 'connected',
-      timestamp: new Date().toISOString()
-    }));
-
-    ws.on('pong', () => {
-      ws.isAlive = true;
-    });
-
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log('Received WebSocket message:', data);
-        ws.send(JSON.stringify({ 
-          type: 'acknowledgment', 
-          status: 'received', 
-          data,
-          timestamp: new Date().toISOString()
-        }));
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({ 
-          type: 'error', 
-          message: 'Invalid message format',
-          timestamp: new Date().toISOString()
-        }));
-      }
-    });
-
-    ws.on('error', (error) => {
-      console.error('WebSocket client error:', error);
-      clients.delete(ws);
-    });
-
-    ws.on('close', () => {
-      console.log('WebSocket client disconnected');
-      clients.delete(ws);
-    });
-  });
-
-  // Cleanup function
-  const cleanup = () => {
-    clearInterval(interval);
-    clients.forEach(client => {
-      try {
-        client.close();
-      } catch (err) {
-        console.error('Error closing WebSocket connection:', err);
-      }
-    });
-    clients.clear();
-    wss.close();
-  };
-
-  // Handle server shutdown
-  server.on('close', cleanup);
-  process.on('SIGTERM', () => {
-    cleanup();
-    process.exit(0);
-  });
-  process.on('SIGINT', () => {
-    cleanup();
-    process.exit(0);
-  });
+  // Set up authentication routes and middleware first
+  setupAuth(app);
 
   // Protected Routes - These require authentication
   app.post("/api/meal-suggestions", async (req, res) => {
@@ -615,7 +471,6 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message });
     }
   });
-
 
 
   app.post("/api/chat", async (req, res) => {

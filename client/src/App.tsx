@@ -58,10 +58,9 @@ function ThemedApp() {
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           autoHideDuration={6000}
-          open={true}
         >
-          <Alert severity="info" variant="filled" sx={{ width: '100%' }}>
-            Hot reload test message - Development server is working!
+          <Alert severity="info" variant="filled">
+            Message
           </Alert>
         </Snackbar>
       </Box>
