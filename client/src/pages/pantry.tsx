@@ -24,6 +24,7 @@ import {
   LinearProgress,
   Menu,
   MenuItem,
+  FormHelperText,
 } from "@mui/material";
 import {
   Twitter as TwitterIcon,
@@ -38,7 +39,7 @@ const pantryInputSchema = z.object({
   carbSource: z.string().min(1, "Carbohydrate source is required"),
   proteinSource: z.string().min(1, "Protein source is required"),
   fatSource: z.string().min(1, "Fat source is required"),
-  mealTypes: z.array(z.enum(["breakfast", "lunch", "dinner", "snack"])),
+  mealTypes: z.array(z.enum(["breakfast", "lunch", "dinner", "snack"])).min(1, "Please select at least one meal type"),
   dietaryPreferences: z
     .array(
       z.enum([
@@ -113,7 +114,7 @@ export default function PantryPage() {
       carbSource: "",
       proteinSource: "",
       fatSource: "",
-      mealTypes: [], // Remove default selection
+      mealTypes: [], 
       dietaryPreferences: ["none"],
       includeUserRecipes: false,
     },
@@ -256,6 +257,15 @@ export default function PantryPage() {
       return;
     }
 
+    if (!data.mealTypes || data.mealTypes.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one meal type",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log("Submitting to API with data:", {
       carbSource: data.carbSource,
       proteinSource: data.proteinSource,
@@ -389,42 +399,41 @@ export default function PantryPage() {
                   />
                 </Grid>
 
+                {/* Meal Types */}
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" sx={{ width: "100%" }}>
-                    <FormLabel component="legend">Meal Types</FormLabel>
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, 1fr)",
-                        gap: 1,
-                        mt: 1,
-                        "& .MuiFormControlLabel-root": {
-                          margin: 0,
-                          minHeight: "48px",
-                        },
-                      }}
-                    >
+                  <FormControl 
+                    component="fieldset" 
+                    fullWidth
+                    error={!!form.formState.errors.mealTypes}
+                  >
+                    <FormLabel component="legend">Meal Types *</FormLabel>
+                    <Box sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                      maxWidth: "100%",
+                      gap: 1,
+                      mt: 1,
+                    }}>
                       {mealTypeOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form
-                                .watch("mealTypes")
-                                ?.includes(option.value)}
-                              onChange={(e) =>
-                                handleMealTypeChange(
-                                  option.value,
-                                  e.target.checked,
-                                )
-                              }
+                              checked={form.watch("mealTypes")?.includes(option.value)}
+                              onChange={(e) => handleMealTypeChange(option.value, e.target.checked)}
                               disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
+                          sx={{ margin: 0, minHeight: '40px' }}
                         />
                       ))}
                     </Box>
+                    {form.formState.errors.mealTypes && (
+                      <FormHelperText error>
+                        Please select at least one meal type
+                      </FormHelperText>
+                    )}
                   </FormControl>
                 </Grid>
 

@@ -22,6 +22,7 @@ import {
   LinearProgress,
   Menu,
   FormControlLabel,
+  FormHelperText,
 } from "@mui/material";
 import {
   Add as PlusCircle,
@@ -88,7 +89,7 @@ export default function Planner() {
       targetCarbs: 0,
       targetProtein: 0,
       targetFats: 0,
-      mealTypes: [],
+      mealTypes: [], 
       dietaryPreferences: ["none"],
       mealCount: 1,
       includeUserRecipes: false,
@@ -183,7 +184,6 @@ export default function Planner() {
       return;
     }
 
-    // Set mealCount based on selected meal types
     data.mealCount = data.mealTypes.length;
 
     console.log("Submitting macro input:", data);
@@ -268,18 +268,15 @@ export default function Planner() {
     let newPreferences: DietaryPreference[];
 
     if (checked) {
-      // If "none" is being added, remove all other preferences
       if (value === "none") {
         newPreferences = ["none"];
       } else {
-        // If adding a specific preference, remove "none" and add the new one
         newPreferences = [
           ...currentPreferences.filter((p) => p !== "none"),
           value,
         ];
       }
     } else {
-      // If unchecking the last preference, set to "none"
       newPreferences = currentPreferences.filter((p) => p !== value);
       if (newPreferences.length === 0) {
         newPreferences = ["none"];
@@ -355,40 +352,39 @@ export default function Planner() {
 
                 {/* Meal Types */}
                 <Grid item xs={12} md={4}>
-                  <FormControl component="fieldset" fullWidth>
-                    <FormLabel component="legend">Meal Types</FormLabel>
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "repeat(auto-fit, minmax(120px, 1fr))",
-                        maxWidth: "100%",
-                        gap: 1,
-                        mt: 1,
-                      }}
-                    >
+                  <FormControl
+                    component="fieldset"
+                    fullWidth
+                    error={!!form.formState.errors.mealTypes}
+                  >
+                    <FormLabel component="legend">Meal Types *</FormLabel>
+                    <Box sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                      maxWidth: "100%",
+                      gap: 1,
+                      mt: 1,
+                    }}>
                       {mealTypeOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form
-                                .watch("mealTypes")
-                                ?.includes(option.value)}
-                              onChange={(e) =>
-                                handleMealTypeChange(
-                                  option.value,
-                                  e.target.checked,
-                                )
-                              }
+                              checked={form.watch("mealTypes")?.includes(option.value)}
+                              onChange={(e) => handleMealTypeChange(option.value, e.target.checked)}
                               disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
-                          sx={{ margin: 0, minHeight: "40px" }}
+                          sx={{ margin: 0, minHeight: '40px' }}
                         />
                       ))}
                     </Box>
+                    {form.formState.errors.mealTypes && (
+                      <FormHelperText error>
+                        Please select at least one meal type
+                      </FormHelperText>
+                    )}
                   </FormControl>
                 </Grid>
 
