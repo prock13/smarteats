@@ -23,19 +23,19 @@ export function registerRoutes(app: Express): Server {
   // Initialize WebSocket server with specific path and configuration
   const wss = new WebSocketServer({ 
     server,
-    path: '/ws',
+    path: '/smarteats-ws',
     perMessageDeflate: false,
     clientTracking: true,
     skipUTF8Validation: true,
     maxPayload: 65536,
     handleProtocols: (protocols) => {
-      console.log('Handling protocols:', protocols);
+      console.log('[WebSocket] Protocol negotiation:', protocols);
       // Accept websocket protocol or fallback to no protocol
       return protocols?.includes('websocket') ? 'websocket' : '';
     },
     verifyClient: (info, callback) => {
-      // Log verification attempt
-      console.log('WebSocket connection verification:', {
+      // Log verification attempt with more details
+      console.log('[WebSocket] Connection attempt:', {
         origin: info.origin,
         secure: info.secure,
         req: {
@@ -52,19 +52,26 @@ export function registerRoutes(app: Express): Server {
         info.req.headers.connection?.toLowerCase().includes('upgrade');
 
       if (!isValidUpgrade) {
-        console.log('Invalid upgrade headers:', info.req.headers);
+        console.log('[WebSocket] Invalid upgrade headers:', info.req.headers);
         callback(false, 400, 'Invalid upgrade request');
         return;
       }
 
-      // Accept connection
-      callback(true);
+      // Add CORS headers to the upgrade response
+      const responseHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Accept',
+        'Access-Control-Allow-Credentials': 'true'
+      };
+
+      callback(true, 200, 'Connection accepted', responseHeaders);
     }
   });
 
-  // Error handling for the WebSocket server
+  // Error handling for the WebSocket server with improved logging
   wss.on('error', (error) => {
-    console.error('WebSocket server error:', error);
+    console.error('[WebSocket] Server error:', error);
   });
 
   // Keep track of connected clients
