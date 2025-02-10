@@ -11,8 +11,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     hmr: {
-      port: 5173,
-      host: "*.repl.co",
+      clientPort: 443,
+      host: "*.replit.dev"
     },
     fs: {
       strict: false,
@@ -24,17 +24,6 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
-    origin: "https://${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.repl.co",
-    allowedHosts: [
-      "localhost",
-      ".replit.dev",
-      ".repl.co",
-      "*.replit.dev",
-      "*.repl.co",
-      ".spock.replit.dev",
-      "**.spock.replit.dev",
-      "b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"
-    ],
   },
   resolve: {
     alias: {

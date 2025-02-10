@@ -20,26 +20,43 @@ export function registerRoutes(app: Express): Server {
   // Create HTTP server after middleware setup
   const server = createServer(app);
 
-  // Initialize WebSocket server with specific path to avoid Vite HMR conflicts
+  // Initialize WebSocket server with specific path and configuration
   const wss = new WebSocketServer({ 
     server,
-    path: '/smarteats-ws', // Custom path that won't conflict with Vite
-    perMessageDeflate: false, // Disable compression to reduce overhead
-    clientTracking: true, // Enable client tracking
-    skipUTF8Validation: true, // Skip UTF8 validation for better performance
-    maxPayload: 65536 // Limit payload size for security
+    path: '/ws',
+    perMessageDeflate: false,
+    clientTracking: true,
+    skipUTF8Validation: true,
+    maxPayload: 65536,
+    handleProtocols: (protocols) => {
+      // Accept websocket protocol or fallback to no protocol
+      return protocols?.includes('websocket') ? 'websocket' : '';
+    },
+    verifyClient: (info, callback) => {
+      // Log verification attempt
+      console.log('WebSocket connection verification:', {
+        origin: info.origin,
+        secure: info.secure,
+        req: {
+          url: info.req.url,
+          headers: info.req.headers
+        }
+      });
+
+      // Accept all connections for now
+      callback(true);
+    }
   });
 
   // Error handling for the WebSocket server
   wss.on('error', (error) => {
     console.error('WebSocket server error:', error);
-    // Don't crash the server on WebSocket errors
   });
 
-  // Keep track of connected clients for cleanup
+  // Keep track of connected clients
   const clients = new Set<WebSocket>();
 
-  // Set up heartbeat to keep connections alive
+  // Set up heartbeat interval
   const interval = setInterval(() => {
     wss.clients.forEach((ws: WebSocket & { isAlive?: boolean }) => {
       if (ws.isAlive === false) {
@@ -51,7 +68,55 @@ export function registerRoutes(app: Express): Server {
     });
   }, 30000);
 
-  // Cleanup on server shutdown
+  // Handle WebSocket connections
+  wss.on('connection', (ws: WebSocket & { isAlive?: boolean }, req) => {
+    console.log('WebSocket client connected from:', req.headers.origin, 'with protocol:', ws.protocol);
+    ws.isAlive = true;
+    clients.add(ws);
+
+    // Send initial connection success message
+    ws.send(JSON.stringify({ 
+      type: 'connection', 
+      status: 'connected',
+      timestamp: new Date().toISOString()
+    }));
+
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
+
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received WebSocket message:', data);
+        ws.send(JSON.stringify({ 
+          type: 'acknowledgment', 
+          status: 'received', 
+          data,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({ 
+          type: 'error', 
+          message: 'Invalid message format',
+          timestamp: new Date().toISOString()
+        }));
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket client error:', error);
+      clients.delete(ws);
+    });
+
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+      clients.delete(ws);
+    });
+  });
+
+  // Cleanup function
   const cleanup = () => {
     clearInterval(interval);
     clients.forEach(client => {
@@ -74,37 +139,6 @@ export function registerRoutes(app: Express): Server {
   process.on('SIGINT', () => {
     cleanup();
     process.exit(0);
-  });
-
-  wss.on('connection', (ws: WebSocket & { isAlive?: boolean }) => {
-    console.log('WebSocket client connected');
-    ws.isAlive = true;
-    clients.add(ws);
-
-    ws.on('pong', () => {
-      ws.isAlive = true;
-    });
-
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log('Received WebSocket message:', data);
-        ws.send(JSON.stringify({ status: 'received' }));
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({ error: 'Invalid message format' }));
-      }
-    });
-
-    ws.on('error', (error) => {
-      console.error('WebSocket client error:', error);
-      clients.delete(ws);
-    });
-
-    ws.on('close', () => {
-      console.log('WebSocket client disconnected');
-      clients.delete(ws);
-    });
   });
 
   // Protected Routes - These require authentication
