@@ -89,12 +89,18 @@ export default function Planner() {
       targetCarbs: 0,
       targetProtein: 0,
       targetFats: 0,
-      mealTypes: [], 
+      mealTypes: [],
       dietaryPreferences: ["none"],
       mealCount: 1,
       includeUserRecipes: false,
     },
+    mode: "onSubmit", // Only validate on form submit
   });
+
+  const allMacrosZero =
+    form.watch("targetCarbs") === 0 &&
+    form.watch("targetProtein") === 0 &&
+    form.watch("targetFats") === 0;
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
@@ -184,8 +190,20 @@ export default function Planner() {
       return;
     }
 
-    data.mealCount = data.mealTypes.length;
+    if (data.targetCarbs === 0 && data.targetProtein === 0 && data.targetFats === 0) {
+      form.setError("targetCarbs", { message: "At least one macro must be greater than 0" });
+      form.setError("targetProtein", { message: "At least one macro must be greater than 0" });
+      form.setError("targetFats", { message: "At least one macro must be greater than 0" });
 
+      toast({
+        title: "Error",
+        description: "At least one macro value (Carbs, Protein, or Fats) must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    data.mealCount = data.mealTypes.length;
     console.log("Submitting macro input:", data);
     mutation.mutate(data);
   };
@@ -253,11 +271,14 @@ export default function Planner() {
   };
 
   const handleMealTypeChange = (value: MealType, checked: boolean) => {
-    const currentValues = form.watch("mealTypes") || [];
-    const newValues = checked
-      ? [...currentValues, value]
-      : currentValues.filter((type) => type !== value);
-    form.setValue("mealTypes", newValues);
+    const currentMealTypes = form.watch("mealTypes") || [];
+    const newMealTypes = checked
+      ? [...currentMealTypes, value]
+      : currentMealTypes.filter((type) => type !== value);
+    form.setValue("mealTypes", newMealTypes, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const handleDietaryPreferenceChange = (
@@ -325,8 +346,12 @@ export default function Planner() {
                     label="Carbohydrates (g)"
                     type="number"
                     {...form.register("targetCarbs", { valueAsNumber: true })}
-                    error={!!form.formState.errors.targetCarbs}
-                    helperText={form.formState.errors.targetCarbs?.message}
+                    error={form.formState.isSubmitted && (!!form.formState.errors.targetCarbs || allMacrosZero)}
+                    helperText={
+                      form.formState.isSubmitted && 
+                      (form.formState.errors.targetCarbs?.message || 
+                       (allMacrosZero ? "Enter at least one non-zero value" : ""))
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -335,8 +360,12 @@ export default function Planner() {
                     label="Protein (g)"
                     type="number"
                     {...form.register("targetProtein", { valueAsNumber: true })}
-                    error={!!form.formState.errors.targetProtein}
-                    helperText={form.formState.errors.targetProtein?.message}
+                    error={form.formState.isSubmitted && (!!form.formState.errors.targetProtein || allMacrosZero)}
+                    helperText={
+                      form.formState.isSubmitted && 
+                      (form.formState.errors.targetProtein?.message || 
+                       (allMacrosZero ? "Enter at least one non-zero value" : ""))
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -345,8 +374,12 @@ export default function Planner() {
                     label="Fats (g)"
                     type="number"
                     {...form.register("targetFats", { valueAsNumber: true })}
-                    error={!!form.formState.errors.targetFats}
-                    helperText={form.formState.errors.targetFats?.message}
+                    error={form.formState.isSubmitted && (!!form.formState.errors.targetFats || allMacrosZero)}
+                    helperText={
+                      form.formState.isSubmitted && 
+                      (form.formState.errors.targetFats?.message || 
+                       (allMacrosZero ? "Enter at least one non-zero value" : ""))
+                    }
                   />
                 </Grid>
 
@@ -355,7 +388,7 @@ export default function Planner() {
                   <FormControl
                     component="fieldset"
                     fullWidth
-                    error={!!form.formState.errors.mealTypes}
+                    error={form.formState.isSubmitted && !!form.formState.errors.mealTypes}
                   >
                     <FormLabel component="legend">Meal Types *</FormLabel>
                     <Box sx={{
@@ -380,7 +413,7 @@ export default function Planner() {
                         />
                       ))}
                     </Box>
-                    {form.formState.errors.mealTypes && (
+                    {form.formState.isSubmitted && form.formState.errors.mealTypes && (
                       <FormHelperText error>
                         Please select at least one meal type
                       </FormHelperText>

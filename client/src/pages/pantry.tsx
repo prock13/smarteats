@@ -19,11 +19,11 @@ import {
   FormControl,
   FormLabel,
   Checkbox,
-  FormControlLabel,
   CircularProgress,
   LinearProgress,
   Menu,
   MenuItem,
+  FormControlLabel,
   FormHelperText,
 } from "@mui/material";
 import {
@@ -114,10 +114,11 @@ export default function PantryPage() {
       carbSource: "",
       proteinSource: "",
       fatSource: "",
-      mealTypes: [], 
+      mealTypes: [],
       dietaryPreferences: ["none"],
       includeUserRecipes: false,
     },
+    mode: "onSubmit", // Only validate on form submit
   });
 
   const mutation = useMutation({
@@ -241,39 +242,16 @@ export default function PantryPage() {
     const newMealTypes = checked
       ? [...currentMealTypes, value]
       : currentMealTypes.filter((type) => type !== value);
-    form.setValue("mealTypes", newMealTypes);
+    form.setValue("mealTypes", newMealTypes, {
+      shouldValidate: true,
+      shouldDirty: true
+    });
   };
 
   const onSubmit = (data: PantryInput) => {
     console.log("Submitting form data:", data);
     setSuggestions(null);
 
-    if (!data.carbSource || !data.proteinSource || !data.fatSource) {
-      toast({
-        title: "Error",
-        description: "Please fill in all ingredient sources",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!data.mealTypes || data.mealTypes.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please select at least one meal type",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log("Submitting to API with data:", {
-      carbSource: data.carbSource,
-      proteinSource: data.proteinSource,
-      fatSource: data.fatSource,
-      mealTypes: data.mealTypes,
-      dietaryPreferences: data.dietaryPreferences,
-      includeUserRecipes: data.includeUserRecipes,
-    });
 
     mutation.mutate(data);
   };
@@ -369,8 +347,8 @@ export default function PantryPage() {
                     label="Carbohydrate Source"
                     placeholder="e.g., Rice, Potatoes, Pasta"
                     {...form.register("carbSource")}
-                    error={!!form.formState.errors.carbSource}
-                    helperText={form.formState.errors.carbSource?.message}
+                    error={form.formState.isSubmitted && !!form.formState.errors.carbSource}
+                    helperText={form.formState.isSubmitted && form.formState.errors.carbSource?.message}
                     disabled={mutation.isPending}
                   />
                 </Grid>
@@ -381,8 +359,8 @@ export default function PantryPage() {
                     label="Protein Source"
                     placeholder="e.g., Chicken, Tofu, Fish"
                     {...form.register("proteinSource")}
-                    error={!!form.formState.errors.proteinSource}
-                    helperText={form.formState.errors.proteinSource?.message}
+                    error={form.formState.isSubmitted && !!form.formState.errors.proteinSource}
+                    helperText={form.formState.isSubmitted && form.formState.errors.proteinSource?.message}
                     disabled={mutation.isPending}
                   />
                 </Grid>
@@ -393,18 +371,18 @@ export default function PantryPage() {
                     label="Fat Source"
                     placeholder="e.g., Olive Oil, Avocado, Nuts"
                     {...form.register("fatSource")}
-                    error={!!form.formState.errors.fatSource}
-                    helperText={form.formState.errors.fatSource?.message}
+                    error={form.formState.isSubmitted && !!form.formState.errors.fatSource}
+                    helperText={form.formState.isSubmitted && form.formState.errors.fatSource?.message}
                     disabled={mutation.isPending}
                   />
                 </Grid>
 
                 {/* Meal Types */}
                 <Grid item xs={12} md={4}>
-                  <FormControl 
-                    component="fieldset" 
+                  <FormControl
+                    component="fieldset"
                     fullWidth
-                    error={!!form.formState.errors.mealTypes}
+                    error={form.formState.isSubmitted && !!form.formState.errors.mealTypes}
                   >
                     <FormLabel component="legend">Meal Types *</FormLabel>
                     <Box sx={{
@@ -429,7 +407,7 @@ export default function PantryPage() {
                         />
                       ))}
                     </Box>
-                    {form.formState.errors.mealTypes && (
+                    {form.formState.isSubmitted && form.formState.errors.mealTypes && (
                       <FormHelperText error>
                         Please select at least one meal type
                       </FormHelperText>
