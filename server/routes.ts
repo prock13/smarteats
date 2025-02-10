@@ -20,42 +20,41 @@ export function registerRoutes(app: Express): Server {
   // Create HTTP server after middleware setup
   const server = createServer(app);
 
-  // Initialize WebSocket server with correct path
+  // Initialize WebSocket server with specific path to avoid Vite HMR conflicts
   const wss = new WebSocketServer({ 
     server,
-    path: '/ws',
-    perMessageDeflate: false // Disable per-message deflate to reduce overhead
+    path: '/smarteats-ws', // Custom path that won't conflict with Vite
+    perMessageDeflate: false, // Disable compression to reduce overhead
+    clientTracking: true // Enable client tracking for better connection management
   });
 
-  // Handle WebSocket server errors at the top level
+  // Error handling for the WebSocket server
   wss.on('error', (error) => {
     console.error('WebSocket server error:', error);
-    // Don't throw the error, just log it
+    // Don't crash the server on WebSocket errors
   });
 
   wss.on('connection', (ws) => {
     console.log('WebSocket client connected');
 
     ws.on('message', (message) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        try {
-          const data = JSON.parse(message.toString());
-          console.log('Received WebSocket message:', data);
-          // Handle message based on type
-          ws.send(JSON.stringify({ status: 'received' }));
-        } catch (error) {
-          console.error('WebSocket message error:', error);
-          ws.send(JSON.stringify({ error: 'Invalid message format' }));
-        }
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received WebSocket message:', data);
+        ws.send(JSON.stringify({ status: 'received' }));
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({ error: 'Invalid message format' }));
       }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket client error:', error);
+      // Don't crash on client errors
     });
 
     ws.on('close', () => {
       console.log('WebSocket client disconnected');
-    });
-
-    ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
     });
   });
 

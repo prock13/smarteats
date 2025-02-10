@@ -44,42 +44,9 @@ app.use(passport.session());
 // Set up authentication
 setupAuth(app);
 
-// CORS middleware - only applied in development
-if (process.env.NODE_ENV === "development") {
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(200);
-    }
-    next();
-  });
-}
-
-// Request logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  log(`${req.method} ${req.path} - Request started`);
-
-  if (req.method === 'POST' || req.method === 'PUT') {
-    log('Request Body: ' + JSON.stringify(req.body, null, 2));
-  }
-
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
-  });
-
-  next();
-});
-
-// Create HTTP server and register routes
+// Create HTTP server and register routes first
 const server = registerRoutes(app);
+
 
 // API-specific error handling middleware
 app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
@@ -98,7 +65,6 @@ if (process.env.NODE_ENV === "development") {
       // Start the server after Vite is ready
       server.listen(Number(PORT), "0.0.0.0", () => {
         log(`Server running on port ${PORT}`);
-        log(`Development server ready on port 5173`);
       });
     })
     .catch(err => {
