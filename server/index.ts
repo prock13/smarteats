@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
+import { setupVite } from "./vite";
+import { log, logServerStart } from "./utils";
 import { storage } from "./storage";
 import session from "express-session";
 import passport from "passport";
@@ -8,6 +9,9 @@ import { setupAuth } from "./auth";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Log server startup
+logServerStart(PORT);
 
 // Basic middleware
 app.use(express.json());
@@ -60,15 +64,15 @@ if (process.env.NODE_ENV === "development") {
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  console.log(`${req.method} ${req.path} - Request started`);
+  log(`${req.method} ${req.path} - Request started`);
 
   if (req.method === 'POST' || req.method === 'PUT') {
-    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    log('Request Body: ' + JSON.stringify(req.body, null, 2));
   }
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+    log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
   });
 
   next();
@@ -91,6 +95,11 @@ if (process.env.NODE_ENV === "development") {
   setupVite(app)
     .then(() => {
       log('Vite middleware setup complete');
+      // Start the server after Vite is ready
+      server.listen(Number(PORT), "0.0.0.0", () => {
+        log(`Server running on port ${PORT}`);
+        log(`Development server ready on port 5173`);
+      });
     })
     .catch(err => {
       console.error('Vite setup error:', err);
@@ -108,6 +117,11 @@ if (process.env.NODE_ENV === "development") {
       next();
     }
   });
+
+  // Start production server
+  server.listen(Number(PORT), "0.0.0.0", () => {
+    log(`Server running on port ${PORT}`);
+  });
 }
 
 // Generic error handling middleware
@@ -116,8 +130,4 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const status = err.status || err.statusCode || 500;
   const message = err.message || "Internal Server Error";
   res.status(status).json({ message });
-});
-
-server.listen(PORT, "0.0.0.0", () => {
-  log(`Server running on port ${PORT}`);
 });
