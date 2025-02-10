@@ -21,19 +21,23 @@ import {
   MenuItem,
   Avatar,
   Alert,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
+import React from 'react';
 
 const userProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  height: z.string().min(1, "Height is required"),
-  sex: z.enum(["male", "female", "other", "prefer_not_to_say"]),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  country: z.string().min(1, "Country is required"),
-  zipCode: z.string().min(1, "Zip code is required"),
-  timezone: z.string().min(1, "Timezone is required"),
+  height: z.string().optional(),
+  sex: z.enum(["male", "female", "other", "prefer_not_to_say"]).optional(),
+  dateOfBirth: z.string().optional(),
+  country: z.string().optional(),
+  zipCode: z.string().optional(),
+  timezone: z.string().optional(),
   profilePicture: z.string().optional(),
+  heightUnit: z.enum(["imperial", "metric"]).default("imperial"),
 });
 
 const passwordUpdateSchema = z.object({
@@ -58,6 +62,10 @@ export default function Profile(): JSX.Element {
     enabled: !!user,
   });
 
+  const [heightUnit, setHeightUnit] = React.useState<'imperial' | 'metric'>(
+    profile?.heightUnit || "imperial"
+  );
+
   const profileForm = useForm<UserProfileForm>({
     resolver: zodResolver(userProfileSchema),
     defaultValues: profile || {
@@ -71,6 +79,7 @@ export default function Profile(): JSX.Element {
       zipCode: "",
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       profilePicture: "",
+      heightUnit: heightUnit,
     },
   });
 
@@ -82,6 +91,13 @@ export default function Profile(): JSX.Element {
       confirmPassword: "",
     },
   });
+
+  React.useEffect(() => {
+    if (profile) {
+      profileForm.reset(profile);
+      setHeightUnit(profile.heightUnit || "imperial");
+    }
+  }, [profile, profileForm]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UserProfileForm) => {
@@ -95,8 +111,9 @@ export default function Profile(): JSX.Element {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
       toast({
-        title: "Success",
-        description: "Your profile has been updated",
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully",
+        variant: "default",
       });
     },
     onError: (error: Error) => {
@@ -107,6 +124,10 @@ export default function Profile(): JSX.Element {
       });
     },
   });
+
+  const handleProfileSubmit = (data: UserProfileForm) => {
+    updateProfileMutation.mutate(data);
+  };
 
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: PasswordUpdateForm) => {
@@ -124,6 +145,7 @@ export default function Profile(): JSX.Element {
       toast({
         title: "Success",
         description: "Your password has been updated",
+        variant: "default"
       });
       passwordForm.reset();
     },
@@ -136,40 +158,82 @@ export default function Profile(): JSX.Element {
     },
   });
 
-  const handleProfileSubmit = (data: UserProfileForm) => {
-    updateProfileMutation.mutate(data);
-  };
-
-  const handlePasswordSubmit = (data: PasswordUpdateForm) => {
-    updatePasswordMutation.mutate(data);
-  };
-
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      toast({
+        title: "Error",
+        description: "Please select a file to upload",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const formData = new FormData();
     formData.append("profilePicture", file);
 
     try {
-      const response = await apiRequest("POST", "/api/user/profile-picture", formData);
+      const response = await fetch("/api/user/profile-picture", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to upload profile picture");
       }
 
+      const { url } = await response.json();
+      profileForm.setValue("profilePicture", url);
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+
       toast({
         title: "Success",
         description: "Profile picture updated successfully",
+        variant: "default",
       });
     } catch (error) {
+      console.error("Profile picture upload error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to upload profile picture",
         variant: "destructive",
       });
     }
+  };
+
+  const handleHeightUnitChange = (_: React.MouseEvent<HTMLElement>, newUnit: 'imperial' | 'metric' | null) => {
+    if (newUnit) {
+      setHeightUnit(newUnit);
+      profileForm.setValue("heightUnit", newUnit);
+
+      const currentHeight = profileForm.getValues("height");
+      if (currentHeight) {
+        try {
+          if (newUnit === "metric" && currentHeight.includes("'")) {
+            const [feet, inches = "0"] = currentHeight.split("'").map(part => 
+              parseInt(part.replace('"', '')) || 0
+            );
+            const totalInches = feet * 12 + inches;
+            const cm = Math.round(totalInches * 2.54);
+            profileForm.setValue("height", `${cm}`);
+          } else if (newUnit === "imperial" && !currentHeight.includes("'")) {
+            const cm = parseInt(currentHeight);
+            const totalInches = cm / 2.54;
+            const feet = Math.floor(totalInches / 12);
+            const inches = Math.round(totalInches % 12);
+            profileForm.setValue("height", `${feet}'${inches}"`);
+          }
+        } catch (error) {
+          console.error("Height conversion error:", error);
+        }
+      }
+    }
+  };
+
+  const handlePasswordSubmit = (data: PasswordUpdateForm) => {
+    updatePasswordMutation.mutate(data);
   };
 
   if (!user) {
@@ -215,8 +279,8 @@ export default function Profile(): JSX.Element {
 
         {updateProfileMutation.error && (
           <Alert severity="error" sx={{ mb: 3 }}>
-            {updateProfileMutation.error instanceof Error 
-              ? updateProfileMutation.error.message 
+            {updateProfileMutation.error instanceof Error
+              ? updateProfileMutation.error.message
               : "An unexpected error occurred"}
           </Alert>
         )}
@@ -232,7 +296,8 @@ export default function Profile(): JSX.Element {
                     sx={{ width: 80, height: 80 }}
                   />
                 }
-                title="User Details"
+                title={user?.username}
+                subheader="Profile Picture"
                 action={
                   <Button
                     component="label"
@@ -255,7 +320,9 @@ export default function Profile(): JSX.Element {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="First Name"
+                        label="First Name *"
+                        required
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("firstName")}
                         error={!!profileForm.formState.errors.firstName}
                         helperText={profileForm.formState.errors.firstName?.message}
@@ -264,7 +331,9 @@ export default function Profile(): JSX.Element {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Last Name"
+                        label="Last Name *"
+                        required
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("lastName")}
                         error={!!profileForm.formState.errors.lastName}
                         helperText={profileForm.formState.errors.lastName?.message}
@@ -274,26 +343,53 @@ export default function Profile(): JSX.Element {
                       <TextField
                         fullWidth
                         type="email"
-                        label="Email Address"
+                        label="Email Address *"
+                        required
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("email")}
                         error={!!profileForm.formState.errors.email}
                         helperText={profileForm.formState.errors.email?.message}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Height"
-                        {...profileForm.register("height")}
-                        error={!!profileForm.formState.errors.height}
-                        helperText={profileForm.formState.errors.height?.message}
-                      />
+                      <FormControl fullWidth>
+                        <InputLabel shrink>Height Unit</InputLabel>
+                        <ToggleButtonGroup
+                          value={heightUnit}
+                          exclusive
+                          onChange={handleHeightUnitChange}
+                          aria-label="height unit"
+                          size="small"
+                          sx={{ mb: 1 }}
+                        >
+                          <ToggleButton value="imperial">
+                            Imperial (ft/in)
+                          </ToggleButton>
+                          <ToggleButton value="metric">
+                            Metric (cm)
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                        <TextField
+                          fullWidth
+                          label={heightUnit === 'imperial' ? "Height (e.g., 5'11\")" : "Height (cm)"}
+                          placeholder={heightUnit === 'imperial' ? "5'11\"" : "180"}
+                          InputLabelProps={{ shrink: true }}
+                          {...profileForm.register("height")}
+                          error={!!profileForm.formState.errors.height}
+                          helperText={
+                            profileForm.formState.errors.height?.message ||
+                            (heightUnit === 'imperial' ? "Enter in format: 5'11\"" : "Enter height in centimeters")
+                          }
+                        />
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
-                        <InputLabel>Sex</InputLabel>
+                        <InputLabel shrink id="sex-label">Sex</InputLabel>
                         <Select
+                          labelId="sex-label"
                           label="Sex"
+                          defaultValue={profile?.sex || "prefer_not_to_say"}
                           {...profileForm.register("sex")}
                           error={!!profileForm.formState.errors.sex}
                         >
@@ -319,6 +415,7 @@ export default function Profile(): JSX.Element {
                       <TextField
                         fullWidth
                         label="Country"
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("country")}
                         error={!!profileForm.formState.errors.country}
                         helperText={profileForm.formState.errors.country?.message}
@@ -328,6 +425,7 @@ export default function Profile(): JSX.Element {
                       <TextField
                         fullWidth
                         label="Zip Code"
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("zipCode")}
                         error={!!profileForm.formState.errors.zipCode}
                         helperText={profileForm.formState.errors.zipCode?.message}
@@ -337,6 +435,7 @@ export default function Profile(): JSX.Element {
                       <TextField
                         fullWidth
                         label="Timezone"
+                        InputLabelProps={{ shrink: true }}
                         {...profileForm.register("timezone")}
                         error={!!profileForm.formState.errors.timezone}
                         helperText={profileForm.formState.errors.timezone?.message}

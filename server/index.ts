@@ -92,7 +92,7 @@ app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction)
   const message = err.message || "Internal Server Error";
   const stack = process.env.NODE_ENV === 'development' ? err.stack : undefined;
 
-  res.status(status).json({ 
+  res.status(status).json({
     message,
     stack,
     details: err.details || undefined
@@ -124,7 +124,20 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-const PORT = 5000;
-server.listen(PORT, "0.0.0.0", () => {
-  log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+
+// Find an available port
+function startServer(port: number) {
+  server.listen(port, "0.0.0.0", () => {
+    log(`Server running on port ${port}`);
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      log(`Port ${port} is in use, trying ${port + 1}`);
+      startServer(port + 1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+}
+
+startServer(PORT);
