@@ -29,6 +29,7 @@ export function registerRoutes(app: Express): Server {
     skipUTF8Validation: true,
     maxPayload: 65536,
     handleProtocols: (protocols) => {
+      console.log('Handling protocols:', protocols);
       // Accept websocket protocol or fallback to no protocol
       return protocols?.includes('websocket') ? 'websocket' : '';
     },
@@ -39,11 +40,24 @@ export function registerRoutes(app: Express): Server {
         secure: info.secure,
         req: {
           url: info.req.url,
-          headers: info.req.headers
+          headers: info.req.headers,
+          upgrade: info.req.headers.upgrade,
+          connection: info.req.headers.connection
         }
       });
 
-      // Accept all connections for now
+      // Verify upgrade headers
+      const isValidUpgrade = 
+        info.req.headers.upgrade?.toLowerCase() === 'websocket' &&
+        info.req.headers.connection?.toLowerCase().includes('upgrade');
+
+      if (!isValidUpgrade) {
+        console.log('Invalid upgrade headers:', info.req.headers);
+        callback(false, 400, 'Invalid upgrade request');
+        return;
+      }
+
+      // Accept connection
       callback(true);
     }
   });
@@ -594,6 +608,7 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message });
     }
   });
+
 
 
   app.post("/api/chat", async (req, res) => {

@@ -5,10 +5,13 @@ export function createWebSocketConnection() {
 
   console.log('Attempting WebSocket connection to:', wsUrl);
 
-  const socket = new WebSocket(wsUrl);
+  // Create WebSocket with explicit protocols
+  const socket = new WebSocket(wsUrl, ['websocket']);
 
   socket.onopen = () => {
-    console.log('WebSocket connection established');
+    console.log('WebSocket connection established with protocol:', socket.protocol);
+    // Send an initial message to test the connection
+    socket.send(JSON.stringify({ type: 'init', timestamp: new Date().toISOString() }));
   };
 
   socket.onmessage = (event) => {
@@ -24,6 +27,9 @@ export function createWebSocketConnection() {
         case 'acknowledgment':
           console.log('Message acknowledged:', data.data);
           break;
+        case 'error':
+          console.error('Server error:', data.message);
+          break;
         default:
           console.log('Received message:', data);
       }
@@ -37,10 +43,14 @@ export function createWebSocketConnection() {
   };
 
   socket.onclose = (event) => {
-    console.log('WebSocket connection closed:', event.code, event.reason);
+    console.log('WebSocket connection closed:', {
+      code: event.code,
+      reason: event.reason,
+      wasClean: event.wasClean
+    });
 
     // Implement reconnection logic if needed
-    if (event.code !== 1000) { // Normal closure
+    if (event.code !== 1000) { // Not a normal closure
       console.log('Attempting to reconnect...');
       setTimeout(() => {
         createWebSocketConnection();
