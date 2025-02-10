@@ -3,28 +3,21 @@ import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     port: 5173,
     strictPort: true,
     hmr: {
-      clientPort: 3000,
-      host: "*.replit.dev",
-      protocol: "ws"
-    },
-    fs: {
-      strict: false,
-      allow: [".."],
-    },
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-    watch: {
-      usePolling: true,
-    },
+      clientPort: 443,
+      host: '*.replit.dev'
+    }
   },
   resolve: {
     alias: {
