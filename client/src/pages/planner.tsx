@@ -34,7 +34,17 @@ import type { Recipe } from "@shared/schema";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useState } from "react";
 
-type DietaryPreference = "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher";
+type DietaryPreference =
+  | "none"
+  | "vegetarian"
+  | "vegan"
+  | "pescatarian"
+  | "keto"
+  | "paleo"
+  | "gluten-free"
+  | "dairy-free"
+  | "halal"
+  | "kosher";
 
 const mealTypeOptions = [
   { label: "Breakfast", value: "breakfast" },
@@ -55,7 +65,6 @@ const dietaryOptions = [
   { value: "halal" as const, label: "Halal" },
   { value: "kosher" as const, label: "Kosher" },
 ] as const;
-
 
 export default function Planner() {
   const { toast } = useToast();
@@ -258,7 +267,10 @@ export default function Planner() {
     }
   };
 
-  const handleDietaryPreferenceChange = (value: DietaryPreference, checked: boolean) => {
+  const handleDietaryPreferenceChange = (
+    value: DietaryPreference,
+    checked: boolean,
+  ) => {
     const currentPreferences = form.watch("dietaryPreferences") || ["none"];
     let newPreferences: DietaryPreference[];
 
@@ -268,11 +280,14 @@ export default function Planner() {
         newPreferences = ["none"];
       } else {
         // If adding a specific preference, remove "none" and add the new one
-        newPreferences = [...currentPreferences.filter(p => p !== "none"), value] as DietaryPreference[];
+        newPreferences = [
+          ...currentPreferences.filter((p) => p !== "none"),
+          value,
+        ] as DietaryPreference[];
       }
     } else {
       // If unchecking the last preference, set to "none"
-      newPreferences = currentPreferences.filter(p => p !== value);
+      newPreferences = currentPreferences.filter((p) => p !== value);
       if (newPreferences.length === 0) {
         newPreferences = ["none"];
       }
@@ -314,7 +329,7 @@ export default function Planner() {
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Carbohydrates (g)"
@@ -324,7 +339,7 @@ export default function Planner() {
                     helperText={form.formState.errors.targetCarbs?.message}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Protein (g)"
@@ -334,7 +349,7 @@ export default function Planner() {
                     helperText={form.formState.errors.targetProtein?.message}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Fats (g)"
@@ -344,10 +359,17 @@ export default function Planner() {
                     helperText={form.formState.errors.targetFats?.message}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl>
-                    <FormLabel>Meal Types</FormLabel>
-                    <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                    <FormLabel component="legend">Meal Types</FormLabel>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        mt: 1,
+                      }}
+                    >
                       {mealTypeOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
@@ -355,49 +377,48 @@ export default function Planner() {
                             <Checkbox
                               checked={form
                                 .watch("mealTypes")
-                                ?.includes(
-                                  option.value as
-                                    | "breakfast"
-                                    | "lunch"
-                                    | "dinner"
-                                    | "snack",
-                                )}
-                              onChange={(e) => {
+                                ?.includes(option.value)}
+                              onChange={(e) =>
                                 handleMealTypeChange(
-                                  e.target.checked,
-                                  option.value as
-                                    | "breakfast"
-                                    | "lunch"
-                                    | "dinner"
-                                    | "snack",
-                                );
-                              }}
+                                  option.value,
+                                  e.target.checked
+                                )
+                              }
+                              disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
                         />
                       ))}
                     </Box>
-                    {form.formState.errors.mealTypes && (
-                      <FormHelperText error>
-                        {form.formState.errors.mealTypes.message}
-                      </FormHelperText>
-                    )}
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl component="fieldset">
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
                     <FormLabel component="legend">Dietary Preferences</FormLabel>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                        mt: 1,
+                      }}
+                    >
                       {dietaryOptions.map((option) => (
                         <FormControlLabel
                           key={option.value}
                           control={
                             <Checkbox
-                              checked={form.watch("dietaryPreferences")?.includes(option.value)}
-                              onChange={(e) => {
-                                handleDietaryPreferenceChange(option.value, e.target.checked);
-                              }}
+                              checked={form
+                                .watch("dietaryPreferences")
+                                ?.includes(option.value)}
+                              onChange={(e) =>
+                                handleDietaryPreferenceChange(
+                                  option.value,
+                                  e.target.checked
+                                )
+                              }
+                              disabled={mutation.isPending}
                             />
                           }
                           label={option.label}
@@ -406,16 +427,22 @@ export default function Planner() {
                     </Box>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        {...form.register("includeUserRecipes")}
-                        defaultChecked={false}
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                    <FormLabel component="legend">My Recipes</FormLabel>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...form.register("includeUserRecipes")}
+                            defaultChecked={false}
+                            disabled={mutation.isPending}
+                          />
+                        }
+                        label="Include My Recipes"
                       />
-                    }
-                    label="Include My Recipes"
-                  />
+                    </Box>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                   <Button

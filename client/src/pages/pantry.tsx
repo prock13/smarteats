@@ -394,14 +394,13 @@ export default function PantryPage() {
                     disabled={mutation.isPending}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl component="fieldset">
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
                     <FormLabel component="legend">Meal Types</FormLabel>
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "row",
-                        flexWrap: "wrap",
+                        flexDirection: "column",
                         gap: 1,
                         mt: 1,
                       }}
@@ -427,23 +426,15 @@ export default function PantryPage() {
                         />
                       ))}
                     </Box>
-                    {form.formState.errors.mealTypes && (
-                      <FormHelperText error>
-                        {form.formState.errors.mealTypes.message}
-                      </FormHelperText>
-                    )}
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl component="fieldset">
-                    <FormLabel component="legend">
-                      Dietary Preferences
-                    </FormLabel>
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                    <FormLabel component="legend">Dietary Preferences</FormLabel>
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "row",
-                        flexWrap: "wrap",
+                        flexDirection: "column",
                         gap: 1,
                         mt: 1,
                       }}
@@ -471,17 +462,22 @@ export default function PantryPage() {
                     </Box>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        {...form.register("includeUserRecipes")}
-                        defaultChecked={false}
-                        disabled={mutation.isPending}
+                <Grid item xs={12} md={4}>
+                  <FormControl component="fieldset" sx={{ width: '100%' }}>
+                    <FormLabel component="legend">My Recipes</FormLabel>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...form.register("includeUserRecipes")}
+                            defaultChecked={false}
+                            disabled={mutation.isPending}
+                          />
+                        }
+                        label="Include My Recipes"
                       />
-                    }
-                    label="Include My Recipes"
-                  />
+                    </Box>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12}>
                   <Button
