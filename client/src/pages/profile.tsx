@@ -20,6 +20,7 @@ import {
   Select,
   MenuItem,
   Avatar,
+  Alert,
 } from '@mui/material';
 
 const userProfileSchema = z.object({
@@ -51,8 +52,15 @@ export default function Profile(): JSX.Element {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: profile, isLoading: isProfileLoading } = useQuery<UserProfileForm>({
+  const { data: profile, isLoading: isProfileLoading, error: profileError } = useQuery<UserProfileForm>({
     queryKey: ["/api/user/profile"],
+    onError: (error: Error) => {
+      toast({
+        title: "Error loading profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
 
   const profileForm = useForm<UserProfileForm>({
@@ -82,8 +90,18 @@ export default function Profile(): JSX.Element {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UserProfileForm) => {
-      const res = await apiRequest("POST", "/api/user/profile", data);
-      return res.json();
+      try {
+        console.log('Submitting profile update:', data);
+        const res = await apiRequest("POST", "/api/user/profile", data);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Failed to update profile");
+        }
+        return res.json();
+      } catch (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
@@ -93,9 +111,10 @@ export default function Profile(): JSX.Element {
       });
     },
     onError: (error: Error) => {
+      console.error('Profile update error:', error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Error updating profile",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     },
@@ -107,6 +126,10 @@ export default function Profile(): JSX.Element {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update password");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -125,8 +148,12 @@ export default function Profile(): JSX.Element {
     },
   });
 
-  const handleProfileSubmit = (data: UserProfileForm) => {
-    updateProfileMutation.mutate(data);
+  const handleProfileSubmit = async (data: UserProfileForm) => {
+    try {
+      await updateProfileMutation.mutateAsync(data);
+    } catch (error) {
+      console.error('Profile submission error:', error);
+    }
   };
 
   const handlePasswordSubmit = (data: PasswordUpdateForm) => {
@@ -141,16 +168,22 @@ export default function Profile(): JSX.Element {
     formData.append("profilePicture", file);
 
     try {
-      await apiRequest("POST", "/api/user/profile-picture", formData);
+      const response = await apiRequest("POST", "/api/user/profile-picture", formData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload profile picture");
+      }
+
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
       toast({
         title: "Success",
         description: "Profile picture updated successfully",
       });
     } catch (error) {
+      console.error('Profile picture upload error:', error);
       toast({
         title: "Error",
-        description: "Failed to upload profile picture",
+        description: error instanceof Error ? error.message : "Failed to upload profile picture",
         variant: "destructive",
       });
     }
@@ -178,6 +211,18 @@ export default function Profile(): JSX.Element {
     );
   }
 
+  if (profileError) {
+    return (
+      <Box sx={{ py: 4 }}>
+        <Container maxWidth="lg">
+          <Alert severity="error">
+            Failed to load profile: {profileError instanceof Error ? profileError.message : 'Unknown error'}
+          </Alert>
+        </Container>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ py: 4 }}>
       <Container maxWidth="lg">
@@ -185,10 +230,18 @@ export default function Profile(): JSX.Element {
           Profile Settings
         </Typography>
 
+        {updateProfileMutation.error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {updateProfileMutation.error instanceof Error 
+              ? updateProfileMutation.error.message 
+              : "An unexpected error occurred"}
+          </Alert>
+        )}
+
         <Grid container spacing={4}>
           <Grid item xs={12} md={8}>
             <Card>
-              <CardHeader 
+              <CardHeader
                 avatar={
                   <Avatar
                     src={profile?.profilePicture}

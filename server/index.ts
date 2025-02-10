@@ -5,12 +5,17 @@ import { storage } from "./storage";
 import session from "express-session";
 import passport from "passport";
 import { setupAuth } from "./auth";
+import fileUpload from 'express-fileupload';
 
 const app = express();
 
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload());
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Set up sessions first
 const sessionSettings: session.SessionOptions = {
@@ -77,9 +82,20 @@ const server = registerRoutes(app);
 // API-specific error handling middleware
 app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('API Error:', err);
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-  res.status(status).json({ message });
+
+  if (err instanceof Error) {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    const stack = process.env.NODE_ENV === 'development' ? err.stack : undefined;
+
+    res.status(status).json({ 
+      message,
+      stack,
+      details: err.details || undefined
+    });
+  } else {
+    res.status(500).json({ message: "An unexpected error occurred" });
+  }
 });
 
 // Handle static files and client routing
