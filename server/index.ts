@@ -6,13 +6,19 @@ import session from "express-session";
 import passport from "passport";
 import { setupAuth } from "./auth";
 import fileUpload from 'express-fileupload';
+import path from 'path';
+
+interface ApiError extends Error {
+  status?: number;
+  statusCode?: number;
+  details?: any;
+}
 
 const app = express();
 
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload());
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
@@ -44,7 +50,7 @@ app.use(passport.session());
 // Set up authentication
 setupAuth(app);
 
-// CORS middleware - make sure this doesn't interfere with cookies
+// CORS middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin) {
@@ -80,36 +86,27 @@ app.use((req, res, next) => {
 const server = registerRoutes(app);
 
 // API-specific error handling middleware
-app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
+app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction) => {
   console.error('API Error:', err);
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  const stack = process.env.NODE_ENV === 'development' ? err.stack : undefined;
 
-  if (err instanceof Error) {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    const stack = process.env.NODE_ENV === 'development' ? err.stack : undefined;
-
-    res.status(status).json({ 
-      message,
-      stack,
-      details: err.details || undefined
-    });
-  } else {
-    res.status(500).json({ message: "An unexpected error occurred" });
-  }
+  res.status(status).json({ 
+    message,
+    stack,
+    details: err.details || undefined
+  });
 });
 
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
-  // Setup Vite middleware for development
   setupVite(app).catch(err => {
     console.error('Vite setup error:', err);
     process.exit(1);
   });
 } else {
-  // Serve static files from the dist/public directory
   app.use(express.static('dist/public'));
-
-  // Handle client-side routing by serving index.html for non-API routes
   app.get('*', (req, res, next) => {
     if (!req.path.startsWith('/api/')) {
       res.sendFile('index.html', { root: 'dist/public' });
@@ -120,7 +117,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Generic error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   const status = err.status || err.statusCode || 500;
   const message = err.message || "Internal Server Error";

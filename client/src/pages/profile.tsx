@@ -54,13 +54,8 @@ export default function Profile(): JSX.Element {
 
   const { data: profile, isLoading: isProfileLoading, error: profileError } = useQuery<UserProfileForm>({
     queryKey: ["/api/user/profile"],
-    onError: (error: Error) => {
-      toast({
-        title: "Error loading profile",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    retry: false,
+    enabled: !!user,
   });
 
   const profileForm = useForm<UserProfileForm>({
@@ -70,7 +65,7 @@ export default function Profile(): JSX.Element {
       lastName: "",
       email: "",
       height: "",
-      sex: "prefer_not_to_say",
+      sex: "prefer_not_to_say" as const,
       dateOfBirth: "",
       country: "",
       zipCode: "",
@@ -90,18 +85,12 @@ export default function Profile(): JSX.Element {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UserProfileForm) => {
-      try {
-        console.log('Submitting profile update:', data);
-        const res = await apiRequest("POST", "/api/user/profile", data);
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to update profile");
-        }
-        return res.json();
-      } catch (error) {
-        console.error('Profile update error:', error);
-        throw error;
+      const res = await apiRequest("POST", "/api/user/profile", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update profile");
       }
+      return res.json() as Promise<UserProfileForm>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
@@ -111,7 +100,6 @@ export default function Profile(): JSX.Element {
       });
     },
     onError: (error: Error) => {
-      console.error('Profile update error:', error);
       toast({
         title: "Error updating profile",
         description: error.message || "An unexpected error occurred",
@@ -148,12 +136,8 @@ export default function Profile(): JSX.Element {
     },
   });
 
-  const handleProfileSubmit = async (data: UserProfileForm) => {
-    try {
-      await updateProfileMutation.mutateAsync(data);
-    } catch (error) {
-      console.error('Profile submission error:', error);
-    }
+  const handleProfileSubmit = (data: UserProfileForm) => {
+    updateProfileMutation.mutate(data);
   };
 
   const handlePasswordSubmit = (data: PasswordUpdateForm) => {
@@ -180,7 +164,6 @@ export default function Profile(): JSX.Element {
         description: "Profile picture updated successfully",
       });
     } catch (error) {
-      console.error('Profile picture upload error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to upload profile picture",
@@ -244,7 +227,7 @@ export default function Profile(): JSX.Element {
               <CardHeader
                 avatar={
                   <Avatar
-                    src={profile?.profilePicture}
+                    src={profile?.profilePicture ?? undefined}
                     alt={`${profileForm.watch("firstName")} ${profileForm.watch("lastName")}`}
                     sx={{ width: 80, height: 80 }}
                   />

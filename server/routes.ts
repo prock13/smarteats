@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
@@ -9,6 +9,12 @@ import { setupAuth } from "./auth";
 import { comparePasswords, hashPassword } from "./auth";
 import path from 'path';
 import fs from 'fs/promises';
+import fileUpload from 'express-fileupload';
+
+interface AuthenticatedRequest extends Request {
+  user?: Express.User;
+  files?: fileUpload.FileArray;
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -17,8 +23,99 @@ const openai = new OpenAI({
 export function registerRoutes(app: Express): Server {
   const server = createServer(app);
 
+  // Set up file upload middleware
+  app.use(fileUpload({
+    createParentPath: true,
+    limits: { 
+      fileSize: 5 * 1024 * 1024 // 5MB max file size
+    },
+    abortOnLimit: true,
+    responseOnLimit: "File size limit has been reached"
+  }));
+
   // Set up authentication routes and middleware first
   setupAuth(app);
+
+  // Profile routes
+  app.post("/api/user/profile", async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      console.log("Profile update request:", req.body);
+
+      const profileData = userProfileSchema.omit({ profilePicture: true }).parse(req.body);
+      const updatedUser = await storage.updateUserProfile(req.user!.id, profileData);
+
+      res.json({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        height: updatedUser.height,
+        sex: updatedUser.sex,
+        dateOfBirth: updatedUser.dateOfBirth,
+        country: updatedUser.country,
+        zipCode: updatedUser.zipCode,
+        timezone: updatedUser.timezone,
+        profilePicture: updatedUser.profilePicture,
+      });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(500).json({ message });
+    }
+  });
+
+  app.post("/api/user/profile-picture", async (req: AuthenticatedRequest & Request, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!req.files || !req.files.profilePicture) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const file = req.files.profilePicture;
+      if (Array.isArray(file)) {
+        return res.status(400).json({ message: "Multiple files not allowed" });
+      }
+
+      const fileExtension = path.extname(file.name).toLowerCase();
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+
+      if (!allowedExtensions.includes(fileExtension)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPG, PNG, and GIF are allowed." });
+      }
+
+      // Generate a unique filename
+      const fileName = `${req.user!.id}-${Date.now()}${fileExtension}`;
+      const uploadPath = path.join(process.cwd(), 'uploads', fileName);
+
+      // Ensure uploads directory exists
+      await fs.mkdir(path.join(process.cwd(), 'uploads'), { recursive: true });
+
+      // Save the file
+      await fs.writeFile(uploadPath, file.data);
+
+      // Update the user's profile with the new picture URL
+      const pictureUrl = `/uploads/${fileName}`;
+      await storage.updateUserProfilePicture(req.user!.id, pictureUrl);
+
+      res.json({ url: pictureUrl });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(500).json({ message });
+    }
+  });
 
   // Protected Routes - These require authentication
   app.post("/api/meal-suggestions", async (req, res) => {
@@ -508,81 +605,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/user/profile", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      console.log("Profile update request:", req.body);
-
-      const profileData = userProfileSchema.omit({ profilePicture: true }).parse(req.body);
-      const updatedUser = await storage.updateUserProfile(req.user!.id, profileData);
-
-      res.json({
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
-        height: updatedUser.height,
-        sex: updatedUser.sex,
-        dateOfBirth: updatedUser.dateOfBirth,
-        country: updatedUser.country,
-        zipCode: updatedUser.zipCode,
-        timezone: updatedUser.timezone,
-        profilePicture: updatedUser.profilePicture,
-      });
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      if (error instanceof ZodError) {
-        return res.status(400).json({ 
-          message: "Validation error",
-          errors: error.errors
-        });
-      }
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(500).json({ message });
-    }
-  });
-
-  app.post("/api/user/profile-picture", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      if (!req.files || !req.files.profilePicture) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      const file = req.files.profilePicture;
-      const fileExtension = path.extname(file.name).toLowerCase();
-      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
-
-      if (!allowedExtensions.includes(fileExtension)) {
-        return res.status(400).json({ message: "Invalid file type. Only JPG, PNG, and GIF are allowed." });
-      }
-
-      // Generate a unique filename
-      const fileName = `${req.user!.id}-${Date.now()}${fileExtension}`;
-      const uploadPath = path.join(process.cwd(), 'uploads', fileName);
-
-      // Ensure uploads directory exists
-      await fs.promises.mkdir(path.join(process.cwd(), 'uploads'), { recursive: true });
-
-      // Save the file
-      await file.mv(uploadPath);
-
-      // Update the user's profile with the new picture URL
-      const pictureUrl = `/uploads/${fileName}`;
-      await storage.updateUserProfilePicture(req.user!.id, pictureUrl);
-
-      res.json({ url: pictureUrl });
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(500).json({ message });
-    }
-  });
 
   app.post("/api/chat", async (req, res) => {
     try {
