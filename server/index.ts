@@ -55,15 +55,15 @@ app.use('/api', (err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(status).json({ message });
 });
 
+let serverStarted = false;
+
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
   // Setup Vite middleware for development with error handling
-  let viteSetupComplete = false;
   setupVite(app)
     .then(() => {
-      if (!viteSetupComplete) {
-        viteSetupComplete = true;
-        log('Vite middleware setup complete');
+      if (!serverStarted) {
+        serverStarted = true;
         server.listen(Number(PORT), "0.0.0.0", () => {
           log(`Server running on port ${PORT}`);
         });
@@ -87,9 +87,12 @@ if (process.env.NODE_ENV === "development") {
   });
 
   // Start production server
-  server.listen(Number(PORT), "0.0.0.0", () => {
-    log(`Server running on port ${PORT}`);
-  });
+  if (!serverStarted) {
+    serverStarted = true;
+    server.listen(Number(PORT), "0.0.0.0", () => {
+      log(`Server running on port ${PORT}`);
+    });
+  }
 }
 
 // Global error handling middleware

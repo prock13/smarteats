@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -14,7 +13,18 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       host: '*.replit.dev'
-    }
+    },
+    fs: {
+      strict: false,
+      allow: ['..']
+    },
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    watch: {
+      usePolling: true
+    },
+    origin: 'https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co'
   },
   resolve: {
     alias: {

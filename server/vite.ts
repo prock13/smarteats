@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "vite";
-import { log } from "./utils";
+import { log } from "../server/utils";
 
 export const setupVite = async (
   app: express.Application,
