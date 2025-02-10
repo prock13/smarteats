@@ -7,7 +7,10 @@ export default {
     "./client/index.html",
     "./client/src/components/**/*.{js,jsx,ts,tsx}",
     "./client/src/pages/**/*.{js,jsx,ts,tsx}",
-    "./client/src/app/**/*.{js,jsx,ts,tsx}"
+    "./client/src/app/**/*.{js,jsx,ts,tsx}",
+    // Add more specific paths
+    "./client/src/layouts/**/*.{js,jsx,ts,tsx}",
+    "./client/src/features/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
