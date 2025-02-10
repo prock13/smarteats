@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from 'ws';
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import OpenAI from "openai";
@@ -13,10 +14,50 @@ const openai = new OpenAI({
 });
 
 export function registerRoutes(app: Express): Server {
-  const server = createServer(app);
-
   // Set up authentication routes and middleware first
   setupAuth(app);
+
+  // Create HTTP server after middleware setup
+  const server = createServer(app);
+
+  // Initialize WebSocket server with correct path
+  const wss = new WebSocketServer({ 
+    server,
+    path: '/ws',
+    perMessageDeflate: false // Disable per-message deflate to reduce overhead
+  });
+
+  // Handle WebSocket server errors at the top level
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
+    // Don't throw the error, just log it
+  });
+
+  wss.on('connection', (ws) => {
+    console.log('WebSocket client connected');
+
+    ws.on('message', (message) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          const data = JSON.parse(message.toString());
+          console.log('Received WebSocket message:', data);
+          // Handle message based on type
+          ws.send(JSON.stringify({ status: 'received' }));
+        } catch (error) {
+          console.error('WebSocket message error:', error);
+          ws.send(JSON.stringify({ error: 'Invalid message format' }));
+        }
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
 
   // Protected Routes - These require authentication
   app.post("/api/meal-suggestions", async (req, res) => {
