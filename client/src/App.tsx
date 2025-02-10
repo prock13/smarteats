@@ -14,6 +14,7 @@ import Favorites from "@/pages/favorites";
 import Planner from "@/pages/planner";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
+import Preferences from "@/pages/preferences";
 import Pantry from "@/pages/pantry";
 import Terms from "@/pages/terms";
 import About from "@/pages/about";
@@ -49,6 +50,7 @@ function ThemedApp() {
             <ProtectedRoute path="/recipes" component={Recipes} />
             <ProtectedRoute path="/favorites" component={Favorites} />
             <ProtectedRoute path="/profile" component={Profile} />
+            <ProtectedRoute path="/preferences" component={Preferences} />
             <ProtectedRoute path="/pantry" component={Pantry} />
             <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
             <Route component={NotFound} />

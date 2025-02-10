@@ -39,6 +39,10 @@ export interface IStorage {
 
   // Session store
   sessionStore: session.Store;
+
+  // Add new methods for user profile
+  updateUserProfile(userId: number, profile: Partial<User>): Promise<User>;
+  updateUserProfilePicture(userId: number, pictureUrl: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -281,6 +285,24 @@ export class DatabaseStorage implements IStorage {
           eq(favorites.id, favoriteId)
         )
       );
+  }
+
+  async updateUserProfile(userId: number, profile: Partial<User>): Promise<User> {
+    console.log('Updating user profile:', userId, JSON.stringify(profile, null, 2));
+    const [updated] = await db
+      .update(users)
+      .set(profile)
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
+  }
+
+  async updateUserProfilePicture(userId: number, pictureUrl: string): Promise<void> {
+    console.log('Updating user profile picture:', userId, pictureUrl);
+    await db
+      .update(users)
+      .set({ profilePicture: pictureUrl })
+      .where(eq(users.id, userId));
   }
 }
 

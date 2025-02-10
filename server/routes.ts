@@ -3,10 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
 import OpenAI from "openai";
-import { macroInputSchema, mealPlanSchema, insertRecipeSchema, insertFavoriteSchema } from "@shared/schema";
+import { macroInputSchema, mealPlanSchema, insertRecipeSchema, insertFavoriteSchema, userProfileSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { setupAuth } from "./auth";
 import { comparePasswords, hashPassword } from "./auth";
+import path from 'path';
+import fs from 'fs/promises';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -472,6 +474,115 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+
+  app.get("/api/user/profile", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Only return profile-related fields
+      const profile = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        height: user.height,
+        sex: user.sex,
+        dateOfBirth: user.dateOfBirth,
+        country: user.country,
+        zipCode: user.zipCode,
+        timezone: user.timezone,
+        profilePicture: user.profilePicture,
+      };
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(500).json({ message });
+    }
+  });
+
+  app.post("/api/user/profile", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      console.log("Profile update request:", req.body);
+
+      const profileData = userProfileSchema.omit({ profilePicture: true }).parse(req.body);
+      const updatedUser = await storage.updateUserProfile(req.user!.id, profileData);
+
+      res.json({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        height: updatedUser.height,
+        sex: updatedUser.sex,
+        dateOfBirth: updatedUser.dateOfBirth,
+        country: updatedUser.country,
+        zipCode: updatedUser.zipCode,
+        timezone: updatedUser.timezone,
+        profilePicture: updatedUser.profilePicture,
+      });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(500).json({ message });
+    }
+  });
+
+  app.post("/api/user/profile-picture", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!req.files || !req.files.profilePicture) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const file = req.files.profilePicture;
+      const fileExtension = path.extname(file.name).toLowerCase();
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+
+      if (!allowedExtensions.includes(fileExtension)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPG, PNG, and GIF are allowed." });
+      }
+
+      // Generate a unique filename
+      const fileName = `${req.user!.id}-${Date.now()}${fileExtension}`;
+      const uploadPath = path.join(process.cwd(), 'uploads', fileName);
+
+      // Ensure uploads directory exists
+      await fs.promises.mkdir(path.join(process.cwd(), 'uploads'), { recursive: true });
+
+      // Save the file
+      await file.mv(uploadPath);
+
+      // Update the user's profile with the new picture URL
+      const pictureUrl = `/uploads/${fileName}`;
+      await storage.updateUserProfilePicture(req.user!.id, pictureUrl);
+
+      res.json({ url: pictureUrl });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(500).json({ message });
+    }
+  });
 
   app.post("/api/chat", async (req, res) => {
     try {

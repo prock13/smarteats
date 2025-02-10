@@ -29,6 +29,9 @@ import {
   Menu as MenuIcon,
   Kitchen as KitchenIcon,
   MenuBook as MenuBookIcon,
+  Settings,
+  Logout,
+  Person,
 } from "@mui/icons-material";
 import { Logo } from "./logo";
 import { ChatBot } from "./chat-bot";
@@ -146,9 +149,21 @@ export default function Navigation() {
             sx={{ py: 1.5 }}
           >
             <ListItemIcon>
-              <AccountCircle />
+              <Person />
             </ListItemIcon>
             <ListItemText primary="Profile" />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={() => handleNavigate("/preferences")}
+            sx={{ py: 1.5 }}
+          >
+            <ListItemIcon>
+              <Settings />
+            </ListItemIcon>
+            <ListItemText primary="Preferences" />
           </ListItemButton>
         </ListItem>
 
@@ -158,7 +173,7 @@ export default function Navigation() {
             sx={{ py: 1.5 }}
           >
             <ListItemIcon>
-              <AccountCircle />
+              <Logout />
             </ListItemIcon>
             <ListItemText primary={logoutMutation.isPending ? "Logging out..." : "Logout"} />
           </ListItemButton>
@@ -215,7 +230,6 @@ export default function Navigation() {
               </Typography>
             </Box>
 
-            {/* Desktop Navigation */}
             <Box
               sx={{
                 display: { xs: "none", md: "flex" },
@@ -241,7 +255,6 @@ export default function Navigation() {
               ))}
             </Box>
 
-            {/* Common action buttons for both mobile and desktop */}
             <Box
               sx={{
                 display: "flex",
@@ -264,7 +277,6 @@ export default function Navigation() {
               >
                 <ChatIcon />
               </IconButton>
-              {/* Only show profile menu on desktop */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <IconButton
                   onClick={handleMenu}
@@ -287,6 +299,9 @@ export default function Navigation() {
                 >
                   <MenuItem onClick={() => handleNavigate("/profile")}>
                     Profile
+                  </MenuItem>
+                  <MenuItem onClick={() => handleNavigate("/preferences")}>
+                    Preferences
                   </MenuItem>
                   <MenuItem onClick={() => logoutMutation.mutate()}>
                     {logoutMutation.isPending ? "Logging out..." : "Logout"}

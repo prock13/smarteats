@@ -6,6 +6,16 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  height: text("height"),
+  sex: text("sex"),
+  dateOfBirth: text("date_of_birth"),
+  country: text("country"),
+  zipCode: text("zip_code"),
+  timezone: text("timezone"),
+  profilePicture: text("profile_picture"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -164,6 +174,19 @@ export const mealPlanSchema = z.object({
     dietaryRestriction: dietaryPreferenceEnum.default("none"),
   }),
   mealType: mealTypeEnum,
+});
+
+export const userProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  height: z.string().min(1, "Height is required"),
+  sex: z.enum(["male", "female", "other", "prefer_not_to_say"]),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  country: z.string().min(1, "Country is required"),
+  zipCode: z.string().min(1, "Zip code is required"),
+  timezone: z.string().min(1, "Timezone is required"),
+  profilePicture: z.string().optional(),
 });
 
 export const insertUserSchema = createInsertSchema(users).extend({
