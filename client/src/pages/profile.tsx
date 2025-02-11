@@ -61,13 +61,14 @@ const passwordUpdateSchema = z
 const commonInputLabelProps = {
   shrink: true,
   sx: {
-    position: "relative",
-    transform: "none",
-    mb: 1,
+    position: "absolute",
+    transform: "translate(14px, -9px) scale(0.75)",
     fontSize: {
       xs: '0.813rem',
       sm: '0.875rem'
-    }
+    },
+    backgroundColor: 'white',
+    padding: '0 4px'
   }
 };
 
@@ -366,34 +367,30 @@ export default function Profile(): JSX.Element {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="First Name *"
+                        label="First Name"
                         required
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("firstName")}
                         error={!!profileForm.formState.errors.firstName}
-                        helperText={
-                          profileForm.formState.errors.firstName?.message
-                        }
+                        helperText={profileForm.formState.errors.firstName?.message}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Last Name *"
+                        label="Last Name"
                         required
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("lastName")}
                         error={!!profileForm.formState.errors.lastName}
-                        helperText={
-                          profileForm.formState.errors.lastName?.message
-                        }
+                        helperText={profileForm.formState.errors.lastName?.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
                         type="email"
-                        label="Email Address *"
+                        label="Email Address"
                         required
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("email")}
@@ -473,9 +470,7 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("dateOfBirth")}
                         error={!!profileForm.formState.errors.dateOfBirth}
-                        helperText={
-                          profileForm.formState.errors.dateOfBirth?.message
-                        }
+                        helperText={profileForm.formState.errors.dateOfBirth?.message}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -485,9 +480,7 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("country")}
                         error={!!profileForm.formState.errors.country}
-                        helperText={
-                          profileForm.formState.errors.country?.message
-                        }
+                        helperText={profileForm.formState.errors.country?.message}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -497,9 +490,7 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("zipCode")}
                         error={!!profileForm.formState.errors.zipCode}
-                        helperText={
-                          profileForm.formState.errors.zipCode?.message
-                        }
+                        helperText={profileForm.formState.errors.zipCode?.message}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -509,9 +500,7 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("timezone")}
                         error={!!profileForm.formState.errors.timezone}
-                        helperText={
-                          profileForm.formState.errors.timezone?.message
-                        }
+                        helperText={profileForm.formState.errors.timezone?.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -536,9 +525,7 @@ export default function Profile(): JSX.Element {
             <Card>
               <CardHeader title="Update Password" />
               <CardContent>
-                <form
-                  onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
-                >
+                <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <TextField
@@ -547,12 +534,8 @@ export default function Profile(): JSX.Element {
                         label="Current Password"
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("currentPassword")}
-                        error={
-                          !!passwordForm.formState.errors.currentPassword
-                        }
-                        helperText={
-                          passwordForm.formState.errors.currentPassword?.message
-                        }
+                        error={!!passwordForm.formState.errors.currentPassword}
+                        helperText={passwordForm.formState.errors.currentPassword?.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -563,9 +546,7 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("newPassword")}
                         error={!!passwordForm.formState.errors.newPassword}
-                        helperText={
-                          passwordForm.formState.errors.newPassword?.message
-                        }
+                        helperText={passwordForm.formState.errors.newPassword?.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -575,12 +556,8 @@ export default function Profile(): JSX.Element {
                         label="Confirm New Password"
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("confirmPassword")}
-                        error={
-                          !!passwordForm.formState.errors.confirmPassword
-                        }
-                        helperText={
-                          passwordForm.formState.errors.confirmPassword?.message
-                        }
+                        error={!!passwordForm.formState.errors.confirmPassword}
+                        helperText={passwordForm.formState.errors.confirmPassword?.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
