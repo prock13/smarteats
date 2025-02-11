@@ -64,12 +64,12 @@ const commonInputLabelProps = {
     position: "absolute",
     transform: "translate(14px, -9px) scale(0.75)",
     fontSize: {
-      xs: '0.813rem',
-      sm: '0.875rem'
+      xs: "0.813rem",
+      sm: "0.875rem",
     },
-    backgroundColor: 'white',
-    padding: '0 4px'
-  }
+    backgroundColor: "white",
+    padding: "0 4px",
+  },
 };
 
 export default function Profile(): JSX.Element {
@@ -252,7 +252,7 @@ export default function Profile(): JSX.Element {
               .map((part) => part.replace('"', "").trim());
             const feet = parseInt(feetStr, 10) || 0;
             const inches = parseInt(inchesStr, 10) || 0;
-            const totalInches = (feet * 12) + Number(inches);
+            const totalInches = feet * 12 + Number(inches);
             const cm = Math.round(totalInches * 2.54);
             profileForm.setValue("height", `${cm}`);
           } else if (newUnit === "imperial" && !currentHeight.includes("'")) {
@@ -346,9 +346,9 @@ export default function Profile(): JSX.Element {
                     size="small"
                     sx={{
                       mt: 2,
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      padding: { xs: '4px 8px', sm: '6px 16px' },
-                      whiteSpace: 'nowrap'
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      padding: { xs: "4px 8px", sm: "6px 16px" },
+                      whiteSpace: "nowrap",
                     }}
                   >
                     Upload Picture
@@ -372,7 +372,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("firstName")}
                         error={!!profileForm.formState.errors.firstName}
-                        helperText={profileForm.formState.errors.firstName?.message}
+                        helperText={
+                          profileForm.formState.errors.firstName?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -383,7 +385,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("lastName")}
                         error={!!profileForm.formState.errors.lastName}
-                        helperText={profileForm.formState.errors.lastName?.message}
+                        helperText={
+                          profileForm.formState.errors.lastName?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -398,25 +402,12 @@ export default function Profile(): JSX.Element {
                         helperText={profileForm.formState.errors.email?.message}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth>
-                        <ToggleButtonGroup
-                          value={heightUnit}
-                          exclusive
-                          onChange={handleHeightUnitChange}
-                          aria-label="height unit"
-                          size="small"
-                          sx={{ mb: 1 }}
-                        >
-                          <ToggleButton value="imperial">
-                            Imperial (ft/in)
-                          </ToggleButton>
-                          <ToggleButton value="metric">
-                            Metric (cm)
-                          </ToggleButton>
-                        </ToggleButtonGroup>
+                    <Grid item xs={12}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
                         <TextField
-                          fullWidth
+                          sx={{ width: "450%" }}
                           label={
                             heightUnit === "imperial"
                               ? "Height (e.g., 5'11\")"
@@ -425,7 +416,10 @@ export default function Profile(): JSX.Element {
                           placeholder={
                             heightUnit === "imperial" ? "5'11\"" : "180"
                           }
-                          InputLabelProps={commonInputLabelProps}
+                          InputLabelProps={{
+                            ...commonInputLabelProps,
+                            required: false,
+                          }}
                           {...profileForm.register("height")}
                           error={!!profileForm.formState.errors.height}
                           helperText={
@@ -435,7 +429,30 @@ export default function Profile(): JSX.Element {
                               : "Enter height in centimeters")
                           }
                         />
-                      </FormControl>
+                        <ToggleButtonGroup
+                          value={heightUnit}
+                          exclusive
+                          onChange={handleHeightUnitChange}
+                          aria-label="height unit"
+                          size="medium"
+                          sx={{
+                            height: "76px",
+                            "& .MuiToggleButton-root": {
+                              padding: "26px 12px",
+                              lineHeight: 1.4,
+                              textTransform: "none",
+                              height: "50px",
+                            },
+                          }}
+                        >
+                          <ToggleButton value="imperial">
+                            Imperial (ft/in)
+                          </ToggleButton>
+                          <ToggleButton value="metric">
+                            Metric (cm)
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
@@ -470,7 +487,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("dateOfBirth")}
                         error={!!profileForm.formState.errors.dateOfBirth}
-                        helperText={profileForm.formState.errors.dateOfBirth?.message}
+                        helperText={
+                          profileForm.formState.errors.dateOfBirth?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -480,7 +499,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("country")}
                         error={!!profileForm.formState.errors.country}
-                        helperText={profileForm.formState.errors.country?.message}
+                        helperText={
+                          profileForm.formState.errors.country?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -490,17 +511,21 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("zipCode")}
                         error={!!profileForm.formState.errors.zipCode}
-                        helperText={profileForm.formState.errors.zipCode?.message}
+                        helperText={
+                          profileForm.formState.errors.zipCode?.message
+                        }
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12}>
                       <TextField
                         fullWidth
                         label="Timezone"
                         InputLabelProps={commonInputLabelProps}
                         {...profileForm.register("timezone")}
                         error={!!profileForm.formState.errors.timezone}
-                        helperText={profileForm.formState.errors.timezone?.message}
+                        helperText={
+                          profileForm.formState.errors.timezone?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -525,7 +550,9 @@ export default function Profile(): JSX.Element {
             <Card>
               <CardHeader title="Update Password" />
               <CardContent>
-                <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
+                >
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <TextField
@@ -535,7 +562,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("currentPassword")}
                         error={!!passwordForm.formState.errors.currentPassword}
-                        helperText={passwordForm.formState.errors.currentPassword?.message}
+                        helperText={
+                          passwordForm.formState.errors.currentPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -546,7 +575,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("newPassword")}
                         error={!!passwordForm.formState.errors.newPassword}
-                        helperText={passwordForm.formState.errors.newPassword?.message}
+                        helperText={
+                          passwordForm.formState.errors.newPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -557,7 +588,9 @@ export default function Profile(): JSX.Element {
                         InputLabelProps={commonInputLabelProps}
                         {...passwordForm.register("confirmPassword")}
                         error={!!passwordForm.formState.errors.confirmPassword}
-                        helperText={passwordForm.formState.errors.confirmPassword?.message}
+                        helperText={
+                          passwordForm.formState.errors.confirmPassword?.message
+                        }
                       />
                     </Grid>
                     <Grid item xs={12}>
