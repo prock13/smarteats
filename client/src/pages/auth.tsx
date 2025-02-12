@@ -18,9 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/logo";
 import { StyledEngineProvider, CssBaseline } from "@mui/material";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
 
@@ -29,20 +29,20 @@ const theme = createTheme({
   components: {
     MuiPopover: {
       defaultProps: {
-        container: () => document.body
-      }
+        container: () => document.body,
+      },
     },
     MuiPopper: {
       defaultProps: {
-        container: () => document.body
-      }
+        container: () => document.body,
+      },
     },
     MuiModal: {
       defaultProps: {
-        container: () => document.body
-      }
-    }
-  }
+        container: () => document.body,
+      },
+    },
+  },
 });
 
 export default function AuthPage() {
@@ -92,7 +92,7 @@ export default function AuthPage() {
             <Card className="w-full shadow-lg">
               <CardHeader className="space-y-1">
                 <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                  <Logo className="w-40 h-40" />
+                  <Logo sx={{ fontSize: 128 }} />
                 </Box>
                 <CardTitle className="text-2xl text-center">
                   Welcome to SmartEats
@@ -111,7 +111,7 @@ export default function AuthPage() {
                     <Form {...loginForm}>
                       <form
                         onSubmit={loginForm.handleSubmit((data) =>
-                          loginMutation.mutate(data)
+                          loginMutation.mutate(data),
                         )}
                         className="space-y-4"
                       >
@@ -155,7 +155,7 @@ export default function AuthPage() {
                     <Form {...registerForm}>
                       <form
                         onSubmit={registerForm.handleSubmit((data) =>
-                          registerMutation.mutate(data)
+                          registerMutation.mutate(data),
                         )}
                         className="space-y-4"
                       >
