@@ -31,6 +31,6 @@
   }
 
   body {
-    @apply font-sans antialiased min-h-screen bg-background text-foreground;
+    @apply font-sans antialiased min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
   }
 }
