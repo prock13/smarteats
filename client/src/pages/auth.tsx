@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,21 +17,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/logo";
-import { Box, Container, StyledEngineProvider, CssBaseline, createTheme, ThemeProvider } from "@mui/material";
+import { StyledEngineProvider, CssBaseline } from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
 
-const theme = createTheme();
+// Create a theme instance with proper SSR configuration
+const theme = createTheme({
+  components: {
+    MuiPopover: {
+      defaultProps: {
+        container: () => document.body
+      }
+    },
+    MuiPopper: {
+      defaultProps: {
+        container: () => document.body
+      }
+    },
+    MuiModal: {
+      defaultProps: {
+        container: () => document.body
+      }
+    }
+  }
+});
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
-
-  useEffect(() => {
-    console.log("Auth page mounted - checking styles");
-    const styles = document.querySelectorAll('style');
-    console.log(`Found ${styles.length} style elements`);
-  }, []);
 
   const loginForm = useForm<LoginFormData>({
     defaultValues: {
@@ -76,7 +92,7 @@ export default function AuthPage() {
             <Card className="w-full shadow-lg">
               <CardHeader className="space-y-1">
                 <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                  <Logo sx={{ fontSize: 128 }} />
+                  <Logo className="w-40 h-40" />
                 </Box>
                 <CardTitle className="text-2xl text-center">
                   Welcome to SmartEats
@@ -127,13 +143,8 @@ export default function AuthPage() {
                         />
                         <Button
                           type="submit"
-                          className="w-full"
+                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
                           disabled={loginMutation.isPending}
-                          style={{
-                            background:
-                              "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                            color: "white",
-                          }}
                         >
                           {loginMutation.isPending ? "Logging in..." : "Login"}
                         </Button>
@@ -176,13 +187,8 @@ export default function AuthPage() {
                         />
                         <Button
                           type="submit"
-                          className="w-full"
+                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
                           disabled={registerMutation.isPending}
-                          style={{
-                            background:
-                              "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
-                            color: "white",
-                          }}
                         >
                           {registerMutation.isPending
                             ? "Creating account..."

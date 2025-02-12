@@ -9,6 +9,7 @@ import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-// Enhanced CORS configuration
+// Enhanced CORS configuration - MUST come before session middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin) {
@@ -44,10 +45,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// Session configuration with detailed logging
+const sessionSettings: session.SessionOptions = {
+  secret: process.env.REPL_ID!,
+  resave: false,
+  saveUninitialized: false,
+  store: storage.sessionStore,
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax'
+  },
+  name: 'connect.sid' // Being explicit about the cookie name
+};
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+  console.log("Production mode: trusting proxy");
+}
+
+// Session and auth middleware
+app.use(session(sessionSettings));
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Enhanced logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Request started`);
+
+  if (req.isAuthenticated()) {
+    console.log('User is authenticated:', req.user);
+  } else {
+    console.log('Unauthenticated user info request');
+  }
 
   if (req.method === 'POST' || req.method === 'PUT') {
     console.log('Request Body:', JSON.stringify(req.body, null, 2));
@@ -61,36 +93,11 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// Session configuration with detailed logging
-const sessionSettings: session.SessionOptions = {
-  secret: process.env.REPL_ID!,
-  resave: false,
-  saveUninitialized: false,
-  store: storage.sessionStore,
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
-  }
-};
-
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
-  console.log("Production mode: trusting proxy");
-}
-
-app.use(session(sessionSettings));
-app.use(passport.initialize());
-app.use(passport.session());
-
 // Set up authentication
 setupAuth(app);
 
 // Register routes
 const server = registerRoutes(app);
-
 
 // Add detailed static file request logging
 app.use((req, res, next) => {
@@ -166,11 +173,9 @@ const PORT = Number(process.env.PORT) || 5000;
 
 function startServer(port: number) {
   return new Promise((resolve, reject) => {
-    server.listen(port, "0.0.0.0", () => {
-      console.log(`Server is ready and listening at http://0.0.0.0:${port}`);
-      console.log(`[${new Date().toISOString()}] Environment: ${process.env.NODE_ENV}`);
-      resolve(server);
-    }).on('error', (err: any) => {
+    const server = createServer(app);
+
+    server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
         console.log(`[${new Date().toISOString()}] Port ${port} is in use, trying ${port + 1}`);
         startServer(port + 1).then(resolve).catch(reject);
@@ -178,6 +183,12 @@ function startServer(port: number) {
         console.error('Server error:', err);
         reject(err);
       }
+    });
+
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`Server is ready and listening at http://0.0.0.0:${port}`);
+      console.log(`[${new Date().toISOString()}] Environment: ${process.env.NODE_ENV}`);
+      resolve(server);
     });
   });
 }
