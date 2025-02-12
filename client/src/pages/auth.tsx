@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,6 @@ import Container from "@mui/material/Container";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
 
-// Create a theme instance with proper SSR configuration
 const theme = createTheme({
   components: {
     MuiPopover: {
@@ -43,11 +42,21 @@ const theme = createTheme({
       },
     },
   },
+  typography: {
+    fontFamily: 'inherit'
+  }
 });
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
+
+  // Add style loading check
+  useEffect(() => {
+    console.log("Auth page mounted - checking styles");
+    const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
+    console.log(`Found ${styleElements.length} style elements`);
+  }, []);
 
   const loginForm = useForm<LoginFormData>({
     defaultValues: {
@@ -72,8 +81,9 @@ export default function AuthPage() {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
+        <CssBaseline enableColorScheme />
         <Box
+          component="main"
           sx={{
             minHeight: "100vh",
             width: "100%",
