@@ -23,17 +23,13 @@ export default defineConfig({
   },
   css: {
     devSourcemap: true,
-    modules: {
-      localsConvention: 'camelCase',
-    },
-    postcss: {
-      plugins: [require('tailwindcss'), require('autoprefixer')],
-    }
+    postcss: "./postcss.config.js"
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -41,7 +37,7 @@ export default defineConfig({
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith('.css')) {
-            return 'assets/styles/[name]-[hash][extname]';
+            return 'assets/[name]-[hash][extname]';
           }
           return 'assets/[name]-[hash][extname]';
         },
@@ -49,12 +45,10 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
       }
     },
-    chunkSizeWarningLimit: 800,
-    cssCodeSplit: true,
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false,
         drop_debugger: true
       }
     }
