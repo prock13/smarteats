@@ -27,7 +27,7 @@
   }
 
   * {
-    @apply border-border;
+    @apply border-[hsl(var(--border))];
   }
 
   body {
