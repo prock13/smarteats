@@ -4,6 +4,12 @@ import { eq, and, gte, lte, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const PostgresSessionStore = connectPg(session);
 
@@ -58,6 +64,9 @@ export class DatabaseStorage implements IStorage {
       pruneSessionInterval: false, // Disable automatic pruning
       errorLog: console.error.bind(console),
     });
+
+    // Log session store initialization
+    console.log('Session store initialized with PostgreSQL');
   }
 
   async getUser(id: number): Promise<User | undefined> {

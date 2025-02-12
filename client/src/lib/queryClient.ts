@@ -7,12 +7,19 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Helper to ensure we always use relative paths
+function getApiUrl(path: string): string {
+  // Remove any leading double slashes that might occur when joining paths
+  return path.startsWith('/api') ? path : `/api${path}`.replace('//', '/');
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const apiUrl = getApiUrl(url);
+  const res = await fetch(apiUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +36,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const apiUrl = getApiUrl(queryKey[0] as string);
+    const res = await fetch(apiUrl, {
       credentials: "include",
     });
 
