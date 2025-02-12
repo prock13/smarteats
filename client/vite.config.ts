@@ -21,23 +21,40 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },
+  css: {
+    devSourcemap: true,
+    modules: {
+      localsConvention: 'camelCase',
+    },
+    postcss: {
+      plugins: [require('tailwindcss'), require('autoprefixer')],
+    }
+  },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
-    sourcemap: false, // Disable source maps in production
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', '@mui/material', '@tanstack/react-query'],
-        }
+        },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/styles/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       }
     },
-    chunkSizeWarningLimit: 800, // Increase warning limit for larger chunks
-    cssCodeSplit: true, // Enable CSS code splitting
-    minify: 'terser', // Use terser for better minification
+    chunkSizeWarningLimit: 800,
+    cssCodeSplit: true,
+    minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console logs in production
+        drop_console: true,
         drop_debugger: true
       }
     }
