@@ -28,7 +28,41 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-// Set up sessions first
+// Enhanced CORS configuration
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    console.log(`Setting CORS for origin: ${origin}`);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Enhanced logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Request started`);
+
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  }
+
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+
+  next();
+});
+
+
+// Session configuration with detailed logging
 const sessionSettings: session.SessionOptions = {
   secret: process.env.REPL_ID!,
   resave: false,
@@ -44,57 +78,19 @@ const sessionSettings: session.SessionOptions = {
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
+  console.log("Production mode: trusting proxy");
 }
 
 app.use(session(sessionSettings));
-
-// Initialize passport after session
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Set up authentication
 setupAuth(app);
 
-// Create HTTP server and register routes first
+// Register routes
 const server = registerRoutes(app);
 
-// Add detailed request logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  console.log(`${req.method} ${req.path} - Request started`);
-
-  if (req.method === 'POST' || req.method === 'PUT') {
-    console.log('Request Body:', JSON.stringify(req.body, null, 2));
-  }
-
-  // Log request headers in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Request Headers:', req.headers);
-  }
-
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
-  });
-
-  next();
-});
-
-// CORS middleware with detailed logging
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    console.log(`Setting CORS for origin: ${origin}`);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
 
 // Add detailed static file request logging
 app.use((req, res, next) => {
@@ -165,20 +161,28 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
+// Enhanced server startup with proper port binding and logging
 const PORT = Number(process.env.PORT) || 5000;
 
-// Find an available port
 function startServer(port: number) {
-  server.listen(port, "0.0.0.0", () => {
-    log(`Server running on port ${port}`);
-  }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      log(`Port ${port} is in use, trying ${port + 1}`);
-      startServer(port + 1);
-    } else {
-      console.error('Server error:', err);
-    }
+  return new Promise((resolve, reject) => {
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`Server is ready and listening at http://0.0.0.0:${port}`);
+      console.log(`[${new Date().toISOString()}] Environment: ${process.env.NODE_ENV}`);
+      resolve(server);
+    }).on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`[${new Date().toISOString()}] Port ${port} is in use, trying ${port + 1}`);
+        startServer(port + 1).then(resolve).catch(reject);
+      } else {
+        console.error('Server error:', err);
+        reject(err);
+      }
+    });
   });
 }
 
-startServer(PORT);
+startServer(PORT).catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
