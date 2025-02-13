@@ -137,15 +137,34 @@ if (process.env.NODE_ENV === "development") {
   const distPath = path.resolve(__dirname, '../dist/public');
   console.log('Serving static files from:', distPath);
 
-  app.use(express.static(distPath, {
-    setHeaders: (res, path) => {
-      res.set('X-Content-Type-Options', 'nosniff');
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  // Serve static files from the client build directory
+  app.use('/', express.static(distPath, {
+    setHeaders: (res, filePath) => {
+      // Set proper content types
+      if (filePath.endsWith('.css')) {
+        res.set('Content-Type', 'text/css');
+      } else if (filePath.endsWith('.js')) {
+        res.set('Content-Type', 'application/javascript');
+      }
+      // Disable caching for all static files
+      res.set('Cache-Control', 'no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
-      if (path.endsWith('.js')) {
-        res.set('Content-Type', 'application/javascript');
-      } else if (path.endsWith('.css')) {
+    },
+    index: false // Don't serve index.html for directory requests
+  }));
+
+  // Serve uploaded files separately
+  app.use('/uploads', express.static('uploads'));
+
+  // Handle all other routes by serving index.html
+  app.get('*', (req, res, next) => {
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(distPath, 'index.html'));
+    } else {
+      next();
+    }
+  });
         res.set('Content-Type', 'text/css');
       }
     }
