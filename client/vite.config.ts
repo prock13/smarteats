@@ -36,12 +36,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', '@mui/material', '@tanstack/react-query'],
         },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.css')) {
-            return 'assets/style.css';
-          }
-          return 'assets/[name].[hash].[ext]';
-        },
+        assetFileNames: 'assets/[name].[ext]',
         chunkFileNames: 'assets/[name].[hash].js',
         entryFileNames: 'assets/[name].[hash].js',
       }
