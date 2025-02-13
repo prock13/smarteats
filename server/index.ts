@@ -154,19 +154,24 @@ if (process.env.NODE_ENV === "development") {
     next();
   });
 
+  app.use((req, res, next) => {
+    if (req.path.includes('index-') && req.path.endsWith('.css')) {
+      req.url = '/assets/style.css';
+    }
+    next();
+  });
+
   app.use(express.static(distPath, {
     index: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.css')) {
-        res.set({
-          'Content-Type': 'text/css',
-          'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        });
+        res.setHeader('Content-Type', 'text/css');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
       } else if (filePath.endsWith('.js')) {
-        res.set('Content-Type', 'application/javascript');
+        res.setHeader('Content-Type', 'application/javascript');
       }
       if (filePath.includes('assets/') && !filePath.endsWith('.css')) {
         res.set('Cache-Control', 'public, max-age=31536000');
