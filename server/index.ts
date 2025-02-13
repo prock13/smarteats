@@ -10,6 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createServer } from 'http';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -157,22 +158,17 @@ if (process.env.NODE_ENV === "development") {
       } else if (filePath.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
       }
+      // Allow caching for assets
+      if (filePath.includes('assets/')) {
+        res.set('Cache-Control', 'public, max-age=31536000');
+      } else {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      }
     }
   }));
 
-  // Additional middleware specifically for CSS files
-  app.get('*.css', (req, res, next) => {
-    const cssPath = path.join(distPath, req.path);
-    if (fs.existsSync(cssPath)) {
-      res.set('Content-Type', 'text/css');
-      res.sendFile(cssPath);
-    } else {
-      next();
-    }
-  });
-
-  // Serve uploaded files separately
-  app.use('/uploads', express.static('uploads'));
 
   // Handle all other routes by serving index.html
   app.get('*', (req, res, next) => {
