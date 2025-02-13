@@ -48,3 +48,10 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
+[[deployment.rewrites]]
+from = "/assets/*"
+to = "/assets/*"
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"

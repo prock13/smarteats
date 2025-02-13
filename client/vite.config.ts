@@ -30,6 +30,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false,
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks: {
