@@ -153,13 +153,14 @@ if (process.env.NODE_ENV === "development") {
       if (filePath.endsWith('.css')) {
         res.set({
           'Content-Type': 'text/css',
-          'X-Content-Type-Options': 'nosniff'
+          'X-Content-Type-Options': 'nosniff',
+          'Cache-Control': 'no-cache, must-revalidate'
         });
       } else if (filePath.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
       }
-      // Allow caching for assets
-      if (filePath.includes('assets/')) {
+      // Allow caching for non-CSS assets
+      if (filePath.includes('assets/') && !filePath.endsWith('.css')) {
         res.set('Cache-Control', 'public, max-age=31536000');
       } else {
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
