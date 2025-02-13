@@ -148,25 +148,27 @@ if (process.env.NODE_ENV === "development") {
   // Serve static files from the client build directory
   app.use(express.static(distPath, {
     index: false,
-    etag: false,
-    lastModified: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.css')) {
-        res.set('Content-Type', 'text/css');
+        res.set({
+          'Content-Type': 'text/css',
+          'X-Content-Type-Options': 'nosniff'
+        });
       } else if (filePath.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
       }
-      // Force no caching
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
     }
   }));
 
-  // Specific handler for CSS files
+  // Additional middleware specifically for CSS files
   app.get('*.css', (req, res, next) => {
-    res.set('Content-Type', 'text/css');
-    next();
+    const cssPath = path.join(distPath, req.path);
+    if (fs.existsSync(cssPath)) {
+      res.set('Content-Type', 'text/css');
+      res.sendFile(cssPath);
+    } else {
+      next();
+    }
   });
 
   // Serve uploaded files separately
