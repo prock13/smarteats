@@ -147,6 +147,13 @@ if (process.env.NODE_ENV === "development") {
   console.log('Serving static files from:', distPath);
 
   // Serve static files from the client build directory
+  app.use((req, res, next) => {
+    if (req.path.includes('index-') && req.path.endsWith('.css')) {
+      req.url = '/assets/style.css';
+    }
+    next();
+  });
+
   app.use(express.static(distPath, {
     index: false,
     setHeaders: (res, filePath) => {
@@ -161,7 +168,6 @@ if (process.env.NODE_ENV === "development") {
       } else if (filePath.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
       }
-      // Allow caching for non-CSS assets
       if (filePath.includes('assets/') && !filePath.endsWith('.css')) {
         res.set('Cache-Control', 'public, max-age=31536000');
       } else {
