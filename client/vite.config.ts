@@ -37,10 +37,8 @@ export default defineConfig({
           vendor: ['react', 'react-dom', '@mui/material', '@tanstack/react-query'],
         },
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
-          if (ext === 'css') {
-            return 'assets/index.css';
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/style.css';
           }
           return 'assets/[name].[hash].[ext]';
         },

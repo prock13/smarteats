@@ -154,7 +154,9 @@ if (process.env.NODE_ENV === "development") {
         res.set({
           'Content-Type': 'text/css',
           'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': 'no-cache, must-revalidate'
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         });
       } else if (filePath.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
