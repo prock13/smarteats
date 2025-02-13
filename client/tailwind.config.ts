@@ -5,12 +5,7 @@ export default {
   darkMode: ["class"],
   content: [
     "./index.html",
-    "./src/**/*.{ts,tsx}",
-    "./src/components/**/*.{ts,tsx}",
-    "./src/pages/**/*.{ts,tsx}",
-    "./src/app/**/*.{ts,tsx}",
-    "./src/layouts/**/*.{ts,tsx}",
-    "./src/features/**/*.{ts,tsx}"
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
