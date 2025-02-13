@@ -148,27 +148,27 @@ if (process.env.NODE_ENV === "development") {
   // Serve static files from the client build directory
   app.use('/', express.static(distPath, {
     setHeaders: (res, filePath) => {
-      if (filePath.includes('assets')) {
-        // Set aggressive caching for assets
+      if (filePath.endsWith('.css')) {
+        res.set('Content-Type', 'text/css; charset=UTF-8');
+        res.set('Cache-Control', 'public, max-age=31536000');
+      } else if (filePath.endsWith('.js')) {
+        res.set('Content-Type', 'application/javascript; charset=UTF-8');
         res.set('Cache-Control', 'public, max-age=31536000');
       } else {
-        // No caching for other files
-        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Cache-Control', 'no-store, must-revalidate');
         res.set('Pragma', 'no-cache');
         res.set('Expires', '0');
       }
-      
-      // Set proper content types
-      if (filePath.endsWith('.css')) {
-        res.set('Content-Type', 'text/css; charset=utf-8');
-      } else if (filePath.endsWith('.js')) {
-        res.set('Content-Type', 'application/javascript; charset=utf-8');
-      } else if (filePath.endsWith('.html')) {
-        res.set('Content-Type', 'text/html; charset=utf-8');
-      }
     },
-    index: false // Don't serve index.html for directory requests
+    index: false,
+    fallthrough: true
   }));
+
+  // Additional middleware to handle CSS files specifically
+  app.get('*.css', (req, res, next) => {
+    res.set('Content-Type', 'text/css; charset=UTF-8');
+    next();
+  });
 
   // Serve uploaded files separately
   app.use('/uploads', express.static('uploads'));
@@ -182,16 +182,16 @@ if (process.env.NODE_ENV === "development") {
     }
   });
 
-  // Handle client-side routing
-  app.get('*', (req, res, next) => {
-    if (!req.path.startsWith('/api/')) {
-      const indexPath = path.join(distPath, 'index.html');
-      console.log('Serving index.html from:', indexPath);
-      res.sendFile(indexPath);
-    } else {
-      next();
-    }
-  });
+  // Handle client-side routing - this is redundant and can be removed
+  // app.get('*', (req, res, next) => {
+  //   if (!req.path.startsWith('/api/')) {
+  //     const indexPath = path.join(distPath, 'index.html');
+  //     console.log('Serving index.html from:', indexPath);
+  //     res.sendFile(indexPath);
+  //   } else {
+  //     next();
+  //   }
+  // });
 }
 
 // Generic error handling middleware
