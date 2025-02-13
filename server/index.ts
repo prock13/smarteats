@@ -148,16 +148,24 @@ if (process.env.NODE_ENV === "development") {
   // Serve static files from the client build directory
   app.use('/', express.static(distPath, {
     setHeaders: (res, filePath) => {
+      if (filePath.includes('assets')) {
+        // Set aggressive caching for assets
+        res.set('Cache-Control', 'public, max-age=31536000');
+      } else {
+        // No caching for other files
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      }
+      
       // Set proper content types
       if (filePath.endsWith('.css')) {
-        res.set('Content-Type', 'text/css');
+        res.set('Content-Type', 'text/css; charset=utf-8');
       } else if (filePath.endsWith('.js')) {
-        res.set('Content-Type', 'application/javascript');
+        res.set('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.html')) {
+        res.set('Content-Type', 'text/html; charset=utf-8');
       }
-      // Disable caching for all static files
-      res.set('Cache-Control', 'no-store, must-revalidate');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
     },
     index: false // Don't serve index.html for directory requests
   }));
