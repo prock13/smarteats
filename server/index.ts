@@ -140,6 +140,9 @@ if (process.env.NODE_ENV === "development") {
   app.use(express.static(distPath, {
     setHeaders: (res, path) => {
       res.set('X-Content-Type-Options', 'nosniff');
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       if (path.endsWith('.js')) {
         res.set('Content-Type', 'application/javascript');
       } else if (path.endsWith('.css')) {
