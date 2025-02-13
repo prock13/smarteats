@@ -146,27 +146,26 @@ if (process.env.NODE_ENV === "development") {
   console.log('Serving static files from:', distPath);
 
   // Serve static files from the client build directory
-  app.use('/', express.static(distPath, {
+  app.use(express.static(distPath, {
+    index: false,
+    etag: false,
+    lastModified: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.css')) {
-        res.set('Content-Type', 'text/css; charset=UTF-8');
-        res.set('Cache-Control', 'public, max-age=31536000');
+        res.set('Content-Type', 'text/css');
       } else if (filePath.endsWith('.js')) {
-        res.set('Content-Type', 'application/javascript; charset=UTF-8');
-        res.set('Cache-Control', 'public, max-age=31536000');
-      } else {
-        res.set('Cache-Control', 'no-store, must-revalidate');
-        res.set('Pragma', 'no-cache');
-        res.set('Expires', '0');
+        res.set('Content-Type', 'application/javascript');
       }
-    },
-    index: false,
-    fallthrough: true
+      // Force no caching
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+    }
   }));
 
-  // Additional middleware to handle CSS files specifically
+  // Specific handler for CSS files
   app.get('*.css', (req, res, next) => {
-    res.set('Content-Type', 'text/css; charset=UTF-8');
+    res.set('Content-Type', 'text/css');
     next();
   });
 
@@ -182,16 +181,16 @@ if (process.env.NODE_ENV === "development") {
     }
   });
 
-  // Handle client-side routing - this is redundant and can be removed
-  // app.get('*', (req, res, next) => {
-  //   if (!req.path.startsWith('/api/')) {
-  //     const indexPath = path.join(distPath, 'index.html');
-  //     console.log('Serving index.html from:', indexPath);
-  //     res.sendFile(indexPath);
-  //   } else {
-  //     next();
-  //   }
-  // });
+  // Handle client-side routing
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico)$/)) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 }
 
 // Generic error handling middleware
