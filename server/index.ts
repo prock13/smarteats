@@ -147,38 +147,18 @@ if (process.env.NODE_ENV === "development") {
   console.log('Serving static files from:', distPath);
 
   // Serve static files from the client build directory
-  app.use((req, res, next) => {
-    if (req.path.includes('index-') && req.path.endsWith('.css')) {
-      req.url = '/assets/style.css';
-    }
-    next();
-  });
-
-  app.use((req, res, next) => {
-    if (req.path.includes('index-') && req.path.endsWith('.css')) {
-      req.url = '/assets/style.css';
-    }
-    next();
-  });
-
   app.use(express.static(distPath, {
     index: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.css')) {
         res.setHeader('Content-Type', 'text/css');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
       } else if (filePath.endsWith('.js')) {
         res.setHeader('Content-Type', 'application/javascript');
       }
-      if (filePath.includes('assets/') && !filePath.endsWith('.css')) {
+      if (filePath.includes('assets/')) {
         res.set('Cache-Control', 'public, max-age=31536000');
       } else {
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.set('Pragma', 'no-cache');
-        res.set('Expires', '0');
       }
     }
   }));
