@@ -165,10 +165,6 @@ if (process.env.NODE_ENV === "development") {
       next();
     }
   });
-        res.set('Content-Type', 'text/css');
-      }
-    }
-  }));
 
   // Handle client-side routing
   app.get('*', (req, res, next) => {
