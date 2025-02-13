@@ -146,21 +146,13 @@ if (process.env.NODE_ENV === "development") {
   const distPath = path.resolve(__dirname, '../dist/public');
   console.log('Serving static files from:', distPath);
 
-  // Redirect old CSS file paths to the new one
-  app.use((req, res, next) => {
-    if (req.url.includes('index-') && req.url.endsWith('.css')) {
-      res.redirect('/assets/styles.css');
-    } else {
-      next();
-    }
-  });
-
   // Serve static files from the client build directory
   app.use(express.static(distPath, {
     index: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.css')) {
         res.setHeader('Content-Type', 'text/css');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
       } else if (filePath.endsWith('.js')) {
         res.setHeader('Content-Type', 'application/javascript');
       }
