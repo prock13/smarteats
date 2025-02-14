@@ -27,10 +27,6 @@ export default defineConfig({
       host: process.env.REPL_SLUG ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : "0.0.0.0",
       timeout: 30000,
       overlay: false
-    },
-    fs: {
-      strict: false,
-      allow: [".."]
     }
   },
   resolve: {
@@ -39,30 +35,9 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },
-  css: {
-    postcss: "./postcss.config.js",
-    devSourcemap: true
-  },
   build: {
-    outDir: path.resolve(__dirname, "../dist/public"),
+    outDir: path.resolve(__dirname, "../dist/client"),
     emptyOutDir: true,
-    sourcemap: process.env.NODE_ENV === 'development',
-    cssCodeSplit: false,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    },
-    minify: process.env.NODE_ENV === 'production',
-    watch: null
-  },
-  optimizeDeps: {
-    force: true,
-    entries: [
-      'src/**/*.{ts,tsx}',
-      'src/main.tsx'
-    ],
-    include: ['**/*.css', '@/components/**/*', '@shared/**/*']
-  },
-  base: "./"
+    sourcemap: process.env.NODE_ENV === 'development'
+  }
 });

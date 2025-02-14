@@ -163,7 +163,7 @@ if (process.env.NODE_ENV === "development") {
   });
 } else {
   // Production static file serving with caching
-  app.use(express.static('dist/client', {
+  app.use(express.static(path.join(__dirname, '../dist/client'), {
     index: false,
     maxAge: '1h',
     etag: true
@@ -185,7 +185,14 @@ if (process.env.NODE_ENV === "development") {
       return res.redirect('/auth');
     }
 
-    res.sendFile(path.join(__dirname, '../dist/client/index.html'));
+    const indexPath = path.join(__dirname, '../dist/client/index.html');
+    if (!fs.existsSync(indexPath)) {
+      return res.status(500).json({ 
+        message: `Could not find index.html at ${indexPath}. Please ensure the client has been built.` 
+      });
+    }
+
+    res.sendFile(indexPath);
   });
 }
 
