@@ -142,22 +142,19 @@ if (process.env.NODE_ENV === "development") {
     process.exit(1);
   });
 } else {
-  // Serve static files with detailed logging
+  // Serve static files with detailed logging and no caching
   const distPath = path.resolve(__dirname, '../dist/public');
   console.log('Serving static files from:', distPath);
 
   // Serve static files from the client build directory
   app.use(express.static(distPath, {
     index: false,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.css')) {
-        res.setHeader('Content-Type', 'text/css');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-      } else if (filePath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-      }
+    etag: false,
+    lastModified: false,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
     }
   }));
 
