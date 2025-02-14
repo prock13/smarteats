@@ -184,15 +184,14 @@ registerRoutes(app);
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
   app.use('*', async (req, res, next) => {
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
     try {
-      if (!req.isAuthenticated() && !req.path.startsWith('/auth')) {
-        res.redirect('/auth');
-      } else {
-        next();
+      if (req.path.startsWith('/api/') || req.path.startsWith('/auth') || req.path.includes('/@')) {
+        return next();
       }
+      if (!req.isAuthenticated()) {
+        return res.redirect('/auth');
+      }
+      next();
     } catch (e) {
       next(e);
     }
