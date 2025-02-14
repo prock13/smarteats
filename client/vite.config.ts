@@ -11,14 +11,7 @@ export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
     host: '0.0.0.0',
-    port: 5173,
-    strictPort: true,
-    hmr: {
-      clientPort: 443,
-      protocol: 'wss'
-    },
-    // Allow all Replit domains and subdomains
-    allowedHosts: [/\.replit\.dev$/, /\.repl\.co$/]
+    allowedHosts: ['.replit.dev', '.spock.replit.dev'],
   },
   resolve: {
     alias: {
@@ -26,14 +19,9 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },
-  css: {
-    postcss: './postcss.config.js'
-  },
+  root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "../dist/public"),
+    outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
-    sourcemap: true,
-    cssCodeSplit: false
   },
-  base: './'
 });
