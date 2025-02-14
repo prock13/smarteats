@@ -24,7 +24,8 @@ export default defineConfig({
     },
     watch: {
       usePolling: true
-    }
+    },
+    allowedHosts: ["*.replit.dev", "*.spock.replit.dev"]
   },
   resolve: {
     alias: {
