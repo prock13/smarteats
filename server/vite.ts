@@ -32,8 +32,9 @@ export const setupVite = async (app: express.Application, isDev = process.env.NO
         middlewareMode: true,
         hmr: {
           protocol: 'wss',
-          host: '0.0.0.0',
-          port: 443
+          clientPort: 443,
+          path: '/@hmr',
+          host: '0.0.0.0'
         }
       },
       appType: 'custom',
