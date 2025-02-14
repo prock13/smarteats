@@ -98,7 +98,7 @@ if (process.env.NODE_ENV === "development") {
       const url = req.originalUrl;
       try {
         // Always serve index.html for SPA routes
-        let template = await vite.transformIndexHtml(url, await fs.readFile('client/index.html', 'utf-8'));
+        let template = await vite.transformIndexHtml(url, await fs.readFile('client/index.html'));
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
       } catch (e) {
         next(e);
