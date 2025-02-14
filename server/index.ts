@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createServer } from 'http';
 import fs from 'fs';
+import fetch from 'node-fetch';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,6 +23,11 @@ interface ApiError extends Error {
 }
 
 const app = express();
+
+// Health check endpoint - place it before other middleware to ensure quick response
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 // Basic middleware
 app.use(express.json());
@@ -188,12 +194,29 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-// Enhanced server startup with proper port binding and logging
-const PORT = Number(process.env.PORT) || 5000;
-
-function startServer(port: number) {
+// Enhanced server startup with health check verification
+function startServer(port: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const server = createServer(app);
+    let serverReady = false;
+
+    const healthCheck = async () => {
+      try {
+        const response = await fetch(`http://0.0.0.0:${port}/health`);
+        if (response.ok) {
+          console.log(`[${new Date().toISOString()}] Health check passed - server is ready`);
+          serverReady = true;
+          resolve(server);
+        } else {
+          throw new Error('Health check failed');
+        }
+      } catch (err) {
+        if (!serverReady) {
+          console.log(`[${new Date().toISOString()}] Waiting for server to be ready...`);
+          setTimeout(healthCheck, 1000);
+        }
+      }
+    };
 
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
@@ -206,12 +229,14 @@ function startServer(port: number) {
     });
 
     server.listen(port, "0.0.0.0", () => {
-      console.log(`Server is ready and listening at http://0.0.0.0:${port}`);
-      console.log(`[${new Date().toISOString()}] Environment: ${process.env.NODE_ENV}`);
-      resolve(server);
+      console.log(`[${new Date().toISOString()}] Server starting up at http://0.0.0.0:${port}`);
+      healthCheck();
     });
   });
 }
+
+// Start the server with enhanced logging and health verification
+const PORT = Number(process.env.PORT) || 5000;
 
 startServer(PORT).catch(err => {
   console.error('Failed to start server:', err);
