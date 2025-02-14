@@ -57,10 +57,12 @@ author = "agent"
 
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false
+wait_for_port = [5000, 5173]
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
+
 [[deployment.rewrites]]
 from = "/assets/*"
 to = "/assets/*"

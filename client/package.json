@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
     "test:watch": "vitest watch",
