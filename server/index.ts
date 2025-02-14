@@ -94,13 +94,19 @@ app.use(passport.session());
 if (process.env.NODE_ENV === "development") {
   console.log('[DEV] Setting up Vite development server');
   setupVite(app).then(vite => {
+    // Use Vite's own middleware first
+    app.use(vite.middlewares);
+    
+    // Then handle SPA routes
     app.use('*', async (req, res, next) => {
       const url = req.originalUrl;
+      
       try {
-        // Always serve index.html for SPA routes
-        let template = await vite.transformIndexHtml(url, await fs.promises.readFile('client/index.html', 'utf-8'));
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+        const template = await fs.promises.readFile('client/index.html', 'utf-8');
+        const transformed = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
       } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
         next(e);
       }
     });
