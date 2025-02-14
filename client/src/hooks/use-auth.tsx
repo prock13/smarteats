@@ -37,7 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetchInterval: false,
     staleTime: Infinity,
     cacheTime: Infinity,
-    networkMode: 'offlineFirst'
+    networkMode: 'offlineFirst',
+    enabled: true,
+    gcTime: Infinity
   });
 
   const loginMutation = useMutation({
