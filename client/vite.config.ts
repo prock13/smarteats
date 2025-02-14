@@ -40,13 +40,14 @@ export default defineConfig({
           vendor: ['react', 'react-dom', '@mui/material', '@tanstack/react-query'],
         },
         assetFileNames: (assetInfo) => {
+          const cssFileName = 'assets/styles.css';
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'assets/index.css';
+            return cssFileName;
           }
-          return 'assets/[name]-[hash][ext]';
+          return 'assets/[name].[hash][ext]';
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
       }
     },
     minify: 'terser',
