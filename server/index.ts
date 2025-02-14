@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === "development") {
         port: 24678
       },
       host: '0.0.0.0',
-      allowedHosts: ['*.replit.dev', '*.spock.replit.dev']
+      allowedHosts: ['*.replit.dev', '*.spock.replit.dev', 'b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev'] // Added allowed host
     }
   }).then(vite => {
     // Serve Vite client and source files without auth
@@ -219,7 +219,7 @@ if (process.env.NODE_ENV === "development") {
       host: '0.0.0.0'
     }
   });
-  
+
   app.use(async (req, res, next) => {
     try {
       // Always allow Vite-related and static assets
