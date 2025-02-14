@@ -138,18 +138,12 @@ app.use((req, res, next) => {
     '/api/auth/register',
     '/assets',
     '/health',
-    '/',
-    '/favicon.ico',
-    '/@vite',
-    '/@fs',
-    '/@id',
-    '/node_modules',
-    '/src'
+    '/favicon.ico'
   ];
 
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
-  const isStaticFile = req.path.includes('.');
+  const isDevServerRequest = req.path.match(/^\/@(vite|fs|id|react-refresh)/);
   const isOptionsRequest = req.method === 'OPTIONS';
 
   console.log(`[Auth Debug] Request details:
@@ -162,7 +156,7 @@ app.use((req, res, next) => {
     Is Options: ${isOptionsRequest}
   `);
 
-  if (isOptionsRequest || isPublicPath || isStaticFile || isDevelopment) {
+  if (isOptionsRequest || isPublicPath || isDevServerRequest || (isDevelopment && req.path === '/')) {
     console.log(`[Auth Debug] Allowing access to: ${req.path}`);
     return next();
   }
