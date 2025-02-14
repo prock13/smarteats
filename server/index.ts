@@ -183,7 +183,11 @@ registerRoutes(app);
 
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
-  const viteInstance = await setupVite(app);
+  const viteInstance = await setupVite(app, {
+    hmr: {
+      port: 24678
+    }
+  });
   
   app.use(async (req, res, next) => {
     try {
