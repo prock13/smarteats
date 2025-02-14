@@ -34,7 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    refetchInterval: false,
     staleTime: Infinity,
+    cacheTime: Infinity,
+    networkMode: 'offlineFirst'
   });
 
   const loginMutation = useMutation({

@@ -2,8 +2,9 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/use-auth";
+import { StyledEngineProvider, createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { ThemeProvider as CustomThemeProvider } from "@/hooks/use-theme";
-import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { useTheme } from "@/hooks/use-theme";
 import NotFound from "@/pages/not-found";
@@ -23,6 +24,29 @@ import { Footer } from "@/components/Footer";
 import { Box, Container } from "@mui/material";
 import { useLocation } from "wouter";
 import MyFitnessPal from "@/pages/myfitnesspal";
+
+const theme = createTheme({
+  components: {
+    MuiPopover: {
+      defaultProps: {
+        container: () => document.getElementById('root') || document.body,
+      },
+    },
+    MuiPopper: {
+      defaultProps: {
+        container: () => document.getElementById('root') || document.body,
+      },
+    },
+    MuiModal: {
+      defaultProps: {
+        container: () => document.getElementById('root') || document.body,
+      },
+    },
+  },
+  typography: {
+    fontFamily: 'inherit'
+  }
+});
 
 function ThemedApp() {
   const { theme } = useTheme();
@@ -67,7 +91,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CustomThemeProvider>
-          <ThemedApp />
+          <StyledEngineProvider injectFirst> {/* Added StyledEngineProvider */}
+            <ThemedApp />
+          </StyledEngineProvider>
         </CustomThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
