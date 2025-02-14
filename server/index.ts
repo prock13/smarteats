@@ -185,12 +185,27 @@ registerRoutes(app);
 if (process.env.NODE_ENV === "development") {
   // Dev server will be configured by setupVite
   app.use((req, res, next) => {
-    if (!req.isAuthenticated() && req.path !== '/auth' && !req.path.includes('/@') && 
-        !req.path.includes('/.vite/') && !req.path.includes('/node_modules/') && 
-        !req.path.endsWith('.js') && !req.path.endsWith('.css') && 
-        !req.path.endsWith('.json') && !req.path.startsWith('/api/')) {
+    // Always allow Vite-related and static assets
+    if (req.path.includes('/@') || 
+        req.path.includes('/.vite/') || 
+        req.path.includes('/node_modules/') ||
+        req.path.endsWith('.js') || 
+        req.path.endsWith('.css') || 
+        req.path.endsWith('.json') ||
+        req.path.startsWith('/api/')) {
+      return next();
+    }
+
+    // Allow access to auth page without authentication
+    if (req.path === '/auth') {
+      return next();
+    }
+
+    // Redirect unauthenticated users to auth page
+    if (!req.isAuthenticated()) {
       return res.redirect('/auth');
     }
+
     next();
   });
 } else {
