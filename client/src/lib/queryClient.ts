@@ -35,31 +35,35 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const apiUrl = getApiUrl(queryKey[0] as string);
-    const res = await fetch(apiUrl, {
-      credentials: "include",
-    });
+    async ({ queryKey }) => {
+      const apiUrl = getApiUrl(queryKey[0] as string);
+      const res = await fetch(apiUrl, {
+        credentials: "include",
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+      await throwIfResNotOk(res);
+      return await res.json();
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      gcTime: 10 * 60 * 1000, // Keep unused data for 10 minutes
+      refetchInterval: false, // Disable automatic refetching
+      refetchOnWindowFocus: false, // Disable refetch on window focus
+      refetchOnMount: false, // Disable refetch on component mount
       retry: false,
+      networkMode: 'online',
     },
     mutations: {
       retry: false,
+      networkMode: 'online',
     },
   },
 });
