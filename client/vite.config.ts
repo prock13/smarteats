@@ -46,13 +46,15 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV === 'development',
     cssCodeSplit: false,
     rollupOptions: {
       output: {
         manualChunks: undefined
       }
-    }
+    },
+    minify: process.env.NODE_ENV === 'production',
+    watch: null
   },
   optimizeDeps: {
     force: true,

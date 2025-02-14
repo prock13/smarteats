@@ -12,6 +12,8 @@ import { dirname } from 'path';
 import { createServer } from 'http';
 import fs from 'fs';
 import fetch from 'node-fetch';
+import compression from 'compression';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,10 +35,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Move static middleware and CORS to the very top
-if (process.env.NODE_ENV === "development") {
+// Production-specific optimizations
+if (process.env.NODE_ENV === "production") {
+  // Enable compression for all responses
+  app.use(compression());
+
+  // Set security headers
+  app.use(helmet());
+
+  // Cache static assets
+  app.use(express.static('dist/public', {
+    maxAge: '1d',
+    etag: true,
+    lastModified: true
+  }));
+} else {
+  // Development-specific middleware
   app.use((req, res, next) => {
-    // Enhanced CORS configuration
     const origin = req.headers.origin;
     if (origin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
@@ -200,8 +215,29 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
 const PORT = Number(process.env.PORT) || 3000;
 const server = createServer(app);
 
+// Add error handling for the server
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`Port ${PORT} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`Port ${PORT} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server starting up at http://0.0.0.0:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
 
 export default app;
