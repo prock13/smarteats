@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,46 +17,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/logo";
-import { StyledEngineProvider, CssBaseline } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
+import { 
+  StyledEngineProvider, 
+  CssBaseline, 
+  ThemeProvider,
+  Box,
+  Container
+} from "@mui/material";
+import theme from "@/lib/theme";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
-
-const theme = createTheme({
-  components: {
-    MuiPopover: {
-      defaultProps: {
-        container: () => document.body,
-      },
-    },
-    MuiPopper: {
-      defaultProps: {
-        container: () => document.body,
-      },
-    },
-    MuiModal: {
-      defaultProps: {
-        container: () => document.body,
-      },
-    },
-  },
-  typography: {
-    fontFamily: 'inherit'
-  }
-});
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
-
-  // Add style loading check
-  useEffect(() => {
-    console.log("Auth page mounted - checking styles");
-    const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
-    console.log(`Found ${styleElements.length} style elements`);
-  }, []);
 
   const loginForm = useForm<LoginFormData>({
     defaultValues: {
@@ -81,13 +55,13 @@ export default function AuthPage() {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <CssBaseline enableColorScheme />
+        <CssBaseline />
         <Box
           component="main"
           sx={{
             minHeight: "100vh",
             width: "100%",
-            bgcolor: "grey.100",
+            bgcolor: "background.default",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -102,7 +76,7 @@ export default function AuthPage() {
             <Card className="w-full shadow-lg">
               <CardHeader className="space-y-1">
                 <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                  <Logo sx={{ fontSize: 128 }} />
+                  <Logo className="w-24 h-24" />
                 </Box>
                 <CardTitle className="text-2xl text-center">
                   Welcome to SmartEats
@@ -121,7 +95,7 @@ export default function AuthPage() {
                     <Form {...loginForm}>
                       <form
                         onSubmit={loginForm.handleSubmit((data) =>
-                          loginMutation.mutate(data),
+                          loginMutation.mutate(data)
                         )}
                         className="space-y-4"
                       >
@@ -165,7 +139,7 @@ export default function AuthPage() {
                     <Form {...registerForm}>
                       <form
                         onSubmit={registerForm.handleSubmit((data) =>
-                          registerMutation.mutate(data),
+                          registerMutation.mutate(data)
                         )}
                         className="space-y-4"
                       >

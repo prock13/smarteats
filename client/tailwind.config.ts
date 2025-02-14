@@ -10,6 +10,7 @@ const config = {
     './index.html',
   ],
   prefix: "",
+  important: '#root', // This ensures Tailwind styles are scoped to our root element
   theme: {
     container: {
       center: true,
