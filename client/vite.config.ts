@@ -12,11 +12,15 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: true,
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
     hmr: {
-      port: 443,
-      host: "0.0.0.0",
-      protocol: "wss"
+      clientPort: 443,
+      host: "0.0.0.0"
+    },
+    fs: {
+      strict: false
     }
   },
   resolve: {
