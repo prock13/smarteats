@@ -4,20 +4,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
 import { Redirect } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Box, 
+  Container, 
+  Card, 
+  CardContent, 
+  CardHeader,
+  Typography,
+  TextField,
+  Button,
+  Tabs,
+  Tab
+} from "@mui/material";
 import { Logo } from "@/components/logo";
-import { Box, Container } from "@mui/material";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
 
@@ -30,10 +29,31 @@ export default function AuthPage() {
       username: "",
       password: "",
     },
+    resolver: zodResolver(
+      insertUserSchema.pick({ username: true, password: true })
+        .refine(
+          (data) => data.username.length > 0,
+          { message: "Username is required", path: ["username"] }
+        )
+        .refine(
+          (data) => data.password.length > 0,
+          { message: "Password is required", path: ["password"] }
+        )
+    ),
   });
 
   const registerForm = useForm<InsertUser>({
-    resolver: zodResolver(insertUserSchema),
+    resolver: zodResolver(
+      insertUserSchema
+        .refine(
+          (data) => data.username.length > 0,
+          { message: "Username is required", path: ["username"] }
+        )
+        .refine(
+          (data) => data.password.length > 0,
+          { message: "Password is required", path: ["password"] }
+        )
+    ),
     defaultValues: {
       username: "",
       password: "",
@@ -46,135 +66,132 @@ export default function AuthPage() {
   }
 
   return (
-        <Box
-          component="main"
-          sx={{
-            minHeight: "100vh",
-            width: "100%",
-            bgcolor: "grey.100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 2,
-          }}
-        >
-          <Container
-            component="main"
-            maxWidth="sm"
-            sx={{ bgcolor: "transparent" }}
-          >
-            <Card className="w-full shadow-lg">
-              <CardHeader className="space-y-1">
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        width: "100%",
+        bgcolor: "grey.100",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 2,
+      }}
+    >
+      <Container component="main" maxWidth="sm" sx={{ bgcolor: "transparent" }}>
+        <Card sx={{ width: '100%', boxShadow: 3 }}>
+          <CardHeader
+            sx={{ textAlign: 'center', pb: 0 }}
+            title={
+              <>
                 <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                   <Logo sx={{ fontSize: 128 }} />
                 </Box>
-                <CardTitle className="text-2xl text-center">
+                <Typography variant="h4" component="h1">
                   Welcome to SmartEats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs
-                  value={mode}
-                  onValueChange={(v) => setMode(v as "login" | "register")}
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Login</TabsTrigger>
-                    <TabsTrigger value="register">Register</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="login">
-                    <Form {...loginForm}>
-                      <form
-                        onSubmit={loginForm.handleSubmit((data) =>
-                          loginMutation.mutate(data),
-                        )}
-                        className="space-y-4"
-                      >
-                        <FormField
-                          control={loginForm.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Username</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={loginForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
-                          disabled={loginMutation.isPending}
-                        >
-                          {loginMutation.isPending ? "Logging in..." : "Login"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </TabsContent>
-                  <TabsContent value="register">
-                    <Form {...registerForm}>
-                      <form
-                        onSubmit={registerForm.handleSubmit((data) =>
-                          registerMutation.mutate(data),
-                        )}
-                        className="space-y-4"
-                      >
-                        <FormField
-                          control={registerForm.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Username</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={registerForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
-                          disabled={registerMutation.isPending}
-                        >
-                          {registerMutation.isPending
-                            ? "Creating account..."
-                            : "Create account"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </Container>
-        </Box>
+                </Typography>
+              </>
+            }
+          />
+          <CardContent>
+            <Tabs
+              value={mode}
+              onChange={(_, newValue) => setMode(newValue)}
+              centered
+              sx={{ mb: 3 }}
+            >
+              <Tab label="Login" value="login" />
+              <Tab label="Register" value="register" />
+            </Tabs>
+
+            {mode === "login" && (
+              <form
+                onSubmit={loginForm.handleSubmit((data) =>
+                  loginMutation.mutate(data)
+                )}
+                noValidate
+              >
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    label="Username"
+                    required
+                    {...loginForm.register("username")}
+                    error={!!loginForm.formState.errors.username}
+                    helperText={loginForm.formState.errors.username?.message || ""}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Password"
+                    type="password"
+                    required
+                    {...loginForm.register("password")}
+                    error={!!loginForm.formState.errors.password}
+                    helperText={loginForm.formState.errors.password?.message || ""}
+                    fullWidth
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loginMutation.isPending}
+                    sx={{
+                      background: 'linear-gradient(to right, #2e7d32, #1976d2)',
+                      '&:hover': {
+                        background: 'linear-gradient(to right, #1b5e20, #1565c0)',
+                      },
+                    }}
+                  >
+                    {loginMutation.isPending ? "Logging in..." : "Login"}
+                  </Button>
+                </Box>
+              </form>
+            )}
+
+            {mode === "register" && (
+              <form
+                onSubmit={registerForm.handleSubmit((data) =>
+                  registerMutation.mutate(data)
+                )}
+                noValidate
+              >
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    label="Username"
+                    required
+                    {...registerForm.register("username")}
+                    error={!!registerForm.formState.errors.username}
+                    helperText={registerForm.formState.errors.username?.message || ""}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Password"
+                    type="password"
+                    required
+                    {...registerForm.register("password")}
+                    error={!!registerForm.formState.errors.password}
+                    helperText={registerForm.formState.errors.password?.message || ""}
+                    fullWidth
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={registerMutation.isPending}
+                    sx={{
+                      background: 'linear-gradient(to right, #2e7d32, #1976d2)',
+                      '&:hover': {
+                        background: 'linear-gradient(to right, #1b5e20, #1565c0)',
+                      },
+                    }}
+                  >
+                    {registerMutation.isPending
+                      ? "Creating account..."
+                      : "Create account"}
+                  </Button>
+                </Box>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 }
