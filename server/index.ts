@@ -152,7 +152,6 @@ app.use((req, res, next) => {
     Authenticated: ${req.isAuthenticated()}
     Is Development: ${isDevelopment}
     Is Public Path: ${isPublicPath}
-    Is Static File: ${isStaticFile}
     Is Options: ${isOptionsRequest}
   `);
 
