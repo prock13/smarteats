@@ -2,6 +2,10 @@ modules = ["nodejs-20", "web", "postgresql-16"]
 run = "npm run dev"
 
 [[ports]]
+localPort = 443
+externalPort = 4200
+
+[[ports]]
 localPort = 3000
 externalPort = 3000
 
