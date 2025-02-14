@@ -28,8 +28,18 @@ import express from 'express';
 export const setupVite = async (app: express.Application, isDev = process.env.NODE_ENV !== 'production') => {
   if (isDev) {
     const vite = await createServer({
-      server: { middlewareMode: true },
-      appType: 'custom'
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          protocol: 'wss',
+          host: '0.0.0.0',
+          port: 443
+        }
+      },
+      appType: 'custom',
+      optimizeDeps: {
+        force: true
+      }
     });
     app.use(vite.middlewares);
   } else {
