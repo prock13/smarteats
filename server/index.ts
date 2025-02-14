@@ -185,20 +185,25 @@ registerRoutes(app);
 if (process.env.NODE_ENV === "development") {
   app.use('*', async (req, res, next) => {
     try {
-      // Skip auth check for static assets and API routes
+      // Skip auth check for Vite and static assets
       if (req.path.startsWith('/api/') || 
           req.path.includes('/@') || 
-          req.path.includes('.') ||
-          req.path === '/auth') {
+          req.path.includes('.')) {
         return next();
       }
       
+      // Allow the auth page itself
+      if (req.path === '/auth') {
+        return vite.middlewares(req, res, next);
+      }
+      
       // For all other routes, check authentication
-      if (!req.isAuthenticated() && req.path !== '/auth') {
+      if (!req.isAuthenticated()) {
         return res.redirect('/auth');
       }
       
-      next();
+      // Let Vite handle the request
+      vite.middlewares(req, res, next);
     } catch (e) {
       next(e);
     }
