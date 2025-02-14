@@ -17,35 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/logo";
-import { StyledEngineProvider, CssBaseline } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
+import { Box, Container } from "@mui/material";
 
 type LoginFormData = Pick<InsertUser, "username" | "password">;
-
-const theme = createTheme({
-  components: {
-    MuiPopover: {
-      defaultProps: {
-        container: () => document.getElementById('root') || document.body,
-      },
-    },
-    MuiPopper: {
-      defaultProps: {
-        container: () => document.getElementById('root') || document.body,
-      },
-    },
-    MuiModal: {
-      defaultProps: {
-        container: () => document.getElementById('root') || document.body,
-      },
-    },
-  },
-  typography: {
-    fontFamily: 'inherit'
-  }
-});
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -72,9 +46,6 @@ export default function AuthPage() {
   }
 
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <CssBaseline enableColorScheme />
         <Box
           component="main"
           sx={{
@@ -205,7 +176,5 @@ export default function AuthPage() {
             </Card>
           </Container>
         </Box>
-      </ThemeProvider>
-    </StyledEngineProvider>
   );
 }
