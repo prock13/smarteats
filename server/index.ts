@@ -183,27 +183,15 @@ registerRoutes(app);
 
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
-  // Serve static assets and Vite HMR without authentication
+  // Dev server will be configured by setupVite
   app.use((req, res, next) => {
-    if (
-      req.path.includes('/@') || 
-      req.path.includes('/.vite/') || 
-      req.path.includes('/node_modules/') ||
-      req.path.endsWith('.js') || 
-      req.path.endsWith('.css') ||
-      req.path.endsWith('.json') ||
-      req.path.startsWith('/api/')
-    ) {
-      return next();
+    if (!req.isAuthenticated() && req.path !== '/auth' && !req.path.includes('/@') && 
+        !req.path.includes('/.vite/') && !req.path.includes('/node_modules/') && 
+        !req.path.endsWith('.js') && !req.path.endsWith('.css') && 
+        !req.path.endsWith('.json') && !req.path.startsWith('/api/')) {
+      return res.redirect('/auth');
     }
-
-    // Handle authentication
-    if (req.path === '/auth' || req.isAuthenticated()) {
-      return vite.middlewares(req, res, next);
-    }
-
-    // Redirect unauthenticated users
-    res.redirect('/auth');
+    next();
   });
 } else {
   // Production static file serving
