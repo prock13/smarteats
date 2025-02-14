@@ -22,34 +22,37 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-import {createServer} from 'vite';
-import express from 'express';
+import { createServer } from "vite";
+import express from "express";
 
-export const setupVite = async (app: express.Application, isDev = process.env.NODE_ENV !== 'production') => {
+export const setupVite = async (
+  app: express.Application,
+  isDev = process.env.NODE_ENV !== "production",
+) => {
   if (isDev) {
     const vite = await createServer({
-      server: { 
-        middlewareMode: 'html',
+      server: {
+        middlewareMode: true,
         hmr: {
           clientPort: 443,
-          port: 24678
+          port: 24678,
         },
-        host: '0.0.0.0',
-        cors: true
+        allowedHosts: true,
+        host: "0.0.0.0",
+        cors: true,
       },
-      appType: 'custom',
+      appType: "custom",
       optimizeDeps: {
-        force: true
-      }
+        force: true,
+      },
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.resolve(__dirname, 'dist', 'public'))); // Adjusted path for production build
-    app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'public', 'index.html')); // Adjusted path for production build
+    app.use(express.static(path.resolve(__dirname, "dist", "public"))); // Adjusted path for production build
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(__dirname, "dist", "public", "index.html")); // Adjusted path for production build
     });
   }
 };
-
 
 // Removed serveStatic function as it's now handled in setupVite
