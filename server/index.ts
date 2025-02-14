@@ -183,30 +183,35 @@ registerRoutes(app);
 
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
-  // Dev server will be configured by setupVite
-  app.use((req, res, next) => {
-    // Always allow Vite-related and static assets
-    if (req.path.includes('/@') || 
-        req.path.includes('/.vite/') || 
-        req.path.includes('/node_modules/') ||
-        req.path.endsWith('.js') || 
-        req.path.endsWith('.css') || 
-        req.path.endsWith('.json') ||
-        req.path.startsWith('/api/')) {
-      return next();
-    }
+  const viteInstance = await setupVite(app);
+  
+  app.use(async (req, res, next) => {
+    try {
+      // Always allow Vite-related and static assets
+      if (req.path.includes('/@') || 
+          req.path.includes('/.vite/') || 
+          req.path.includes('/node_modules/') ||
+          req.path.endsWith('.js') || 
+          req.path.endsWith('.css') || 
+          req.path.endsWith('.json') ||
+          req.path.startsWith('/api/')) {
+        return next();
+      }
 
-    // Allow access to auth page without authentication
-    if (req.path === '/auth') {
-      return next();
-    }
+      // Allow access to auth page without authentication
+      if (req.path === '/auth') {
+        return viteInstance.middlewares(req, res, next);
+      }
 
-    // Redirect unauthenticated users to auth page
-    if (!req.isAuthenticated()) {
-      return res.redirect('/auth');
-    }
+      // Redirect unauthenticated users to auth page
+      if (!req.isAuthenticated()) {
+        return res.redirect('/auth');
+      }
 
-    next();
+      return viteInstance.middlewares(req, res, next);
+    } catch (e) {
+      next(e);
+    }
   });
 } else {
   // Production static file serving
