@@ -90,6 +90,19 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+// Production static file serving
+if (process.env.NODE_ENV === "production") {
+  const distPath = path.resolve(__dirname, '../dist/public');
+  console.log('Serving static files from:', distPath);
+
+  app.use(express.static(distPath, {
+    index: false,
+    etag: false,
+    lastModified: false,
+  }));
+}
+
 // Development mode setup
 if (process.env.NODE_ENV === "development") {
   console.log('[DEV] Setting up Vite development server');
@@ -102,17 +115,19 @@ if (process.env.NODE_ENV === "development") {
 // Enhanced logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Request started`);
+  const logPrefix = `[${new Date().toISOString()}]`;
+  console.log(`${logPrefix} ${req.method} ${req.path} - Request started`);
+  console.log(`${logPrefix} Headers:`, req.headers);
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+    console.log(`${logPrefix} ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
   });
 
   next();
 });
 
-// Public routes that don't require authentication
+// Update the public routes middleware with better logging and matching
 app.use((req, res, next) => {
   const publicPaths = [
     '/auth',
@@ -123,28 +138,42 @@ app.use((req, res, next) => {
     '/api/auth/login',
     '/api/auth/register',
     '/assets',
-    '/health'
+    '/health',
+    '/',
+    '/favicon.ico',
+    '/@vite',
+    '/@fs',
+    '/@id',
+    '/node_modules',
+    '/src'
   ];
 
-  // Allow all OPTIONS requests for CORS
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
+  const isStaticFile = req.path.includes('.');
+  const isOptionsRequest = req.method === 'OPTIONS';
 
-  // Allow access to static files and public paths
-  if (publicPaths.some(path => req.path.startsWith(path)) || 
-      req.path.includes('.') || 
-      req.path === '/') {
+  console.log(`[Auth Debug] Request details:
+    Path: ${req.path}
+    Method: ${req.method}
+    Authenticated: ${req.isAuthenticated()}
+    Is Development: ${isDevelopment}
+    Is Public Path: ${isPublicPath}
+    Is Static File: ${isStaticFile}
+    Is Options: ${isOptionsRequest}
+  `);
+
+  if (isOptionsRequest || isPublicPath || isStaticFile || isDevelopment) {
+    console.log(`[Auth Debug] Allowing access to: ${req.path}`);
     return next();
   }
 
   if (!req.isAuthenticated()) {
+    console.log(`[Auth Debug] Authentication required for: ${req.path}`);
     if (req.path.startsWith('/api/')) {
-      res.status(401).json({ message: 'Authentication required' });
-    } else {
-      res.redirect('/auth');
+      return res.status(401).json({ message: 'Authentication required' });
     }
-    return;
+    return res.redirect('/auth');
   }
 
   next();
@@ -156,24 +185,6 @@ setupAuth(app);
 // Register routes
 registerRoutes(app);
 
-// Production static file serving
-if (process.env.NODE_ENV === "production") {
-  const distPath = path.resolve(__dirname, '../dist/public');
-  console.log('Serving static files from:', distPath);
-
-  app.use(express.static(distPath, {
-    index: false,
-    etag: false,
-    lastModified: false,
-  }));
-
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
 
 // Error handling middleware
 app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction) => {
