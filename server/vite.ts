@@ -35,7 +35,9 @@ export const setupVite = async (app: express.Application, isDev = process.env.NO
           host: '0.0.0.0',
           protocol: 'wss'
         },
-        cors: true
+        cors: true,
+        host: true,
+        strictPort: true
       },
       appType: 'custom',
       optimizeDeps: {
