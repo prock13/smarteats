@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateMealSuggestions } from "./openai";
@@ -15,6 +15,13 @@ interface AuthenticatedRequest extends Request {
   user?: Express.User;
   files?: fileUpload.FileArray;
 }
+
+// Fixed route handler types
+type RouteHandler = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => Promise<void | Response> | void;
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -36,8 +43,8 @@ export function registerRoutes(app: Express): Server {
   // Set up authentication routes and middleware first
   setupAuth(app);
 
-  // Profile routes
-  app.post("/api/user/profile", async (req: AuthenticatedRequest, res) => {
+  // Profile routes - Fixed types
+  const updateProfile: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -71,9 +78,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(500).json({ message });
     }
-  });
+  };
 
-  app.post("/api/user/profile-picture", async (req: AuthenticatedRequest & Request, res) => {
+  app.post("/api/user/profile", updateProfile);
+
+  const updateProfilePicture: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -115,10 +124,47 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(500).json({ message });
     }
+  };
+
+  app.post("/api/user/profile-picture", updateProfilePicture);
+
+  // Fixed meal plan creation to include required fields
+  app.post("/api/meal-plans", async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      console.log('Received meal plan request:', JSON.stringify(req.body, null, 2));
+      const plan = mealPlanSchema.parse(req.body);
+      console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
+
+      const { meal } = plan;
+      const mealWithMacros = {
+        ...meal,
+        carbs: meal.nutrients?.carbohydrates || 0,
+        protein: meal.nutrients?.protein || 0,
+        fats: meal.nutrients?.fats || 0,
+      };
+
+      const saved = await storage.saveMealPlan({
+        ...plan,
+        meal: mealWithMacros,
+        userId: req.user!.id,
+        id: Date.now(), // Temporary ID for new meal plans
+      });
+
+      console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
+      res.json(saved);
+    } catch (error) {
+      console.error('Error saving meal plan:', error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
+      res.status(400).json({ message });
+    }
   });
 
   // Protected Routes - These require authentication
-  app.post("/api/meal-suggestions", async (req, res) => {
+  const getMealSuggestions: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -182,9 +228,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(500).json({ message });
     }
-  });
+  };
+  app.post("/api/meal-suggestions", getMealSuggestions);
 
-  app.get("/api/meal-plans", async (req, res) => {
+
+  const getMealPlans: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -209,34 +257,10 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.get("/api/meal-plans", getMealPlans);
 
-  app.post("/api/meal-plans", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      console.log('Received meal plan request:', JSON.stringify(req.body, null, 2));
-      const plan = mealPlanSchema.parse(req.body);
-      console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
-
-      const saved = await storage.saveMealPlan({
-        ...plan,
-        userId: req.user!.id,
-        id: Date.now(), // Temporary ID for new meal plans
-      });
-
-      console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
-      res.json(saved);
-    } catch (error) {
-      console.error('Error saving meal plan:', error);
-      const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      res.status(400).json({ message });
-    }
-  });
-
-  app.delete("/api/meal-plans/:id", async (req, res) => {
+  const deleteMealPlan: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -252,10 +276,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.delete("/api/meal-plans/:id", deleteMealPlan);
 
   // Recipe routes
-  app.get("/api/recipes", async (req, res) => {
+  const getRecipes: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -267,9 +292,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.get("/api/recipes", getRecipes);
 
-  app.get("/api/recipes/:id", async (req, res) => {
+
+  const getRecipeById: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -289,9 +316,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.get("/api/recipes/:id", getRecipeById);
 
-  app.post("/api/recipes", async (req, res) => {
+
+  const createRecipe: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -328,9 +357,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.post("/api/recipes", createRecipe);
 
-  app.put("/api/recipes/:id", async (req, res) => {
+
+  const updateRecipe: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -353,9 +384,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.put("/api/recipes/:id", updateRecipe);
 
-  app.delete("/api/recipes/:id", async (req, res) => {
+
+  const deleteRecipe: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -371,10 +404,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.delete("/api/recipes/:id", deleteRecipe);
 
   // Add favorite routes
-  app.get("/api/favorites", async (req, res) => {
+  const getFavorites: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -389,9 +423,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.get("/api/favorites", getFavorites);
 
-  app.post("/api/favorites", async (req, res) => {
+
+  const addFavorite: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -408,9 +444,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.post("/api/favorites", addFavorite);
 
-  app.delete("/api/favorites/:id", async (req, res) => {
+
+  const deleteFavorite: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -430,9 +468,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.delete("/api/favorites/:id", deleteFavorite);
 
-  app.get("/api/favorites/check/:name", async (req, res) => {
+
+  const checkFavorite: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -445,9 +485,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.get("/api/favorites/check/:name", checkFavorite);
 
-  app.post("/api/user/password", async (req, res) => {
+
+  const updatePassword: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -477,9 +519,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.post("/api/user/password", updatePassword);
 
-  app.post("/api/pantry-suggestions", async (req, res) => {
+
+  const getPantrySuggestions: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -544,9 +588,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.post("/api/pantry-suggestions", getPantrySuggestions);
 
-  app.patch("/api/favorites/:id", async (req, res) => {
+
+  const updateFavoriteTags: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -569,10 +615,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(400).json({ message });
     }
-  });
+  };
+  app.patch("/api/favorites/:id", updateFavoriteTags);
 
 
-  app.get("/api/user/profile", async (req, res) => {
+  const getUserProfile: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -603,10 +650,11 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
       res.status(500).json({ message });
     }
-  });
+  };
+  app.get("/api/user/profile", getUserProfile);
 
 
-  app.post("/api/chat", async (req, res) => {
+  const chatHandler: RouteHandler = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -654,7 +702,8 @@ export function registerRoutes(app: Express): Server {
       const message = error instanceof Error ? error.message : "Failed to generate response";
       res.status(500).json({ message });
     }
-  });
+  };
+  app.post("/api/chat", chatHandler);
 
   return server;
 }

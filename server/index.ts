@@ -90,44 +90,6 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Development mode setup - Moving this before auth middleware
-if (process.env.NODE_ENV === "development") {
-  console.log('[DEV] Setting up Vite development server');
-  setupVite(app).then(vite => {
-    // Serve Vite client and source files without auth
-    // Vite's dev middleware must come before auth
-    app.use(vite.middlewares);
-
-    // Then handle SPA routes
-    app.use('*', async (req, res, next) => {
-      const url = req.originalUrl;
-      try {
-        const template = await fs.promises.readFile('client/index.html', 'utf-8');
-        const transformed = await vite.transformIndexHtml(url, template);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as Error);
-        next(e);
-      }
-    });
-  }).catch(err => {
-    console.error('Vite setup error:', err);
-    process.exit(1);
-  });
-}
-
-// Production static file serving
-if (process.env.NODE_ENV === "production") {
-  const distPath = path.resolve(__dirname, '../dist/public');
-  console.log('Serving static files from:', distPath);
-
-  app.use(express.static(distPath, {
-    index: false,
-    etag: false,
-    lastModified: false,
-  }));
-}
-
 // Enhanced logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
@@ -143,7 +105,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Update the public routes middleware with better logging and matching
+// Update the public routes middleware with better matching
 app.use((req, res, next) => {
   const publicPaths = [
     '/auth',
@@ -159,13 +121,24 @@ app.use((req, res, next) => {
     '/@vite',
     '/@fs',
     '/@id',
-    '/@react-refresh'
+    '/@react-refresh',
+    '/node_modules',
+    '/.vite',
+    '/src',
+    '/_tailwind.css',
+    '/@fs/',
+    '/dist',
+    '/.env',
+    '/theme.json',
+    '/client',
+    '/static'
   ];
 
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
   const isDevServerRequest = req.path.match(/^\/@(vite|fs|id|react-refresh)/);
-  const isSourceFile = req.path.startsWith('/src/') || req.path.match(/\.(js|ts|tsx|css|json)$/);
+  const isStyleFile = req.path.match(/\.(css|less|sass|scss|styl|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/);
+  const isSourceFile = req.path.startsWith('/src/') || req.path.match(/\.(js|ts|tsx|json)$/);
   const isOptionsRequest = req.method === 'OPTIONS';
 
   console.log(`[Auth Debug] Request details:
@@ -174,11 +147,12 @@ app.use((req, res, next) => {
     Authenticated: ${req.isAuthenticated()}
     Is Development: ${isDevelopment}
     Is Public Path: ${isPublicPath}
+    Is Style File: ${isStyleFile}
     Is Options: ${isOptionsRequest}
     Is Source: ${isSourceFile}
   `);
 
-  if (isOptionsRequest || isPublicPath || isDevServerRequest || isSourceFile || (isDevelopment && req.path === '/')) {
+  if (isOptionsRequest || isPublicPath || isDevServerRequest || isStyleFile || isSourceFile || (isDevelopment && req.path === '/')) {
     console.log(`[Auth Debug] Allowing access to: ${req.path}`);
     return next();
   }
@@ -200,43 +174,33 @@ setupAuth(app);
 // Register routes
 registerRoutes(app);
 
-// Serve index.html for client-side routing in development
+// Development mode setup
 if (process.env.NODE_ENV === "development") {
-  const viteInstance = await setupVite(app, {
-    hmr: {
-      clientPort: 443,
-      port: 24678,
-      host: '0.0.0.0'
+  setupVite(app).then(vite => {
+    if (!vite) {
+      console.error('Failed to initialize Vite middleware');
+      process.exit(1);
     }
-  });
-  
-  app.use(async (req, res, next) => {
-    try {
-      // Always allow Vite-related and static assets
-      if (req.path.includes('/@') || 
-          req.path.includes('/.vite/') || 
-          req.path.includes('/node_modules/') ||
-          req.path.endsWith('.js') || 
-          req.path.endsWith('.css') || 
-          req.path.endsWith('.json') ||
-          req.path.startsWith('/api/')) {
-        return next();
-      }
 
-      // Allow access to auth page without authentication
-      if (req.path === '/auth') {
-        return viteInstance.middlewares(req, res, next);
-      }
+    app.use(vite.middlewares);
 
-      // Redirect unauthenticated users to auth page
-      if (!req.isAuthenticated()) {
-        return res.redirect('/auth');
+    // Handle SPA routes
+    app.use('*', async (req, res, next) => {
+      const url = req.originalUrl;
+      try {
+        const template = await fs.promises.readFile('client/index.html', 'utf-8');
+        const transformed = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
+      } catch (e) {
+        if (vite) {
+          vite.ssrFixStacktrace(e as Error);
+        }
+        next(e);
       }
-
-      return viteInstance.middlewares(req, res, next);
-    } catch (e) {
-      next(e);
-    }
+    });
+  }).catch(err => {
+    console.error('Vite setup error:', err);
+    process.exit(1);
   });
 } else {
   // Production static file serving
