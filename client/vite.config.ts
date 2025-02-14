@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -16,9 +17,9 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       protocol: "wss",
+      host: true
     },
-    // Allow all Replit domains and subdomains
-    allowedHosts: true,
+    allowedHosts: ["b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev"]
   },
   resolve: {
     alias: {
