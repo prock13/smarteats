@@ -10,15 +10,15 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 5173,
     strictPort: true,
     hmr: {
       clientPort: 443,
-      protocol: 'wss'
+      protocol: "wss",
     },
     // Allow all Replit domains and subdomains
-    allowedHosts: true
+    allowedHosts: true,
   },
   resolve: {
     alias: {
@@ -27,13 +27,13 @@ export default defineConfig({
     },
   },
   css: {
-    postcss: './postcss.config.js'
+    postcss: "./postcss.config.js",
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
-    cssCodeSplit: false
+    cssCodeSplit: false,
   },
-  base: './'
+  base: "./",
 });
