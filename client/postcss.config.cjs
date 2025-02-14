@@ -1,9 +1,7 @@
 module.exports = {
   plugins: {
     'tailwindcss/nesting': {},
-    tailwindcss: {
-      config: './tailwind.config.ts'
-    },
+    tailwindcss: {},
     autoprefixer: {},
     ...(process.env.NODE_ENV === 'production'
       ? {
