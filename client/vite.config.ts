@@ -21,6 +21,9 @@ export default defineConfig({
     },
     fs: {
       strict: false
+    },
+    watch: {
+      usePolling: true
     }
   },
   resolve: {
@@ -37,6 +40,11 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false,
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
   },
   base: "./",
 });
