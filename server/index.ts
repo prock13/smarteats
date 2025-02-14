@@ -185,16 +185,27 @@ registerRoutes(app);
 if (process.env.NODE_ENV === "development") {
   app.use('*', async (req, res, next) => {
     try {
+      // Skip middleware for Vite HMR and static assets
+      if (req.path.includes('/@') || req.path.includes('/.vite/') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
+        return next();
+      }
+
+      // Handle API routes
       if (req.path.startsWith('/api/')) {
         return next();
       }
 
-      // For development, proxy all non-API requests to Vite dev server
-      if (!req.isAuthenticated() && !req.path.startsWith('/auth') && !req.path.includes('/@')) {
+      // Handle auth routes
+      if (req.path === '/auth') {
+        return vite.middlewares(req, res, next);
+      }
+
+      // Redirect unauthenticated users
+      if (!req.isAuthenticated()) {
         return res.redirect('/auth');
       }
 
-      // Forward the request to Vite dev server
+      // Let Vite handle the rest
       return vite.middlewares(req, res, next);
     } catch (e) {
       next(e);
@@ -270,7 +281,7 @@ function startServer(port: number): Promise<any> {
 }
 
 // Start the server
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 3000;
 
 startServer(PORT).catch(err => {
   console.error('Failed to start server:', err);
