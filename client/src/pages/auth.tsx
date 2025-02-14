@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,17 +28,17 @@ const theme = createTheme({
   components: {
     MuiPopover: {
       defaultProps: {
-        container: () => document.body,
+        container: () => document.getElementById('root') || document.body,
       },
     },
     MuiPopper: {
       defaultProps: {
-        container: () => document.body,
+        container: () => document.getElementById('root') || document.body,
       },
     },
     MuiModal: {
       defaultProps: {
-        container: () => document.body,
+        container: () => document.getElementById('root') || document.body,
       },
     },
   },
@@ -50,13 +50,6 @@ const theme = createTheme({
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
-
-  // Add style loading check
-  useEffect(() => {
-    console.log("Auth page mounted - checking styles");
-    const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
-    console.log(`Found ${styleElements.length} style elements`);
-  }, []);
 
   const loginForm = useForm<LoginFormData>({
     defaultValues: {

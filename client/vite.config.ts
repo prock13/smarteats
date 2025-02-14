@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -10,22 +9,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+      include: /\.(mdx|js|jsx|ts|tsx|css)$/
+    }),
+    runtimeErrorOverlay(),
+    themePlugin()
+  ],
   server: {
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
     hmr: {
       clientPort: 443,
-      host: "0.0.0.0"
+      protocol: 'wss',
+      host: process.env.REPL_SLUG ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : "0.0.0.0",
+      timeout: 30000,
+      overlay: false
     },
     fs: {
-      strict: false
-    },
-    watch: {
-      usePolling: true
-    },
-    allowedHosts: ["*.replit.dev", "*.spock.replit.dev"]
+      strict: false,
+      allow: [".."]
+    }
   },
   resolve: {
     alias: {
@@ -35,17 +41,26 @@ export default defineConfig({
   },
   css: {
     postcss: "./postcss.config.js",
+    devSourcemap: true
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
-  preview: {
-    host: "0.0.0.0",
-    port: 5173,
-    strictPort: true,
+  optimizeDeps: {
+    force: true,
+    entries: [
+      'src/**/*.{ts,tsx}',
+      'src/main.tsx'
+    ],
+    include: ['**/*.css', '@/components/**/*', '@shared/**/*']
   },
-  base: "./",
+  base: "./"
 });

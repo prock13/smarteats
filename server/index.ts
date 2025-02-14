@@ -29,7 +29,26 @@ if (!process.env.NODE_ENV) {
 
 const app = express();
 
-// Health check endpoint - place it before other middleware to ensure quick response
+// Move static middleware and CORS to the very top
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    // Enhanced CORS configuration
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+}
+
+// Health check endpoint - place it before other middleware
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
@@ -38,33 +57,19 @@ app.get('/health', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enhanced CORS configuration - MUST come before session middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// Add strict no-cache headers to all responses
-app.use((req, res, next) => {
+// Add strict no-cache headers to API responses only
+app.use('/api', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
   next();
 });
 
-// Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+// Allow static assets to be cached
+app.use('/uploads', express.static('uploads', {
+  maxAge: '1h',
+  etag: true
+}));
 
 // Session configuration
 const sessionSettings: session.SessionOptions = {
@@ -90,91 +95,13 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Enhanced logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  const logPrefix = `[${new Date().toISOString()}]`;
-  console.log(`${logPrefix} ${req.method} ${req.path} - Request started`);
-  console.log(`${logPrefix} Headers:`, req.headers);
-
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(`${logPrefix} ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
-  });
-
-  next();
-});
-
-// Update the public routes middleware with better matching
-app.use((req, res, next) => {
-  const publicPaths = [
-    '/auth',
-    '/login',
-    '/register',
-    '/api/login',
-    '/api/register',
-    '/api/auth/login',
-    '/api/auth/register',
-    '/assets',
-    '/health',
-    '/favicon.ico',
-    '/@vite',
-    '/@fs',
-    '/@id',
-    '/@react-refresh',
-    '/node_modules',
-    '/.vite',
-    '/src',
-    '/_tailwind.css',
-    '/@fs/',
-    '/dist',
-    '/.env',
-    '/theme.json',
-    '/client',
-    '/static'
-  ];
-
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
-  const isDevServerRequest = req.path.match(/^\/@(vite|fs|id|react-refresh)/);
-  const isStyleFile = req.path.match(/\.(css|less|sass|scss|styl|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/);
-  const isSourceFile = req.path.startsWith('/src/') || req.path.match(/\.(js|ts|tsx|json)$/);
-  const isOptionsRequest = req.method === 'OPTIONS';
-
-  console.log(`[Auth Debug] Request details:
-    Path: ${req.path}
-    Method: ${req.method}
-    Authenticated: ${req.isAuthenticated()}
-    Is Development: ${isDevelopment}
-    Is Public Path: ${isPublicPath}
-    Is Style File: ${isStyleFile}
-    Is Options: ${isOptionsRequest}
-    Is Source: ${isSourceFile}
-  `);
-
-  if (isOptionsRequest || isPublicPath || isDevServerRequest || isStyleFile || isSourceFile || (isDevelopment && req.path === '/')) {
-    console.log(`[Auth Debug] Allowing access to: ${req.path}`);
-    return next();
-  }
-
-  if (!req.isAuthenticated()) {
-    console.log(`[Auth Debug] Authentication required for: ${req.path}`);
-    if (req.path.startsWith('/api/')) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    return res.redirect('/auth');
-  }
-
-  next();
-});
-
 // Set up authentication
 setupAuth(app);
 
 // Register routes
 registerRoutes(app);
 
-// Development mode setup
+// Development mode setup with Vite
 if (process.env.NODE_ENV === "development") {
   setupVite(app).then(vite => {
     if (!vite) {
@@ -182,14 +109,31 @@ if (process.env.NODE_ENV === "development") {
       process.exit(1);
     }
 
+    // Use Vite's middlewares after auth but before catch-all
     app.use(vite.middlewares);
 
-    // Handle SPA routes
+    // SPA route handler - make sure this comes after Vite middleware
     app.use('*', async (req, res, next) => {
       const url = req.originalUrl;
+
+      // Skip API routes and static files
+      if (url.startsWith('/api/') || url.match(/\.(css|js|png|jpg|jpeg|gif|ico)$/)) {
+        return next();
+      }
+
+      // Check if the request is for a public route
+      const publicPaths = ['/auth', '/login', '/register'];
+      const isPublicPath = publicPaths.some(path => url.startsWith(path));
+
       try {
         const template = await fs.promises.readFile('client/index.html', 'utf-8');
         const transformed = await vite.transformIndexHtml(url, template);
+
+        // If not public and not authenticated, redirect to auth
+        if (!isPublicPath && !req.isAuthenticated()) {
+          return res.redirect('/auth');
+        }
+
         res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
       } catch (e) {
         if (vite) {
@@ -205,10 +149,16 @@ if (process.env.NODE_ENV === "development") {
 } else {
   // Production static file serving
   app.use(express.static('dist/client', {
-    index: false
+    index: false,
+    maxAge: '1h',
+    etag: true
   }));
-}
 
+  // SPA route handler for production
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/client/index.html'));
+  });
+}
 
 // Error handling middleware
 app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction) => {
@@ -232,33 +182,35 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-// Enhanced server startup with health check verification
+// Enhanced server startup with port waiting
 function startServer(port: number): Promise<any> {
   return new Promise((resolve, reject) => {
     const server = createServer(app);
-    let serverReady = false;
+    let isReady = false;
 
-    const healthCheck = async () => {
+    // Health check function to verify server is ready
+    const checkHealth = async () => {
       try {
-        const response = await fetch(`http://0.0.0.0:${port}/health`);
-        if (response.ok) {
-          console.log(`[${new Date().toISOString()}] Health check passed - server is ready`);
-          serverReady = true;
-          resolve(server);
-        } else {
-          throw new Error('Health check failed');
+        if (!isReady) {
+          const response = await fetch(`http://0.0.0.0:${port}/health`);
+          if (response.ok) {
+            console.log(`Server health check passed on port ${port}`);
+            isReady = true;
+            resolve(server);
+          } else {
+            setTimeout(checkHealth, 1000);
+          }
         }
       } catch (err) {
-        if (!serverReady) {
-          console.log(`[${new Date().toISOString()}] Waiting for server to be ready...`);
-          setTimeout(healthCheck, 1000);
+        if (!isReady) {
+          setTimeout(checkHealth, 1000);
         }
       }
     };
 
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
-        console.log(`[${new Date().toISOString()}] Port ${port} is in use, trying ${port + 1}`);
+        console.log(`Port ${port} is in use, trying ${port + 1}`);
         startServer(port + 1).then(resolve).catch(reject);
       } else {
         console.error('Server error:', err);
@@ -267,18 +219,14 @@ function startServer(port: number): Promise<any> {
     });
 
     server.listen(port, "0.0.0.0", () => {
-      console.log(`[${new Date().toISOString()}] Server starting up at http://0.0.0.0:${port}`);
-      if (process.env.NODE_ENV === "development") {
-        console.log('[DEV] Running in development mode');
-      }
-      healthCheck();
+      console.log(`Server starting up at http://0.0.0.0:${port}`);
+      checkHealth();
     });
   });
 }
 
 // Start the server
 const PORT = Number(process.env.PORT) || 3000;
-
 startServer(PORT).catch(err => {
   console.error('Failed to start server:', err);
   process.exit(1);

@@ -3,11 +3,11 @@ import type { Config } from "tailwindcss";
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-    './index.html',
+    "./src/pages/**/*.{ts,tsx}",
+    "./src/components/**/*.{ts,tsx}",
+    "./src/app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "./index.html",
   ],
   prefix: "",
   theme: {
@@ -75,7 +75,29 @@ const config = {
       },
     },
   },
-  plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],
+  plugins: [
+    require("@tailwindcss/typography"),
+    require("tailwindcss-animate")
+  ],
+  safelist: [
+    'bg-primary',
+    'text-primary-foreground',
+    'bg-secondary',
+    'text-secondary-foreground',
+    'bg-background',
+    'text-foreground',
+    'space-y-1',
+    'space-y-4',
+    'min-h-screen',
+    'w-full',
+    'shadow-lg',
+    'flex',
+    'items-center',
+    'justify-center',
+    'p-4',
+    'rounded-lg',
+    'animate-spin'
+  ]
 } satisfies Config;
 
 export default config;
