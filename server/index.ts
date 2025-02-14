@@ -90,6 +90,14 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Development mode setup - Moving this before auth middleware
+if (process.env.NODE_ENV === "development") {
+  console.log('[DEV] Setting up Vite development server');
+  setupVite(app).catch(err => {
+    console.error('Vite setup error:', err);
+    process.exit(1);
+  });
+}
 
 // Production static file serving
 if (process.env.NODE_ENV === "production") {
@@ -101,15 +109,6 @@ if (process.env.NODE_ENV === "production") {
     etag: false,
     lastModified: false,
   }));
-}
-
-// Development mode setup
-if (process.env.NODE_ENV === "development") {
-  console.log('[DEV] Setting up Vite development server');
-  setupVite(app).catch(err => {
-    console.error('Vite setup error:', err);
-    process.exit(1);
-  });
 }
 
 // Enhanced logging middleware
@@ -184,6 +183,17 @@ setupAuth(app);
 
 // Register routes
 registerRoutes(app);
+
+// Serve index.html for client-side routing in development
+if (process.env.NODE_ENV === "development") {
+  app.use('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    // Let Vite handle the request
+    next();
+  });
+}
 
 
 // Error handling middleware
