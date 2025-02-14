@@ -95,19 +95,8 @@ if (process.env.NODE_ENV === "development") {
   console.log('[DEV] Setting up Vite development server');
   setupVite(app).then(vite => {
     // Serve Vite client and source files without auth
-    app.use((req, res, next) => {
-      if (req.path.startsWith('/@') || 
-          req.path.startsWith('/node_modules/') ||
-          req.path.startsWith('/src/') ||
-          req.path.includes('hot-update') ||
-          req.path.endsWith('.ts') ||
-          req.path.endsWith('.tsx') ||
-          req.path.endsWith('.js') ||
-          req.path.endsWith('.css')) {
-        return vite.middlewares(req, res, next);
-      }
-      next();
-    });
+    // Vite's dev middleware must come before auth
+    app.use(vite.middlewares);
 
     // Then handle SPA routes
     app.use('*', async (req, res, next) => {
