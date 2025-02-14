@@ -1,8 +1,8 @@
 export default {
   plugins: {
-    'tailwindcss': {},
-    'autoprefixer': {},
-    'cssnano': {
+    'tailwindcss': require('tailwindcss'),
+    'autoprefixer': require('autoprefixer'),
+    'cssnano': process.env.NODE_ENV === 'production' ? {
       preset: ['default', {
         discardComments: {
           removeAll: true,
@@ -12,6 +12,6 @@ export default {
         colormin: false,
         calc: false
       }],
-    },
+    } : false,
   },
 }

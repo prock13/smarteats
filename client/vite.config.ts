@@ -24,33 +24,13 @@ export default defineConfig({
   css: {
     devSourcemap: true,
     postcss: {
-      plugins: ['tailwindcss', 'autoprefixer']
+      plugins: [require('tailwindcss'), require('autoprefixer')]
     }
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
-    cssCodeSplit: false,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.css')) {
-            return 'assets/styles.css';
-          }
-          return 'assets/[name].[hash].[ext]';
-        },
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js'
-      }
-    },
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false,
-        drop_debugger: true
-      }
-    }
-  },
+    cssCodeSplit: false
+  }
 });

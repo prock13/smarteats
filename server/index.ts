@@ -22,6 +22,11 @@ interface ApiError extends Error {
   details?: any;
 }
 
+// Explicitly set development mode if not in production
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "development";
+}
+
 const app = express();
 
 // Health check endpoint - place it before other middleware to ensure quick response
@@ -143,6 +148,7 @@ app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction)
 
 // Handle static files and client routing
 if (process.env.NODE_ENV === "development") {
+  console.log('[DEV] Setting up Vite development server');
   setupVite(app).catch(err => {
     console.error('Vite setup error:', err);
     process.exit(1);
@@ -172,17 +178,6 @@ if (process.env.NODE_ENV === "development") {
     } else {
       next();
     }
-  });
-
-  // Handle client-side routing
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-    if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico)$/)) {
-      return next();
-    }
-    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
@@ -230,6 +225,9 @@ function startServer(port: number): Promise<any> {
 
     server.listen(port, "0.0.0.0", () => {
       console.log(`[${new Date().toISOString()}] Server starting up at http://0.0.0.0:${port}`);
+      if (process.env.NODE_ENV === "development") {
+        console.log('[DEV] Running in development mode');
+      }
       healthCheck();
     });
   });
