@@ -93,16 +93,9 @@ app.use(passport.session());
 // Development mode setup - Moving this before auth middleware
 if (process.env.NODE_ENV === "development") {
   console.log('[DEV] Setting up Vite development server');
-  setupVite(app, {
-    server: { 
-      middlewareMode: true
-    },
-    appType: 'custom',
-    base: '/',
-    optimizeDeps: {
-      force: true
-    }
-  }).then(vite => {
+  setupVite(app).then(vite => {
+    // Serve Vite client and source files without auth
+    // Vite's dev middleware must come before auth
     app.use(vite.middlewares);
 
     // Then handle SPA routes
@@ -216,7 +209,7 @@ if (process.env.NODE_ENV === "development") {
       host: '0.0.0.0'
     }
   });
-
+  
   app.use(async (req, res, next) => {
     try {
       // Always allow Vite-related and static assets

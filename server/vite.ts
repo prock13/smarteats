@@ -32,19 +32,17 @@ export const setupVite = async (
       server: {
         middlewareMode: true,
         hmr: {
-          protocol: 'ws',
+          clientPort: 443,
           port: 24678,
-          clientPort: 443
         },
-        host: true,
-        strictPort: true,
-        watch: {
-          usePolling: true,
-          interval: 100
-        }
+        allowedHosts: true,
+        host: "0.0.0.0",
+        cors: true,
       },
       appType: "custom",
-      base: '/',
+      optimizeDeps: {
+        force: true,
+      },
       ...config
     });
 
