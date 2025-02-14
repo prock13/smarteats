@@ -29,6 +29,10 @@ if (!process.env.NODE_ENV) {
 
 const app = express();
 
+// Basic middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Move static middleware and CORS to the very top
 if (process.env.NODE_ENV === "development") {
   app.use((req, res, next) => {
@@ -52,10 +56,6 @@ if (process.env.NODE_ENV === "development") {
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
-
-// Basic middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Add strict no-cache headers to API responses only
 app.use('/api', (req, res, next) => {
@@ -95,12 +95,6 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Set up authentication
-setupAuth(app);
-
-// Register routes
-registerRoutes(app);
-
 // Development mode setup with Vite
 if (process.env.NODE_ENV === "development") {
   setupVite(app).then(vite => {
@@ -109,8 +103,14 @@ if (process.env.NODE_ENV === "development") {
       process.exit(1);
     }
 
-    // Use Vite's middlewares after auth but before catch-all
+    // Use Vite's middlewares before auth but after session
     app.use(vite.middlewares);
+
+    // Set up authentication after Vite middleware
+    setupAuth(app);
+
+    // Register routes after auth
+    registerRoutes(app);
 
     // SPA route handler - make sure this comes after Vite middleware
     app.use('*', async (req, res, next) => {
@@ -129,7 +129,7 @@ if (process.env.NODE_ENV === "development") {
         const template = await fs.promises.readFile('client/index.html', 'utf-8');
         const transformed = await vite.transformIndexHtml(url, template);
 
-        // If not public and not authenticated, redirect to auth
+        // Only redirect to auth for non-public paths when not authenticated
         if (!isPublicPath && !req.isAuthenticated()) {
           return res.redirect('/auth');
         }
@@ -147,15 +147,29 @@ if (process.env.NODE_ENV === "development") {
     process.exit(1);
   });
 } else {
-  // Production static file serving
+  // Production static file serving with caching
   app.use(express.static('dist/client', {
     index: false,
     maxAge: '1h',
     etag: true
   }));
 
+  // Set up authentication
+  setupAuth(app);
+
+  // Register routes
+  registerRoutes(app);
+
   // SPA route handler for production
   app.get('*', (req, res) => {
+    const url = req.originalUrl;
+    const publicPaths = ['/auth', '/login', '/register'];
+    const isPublicPath = publicPaths.some(path => url.startsWith(path));
+
+    if (!isPublicPath && !req.isAuthenticated()) {
+      return res.redirect('/auth');
+    }
+
     res.sendFile(path.join(__dirname, '../dist/client/index.html'));
   });
 }
@@ -182,52 +196,12 @@ app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-// Enhanced server startup with port waiting
-function startServer(port: number): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const server = createServer(app);
-    let isReady = false;
-
-    // Health check function to verify server is ready
-    const checkHealth = async () => {
-      try {
-        if (!isReady) {
-          const response = await fetch(`http://0.0.0.0:${port}/health`);
-          if (response.ok) {
-            console.log(`Server health check passed on port ${port}`);
-            isReady = true;
-            resolve(server);
-          } else {
-            setTimeout(checkHealth, 1000);
-          }
-        }
-      } catch (err) {
-        if (!isReady) {
-          setTimeout(checkHealth, 1000);
-        }
-      }
-    };
-
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} is in use, trying ${port + 1}`);
-        startServer(port + 1).then(resolve).catch(reject);
-      } else {
-        console.error('Server error:', err);
-        reject(err);
-      }
-    });
-
-    server.listen(port, "0.0.0.0", () => {
-      console.log(`Server starting up at http://0.0.0.0:${port}`);
-      checkHealth();
-    });
-  });
-}
-
 // Start the server
 const PORT = Number(process.env.PORT) || 3000;
-startServer(PORT).catch(err => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
+const server = createServer(app);
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server starting up at http://0.0.0.0:${PORT}`);
 });
+
+export default app;
