@@ -12,7 +12,7 @@ export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
     host: "0.0.0.0",
-    port: 3001, // Changed from 5173 to avoid conflict
+    port: 3001,
     strictPort: true,
     hmr: {
       clientPort: 443,
@@ -33,13 +33,7 @@ export default defineConfig({
     },
   },
   css: {
-    postcss: {
-      plugins: [
-        require("tailwindcss"),
-        require("autoprefixer"),
-        require("postcss-nesting"),
-      ],
-    },
+    postcss: "./postcss.config.js"
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
