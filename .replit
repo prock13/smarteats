@@ -1,6 +1,30 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
 run = "npm run dev"
 
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3001
+
+[[ports]]
+localPort = 5002
+externalPort = 3002
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
+
+[[ports]]
+localPort = 24678
+externalPort = 3003
+
 [[deployment.rewrites]]
 from = "/assets/*"
 to = "/assets/*"
@@ -22,22 +46,6 @@ channel = "stable-24_05"
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "npm run build"]
 run = ["sh", "-c", "NODE_ENV=production node dist/index.js"]
-
-[[ports]]
-localPort = 3000
-externalPort = 3000
-
-[[ports]]
-localPort = 5000
-externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 3001
-
-[[ports]]
-localPort = 5002
-externalPort = 3002
 
 [workflows]
 runButton = "Start application"

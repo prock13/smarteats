@@ -1,13 +1,12 @@
 import type { Config } from "tailwindcss";
 
-export default {
+const config = {
   darkMode: ["class"],
   content: [
     './index.html',
     './src/**/*.{ts,tsx}',
-    './src/components/**/*.{ts,tsx}',
-    './src/pages/**/*.{ts,tsx}',
   ],
+  prefix: "",
   theme: {
     extend: {
       colors: {
@@ -54,3 +53,5 @@ export default {
   },
   plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],
 } satisfies Config;
+
+export default config;

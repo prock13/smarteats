@@ -1,8 +1,8 @@
 export default {
   plugins: {
-    'tailwindcss': require('tailwindcss'),
-    'autoprefixer': require('autoprefixer'),
-    'cssnano': process.env.NODE_ENV === 'production' ? {
+    tailwindcss: {},
+    autoprefixer: {},
+    cssnano: process.env.NODE_ENV === 'production' ? {
       preset: ['default', {
         discardComments: {
           removeAll: true,

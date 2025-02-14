@@ -12,8 +12,10 @@ export default defineConfig({
     strictPort: true,
     hmr: {
       clientPort: 443,
+      protocol: 'wss',
       host: '*.replit.dev'
-    }
+    },
+    allowedHosts: 'all'
   },
   resolve: {
     alias: {
@@ -22,15 +24,13 @@ export default defineConfig({
     },
   },
   css: {
-    devSourcemap: true,
-    postcss: {
-      plugins: [require('tailwindcss'), require('autoprefixer')]
-    }
+    postcss: './postcss.config.js'
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false
-  }
+  },
+  base: './'
 });

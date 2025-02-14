@@ -154,13 +154,12 @@ if (process.env.NODE_ENV === "development") {
     process.exit(1);
   });
 } else {
-  // Serve static files with detailed logging and no caching
   const distPath = path.resolve(__dirname, '../dist/public');
   console.log('Serving static files from:', distPath);
 
-  // Serve static files from the client build directory
+  // Serve static files with detailed logging
   app.use(express.static(distPath, {
-    index: false,
+    index: false, // Don't serve index.html for /
     etag: false,
     lastModified: false,
     setHeaders: (res) => {
@@ -170,14 +169,14 @@ if (process.env.NODE_ENV === "development") {
     }
   }));
 
-
-  // Handle all other routes by serving index.html
+  // Handle client-side routing
   app.get('*', (req, res, next) => {
-    if (!req.path.startsWith('/api/')) {
-      res.sendFile(path.join(distPath, 'index.html'));
-    } else {
-      next();
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
     }
+    console.log('Serving index.html for client-side route:', req.path);
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
