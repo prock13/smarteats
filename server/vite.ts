@@ -1,3 +1,4 @@
+
 import express, { type Express } from "express";
 import fs from "fs";
 import path, { dirname } from "path";
@@ -6,7 +7,6 @@ import { createServer as createViteServer, createLogger } from "vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 import { type Server } from "http";
-// import viteConfig from "../vite.config"; // Removed as it's not used in the new setupVite
 import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
@@ -22,15 +22,13 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-import { createServer } from "vite";
-import express from "express";
-
 export const setupVite = async (
   app: express.Application,
-  isDev = process.env.NODE_ENV !== "production",
+  config = {},
+  isDev = process.env.NODE_ENV !== "production"
 ) => {
   if (isDev) {
-    const vite = await createServer({
+    const vite = await createViteServer({
       server: {
         middlewareMode: true,
         hmr: {
@@ -45,14 +43,16 @@ export const setupVite = async (
       optimizeDeps: {
         force: true,
       },
+      ...config
     });
+
     app.use(vite.middlewares);
+    return vite;
   } else {
-    app.use(express.static(path.resolve(__dirname, "dist", "public"))); // Adjusted path for production build
+    app.use(express.static(path.resolve(__dirname, "dist", "public")));
     app.get("*", (req, res) => {
-      res.sendFile(path.resolve(__dirname, "dist", "public", "index.html")); // Adjusted path for production build
+      res.sendFile(path.resolve(__dirname, "dist", "public", "index.html"));
     });
+    return null;
   }
 };
-
-// Removed serveStatic function as it's now handled in setupVite
