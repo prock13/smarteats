@@ -94,18 +94,15 @@ app.use(passport.session());
 if (process.env.NODE_ENV === "development") {
   console.log('[DEV] Setting up Vite development server');
   setupVite(app, {
-    server: {
-      hmr: {
-        protocol: 'ws',
-        host: '0.0.0.0',
-        port: 24678
-      },
-      host: '0.0.0.0',
-      allowedHosts: ['*.replit.dev', '*.spock.replit.dev', 'b196dfc5-9c58-4e32-b69d-a8830ce942e6-00-3ufe03eyryib8.spock.replit.dev'] // Added allowed host
+    server: { 
+      middlewareMode: true
+    },
+    appType: 'custom',
+    base: '/',
+    optimizeDeps: {
+      force: true
     }
   }).then(vite => {
-    // Serve Vite client and source files without auth
-    // Vite's dev middleware must come before auth
     app.use(vite.middlewares);
 
     // Then handle SPA routes
