@@ -183,30 +183,34 @@ registerRoutes(app);
 
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
+  // Serve Vite client for development
   app.use('*', async (req, res, next) => {
     try {
-      // Skip middleware for Vite HMR and static assets
-      if (req.path.includes('/@') || req.path.includes('/.vite/') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
+      // Skip auth check for assets and special paths
+      if (req.path.includes('/@') || 
+          req.path.includes('/.vite/') || 
+          req.path.includes('/node_modules/') ||
+          req.path.endsWith('.js') || 
+          req.path.endsWith('.css') ||
+          req.path.startsWith('/api/')) {
         return next();
       }
 
-      // Handle API routes
-      if (req.path.startsWith('/api/')) {
-        return next();
-      }
-
-      // Handle auth routes
+      // Handle auth page separately
       if (req.path === '/auth') {
         return vite.middlewares(req, res, next);
       }
 
-      // Redirect unauthenticated users
+      // Check authentication for all other routes
       if (!req.isAuthenticated()) {
+        if (req.headers.accept?.includes('application/json')) {
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
         return res.redirect('/auth');
       }
 
-      // Let Vite handle the rest
-      return vite.middlewares(req, res, next);
+      // Serve vite for authenticated routes
+      vite.middlewares(req, res, next);
     } catch (e) {
       next(e);
     }
