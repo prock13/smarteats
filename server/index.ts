@@ -38,6 +38,23 @@ app.get('/health', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Enhanced CORS configuration - MUST come before session middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Add strict no-cache headers to all responses
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -49,23 +66,7 @@ app.use((req, res, next) => {
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-// Enhanced CORS configuration - MUST come before session middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    console.log(`Setting CORS for origin: ${origin}`);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// Session configuration with detailed logging
+// Session configuration
 const sessionSettings: session.SessionOptions = {
   secret: process.env.REPL_ID!,
   resave: false,
@@ -77,12 +78,11 @@ const sessionSettings: session.SessionOptions = {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   },
-  name: 'connect.sid' // Being explicit about the cookie name
+  name: 'connect.sid'
 };
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
-  console.log("Production mode: trusting proxy");
 }
 
 // Session and auth middleware
@@ -90,20 +90,19 @@ app.use(session(sessionSettings));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Development mode setup
+if (process.env.NODE_ENV === "development") {
+  console.log('[DEV] Setting up Vite development server');
+  setupVite(app).catch(err => {
+    console.error('Vite setup error:', err);
+    process.exit(1);
+  });
+}
+
 // Enhanced logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Request started`);
-
-  if (req.isAuthenticated()) {
-    console.log('User is authenticated:', req.user);
-  } else {
-    console.log('Unauthenticated user info request');
-  }
-
-  if (req.method === 'POST' || req.method === 'PUT') {
-    console.log('Request Body:', JSON.stringify(req.body, null, 2));
-  }
 
   res.on('finish', () => {
     const duration = Date.now() - start;
@@ -113,26 +112,70 @@ app.use((req, res, next) => {
   next();
 });
 
+// Public routes that don't require authentication
+app.use((req, res, next) => {
+  const publicPaths = [
+    '/auth',
+    '/login',
+    '/register',
+    '/api/login',
+    '/api/register',
+    '/api/auth/login',
+    '/api/auth/register',
+    '/assets',
+    '/health'
+  ];
+
+  // Allow all OPTIONS requests for CORS
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
+  // Allow access to static files and public paths
+  if (publicPaths.some(path => req.path.startsWith(path)) || 
+      req.path.includes('.') || 
+      req.path === '/') {
+    return next();
+  }
+
+  if (!req.isAuthenticated()) {
+    if (req.path.startsWith('/api/')) {
+      res.status(401).json({ message: 'Authentication required' });
+    } else {
+      res.redirect('/auth');
+    }
+    return;
+  }
+
+  next();
+});
+
 // Set up authentication
 setupAuth(app);
 
 // Register routes
-const server = registerRoutes(app);
+registerRoutes(app);
 
-// Add detailed static file request logging
-app.use((req, res, next) => {
-  if (!req.path.startsWith('/api/')) {
-    console.log('Static file request:', {
-      path: req.path,
-      method: req.method,
-      headers: req.headers,
-      timestamp: new Date().toISOString()
-    });
-  }
-  next();
-});
+// Production static file serving
+if (process.env.NODE_ENV === "production") {
+  const distPath = path.resolve(__dirname, '../dist/public');
+  console.log('Serving static files from:', distPath);
 
-// API-specific error handling middleware
+  app.use(express.static(distPath, {
+    index: false,
+    etag: false,
+    lastModified: false,
+  }));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// Error handling middleware
 app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction) => {
   console.error('API Error:', err);
   const status = err.status || err.statusCode || 500;
@@ -145,40 +188,6 @@ app.use('/api', (err: ApiError, req: Request, res: Response, next: NextFunction)
     details: err.details || undefined
   });
 });
-
-// Handle static files and client routing
-if (process.env.NODE_ENV === "development") {
-  console.log('[DEV] Setting up Vite development server');
-  setupVite(app).catch(err => {
-    console.error('Vite setup error:', err);
-    process.exit(1);
-  });
-} else {
-  const distPath = path.resolve(__dirname, '../dist/public');
-  console.log('Serving static files from:', distPath);
-
-  // Serve static files with detailed logging
-  app.use(express.static(distPath, {
-    index: false, // Don't serve index.html for /
-    etag: false,
-    lastModified: false,
-    setHeaders: (res) => {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-    }
-  }));
-
-  // Handle client-side routing
-  app.get('*', (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-    console.log('Serving index.html for client-side route:', req.path);
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
 
 // Generic error handling middleware
 app.use((err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
@@ -232,7 +241,7 @@ function startServer(port: number): Promise<any> {
   });
 }
 
-// Start the server with enhanced logging and health verification
+// Start the server
 const PORT = Number(process.env.PORT) || 5000;
 
 startServer(PORT).catch(err => {

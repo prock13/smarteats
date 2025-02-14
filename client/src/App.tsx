@@ -20,7 +20,7 @@ import Terms from "@/pages/terms";
 import About from "@/pages/about";
 import Navigation from "@/components/navigation";
 import { Footer } from "@/components/Footer";
-import { Box, Container, Snackbar, Alert } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { useLocation } from "wouter";
 import MyFitnessPal from "@/pages/myfitnesspal";
 
@@ -42,8 +42,6 @@ function ThemedApp() {
         <Container maxWidth="lg" sx={{ py: { xs: 1, md: 4 }, flex: 1 }}>
           <Switch>
             <Route path="/auth" component={Auth} />
-            <ProtectedRoute path="/terms" component={Terms} />
-            <ProtectedRoute path="/about" component={About} />
             <ProtectedRoute path="/" component={Home} />
             <ProtectedRoute path="/planner" component={Planner} />
             <ProtectedRoute path="/calendar" component={Calendar} />
@@ -52,19 +50,13 @@ function ThemedApp() {
             <ProtectedRoute path="/profile" component={Profile} />
             <ProtectedRoute path="/preferences" component={Preferences} />
             <ProtectedRoute path="/pantry" component={Pantry} />
+            <ProtectedRoute path="/terms" component={Terms} />
+            <ProtectedRoute path="/about" component={About} />
             <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
             <Route component={NotFound} />
           </Switch>
         </Container>
         {!isAuthPage && <Footer />}
-        <Snackbar
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          autoHideDuration={6000}
-        >
-          <Alert severity="info" variant="filled">
-            Message
-          </Alert>
-        </Snackbar>
       </Box>
     </MuiThemeProvider>
   );

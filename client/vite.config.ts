@@ -15,7 +15,7 @@ export default defineConfig({
       protocol: 'wss',
       host: '*.replit.dev'
     },
-    allowedHosts: 'all'
+    allowedHosts: ['.replit.dev']
   },
   resolve: {
     alias: {
