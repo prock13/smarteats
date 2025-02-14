@@ -188,7 +188,11 @@ if (process.env.NODE_ENV === "development") {
       return next();
     }
     try {
-      res.redirect('http://0.0.0.0:5173');
+      if (!req.isAuthenticated() && !req.path.startsWith('/auth')) {
+        res.redirect('/auth');
+      } else {
+        next();
+      }
     } catch (e) {
       next(e);
     }
