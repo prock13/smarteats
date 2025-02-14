@@ -24,9 +24,6 @@ export default defineConfig({
   css: {
     devSourcemap: true,
     postcss: "./postcss.config.js",
-    modules: {
-      generateScopedName: '[name]__[local]__[hash:base64:5]'
-    }
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
@@ -37,12 +34,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', '@mui/material', '@tanstack/react-query'],
+          vendor: ['react', 'react-dom', '@tanstack/react-query'],
         },
         assetFileNames: (assetInfo) => {
-          const cssFileName = 'assets/styles.css';
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return cssFileName;
+            return 'assets/index-[hash].css';
           }
           return 'assets/[name].[hash][ext]';
         },
