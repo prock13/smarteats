@@ -8,18 +8,16 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
-    host: "0.0.0.0",
-    port: 5173,
-    strictPort: true,
+    host: true,
     hmr: {
-      clientPort: 443,
-      protocol: "wss",
-      host: "0.0.0.0"
-    },
-    allowedHosts: true
+      port: 443,
+      host: "0.0.0.0",
+      protocol: "wss"
+    }
   },
   resolve: {
     alias: {
