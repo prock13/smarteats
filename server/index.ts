@@ -185,7 +185,9 @@ registerRoutes(app);
 if (process.env.NODE_ENV === "development") {
   const viteInstance = await setupVite(app, {
     hmr: {
-      port: 24678
+      clientPort: 443,
+      port: 24678,
+      host: '0.0.0.0'
     }
   });
   
