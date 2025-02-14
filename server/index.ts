@@ -153,13 +153,10 @@ if (process.env.NODE_ENV === "development") {
       if (filePath.endsWith('.css')) {
         res.setHeader('Content-Type', 'text/css');
         res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
       } else if (filePath.endsWith('.js')) {
         res.setHeader('Content-Type', 'application/javascript');
-      }
-      if (filePath.includes('assets/')) {
-        res.set('Cache-Control', 'public, max-age=31536000');
-      } else {
-        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
       }
     }
   }));
