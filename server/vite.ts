@@ -29,15 +29,13 @@ export const setupVite = async (app: express.Application, isDev = process.env.NO
   if (isDev) {
     const vite = await createServer({
       server: { 
-        middlewareMode: true,
+        middlewareMode: 'html',
         hmr: {
           clientPort: 443,
-          host: '0.0.0.0',
-          protocol: 'wss'
+          port: 24678
         },
-        cors: true,
-        host: true,
-        strictPort: true
+        host: '0.0.0.0',
+        cors: true
       },
       appType: 'custom',
       optimizeDeps: {

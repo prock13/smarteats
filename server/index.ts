@@ -183,12 +183,15 @@ registerRoutes(app);
 
 // Serve index.html for client-side routing in development
 if (process.env.NODE_ENV === "development") {
-  app.use('*', (req, res, next) => {
+  app.use('*', async (req, res, next) => {
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    // Let Vite handle the request
-    next();
+    try {
+      res.redirect('http://0.0.0.0:5173');
+    } catch (e) {
+      next(e);
+    }
   });
 }
 
