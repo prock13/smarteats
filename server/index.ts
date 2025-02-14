@@ -185,12 +185,19 @@ registerRoutes(app);
 if (process.env.NODE_ENV === "development") {
   app.use('*', async (req, res, next) => {
     try {
-      if (req.path.startsWith('/api/') || req.path.startsWith('/auth') || req.path.includes('/@')) {
+      // Skip auth check for static assets and API routes
+      if (req.path.startsWith('/api/') || 
+          req.path.includes('/@') || 
+          req.path.includes('.') ||
+          req.path === '/auth') {
         return next();
       }
-      if (!req.isAuthenticated()) {
+      
+      // For all other routes, check authentication
+      if (!req.isAuthenticated() && req.path !== '/auth') {
         return res.redirect('/auth');
       }
+      
       next();
     } catch (e) {
       next(e);
