@@ -138,7 +138,11 @@ app.use((req, res, next) => {
     '/api/auth/register',
     '/assets',
     '/health',
-    '/favicon.ico'
+    '/favicon.ico',
+    '/@vite',
+    '/@fs',
+    '/@id',
+    '/@react-refresh'
   ];
 
   const isDevelopment = process.env.NODE_ENV === 'development';

@@ -31,11 +31,11 @@ export const setupVite = async (app: express.Application, isDev = process.env.NO
       server: { 
         middlewareMode: true,
         hmr: {
-          protocol: 'wss',
           clientPort: 443,
-          path: '/@hmr',
-          host: '0.0.0.0'
-        }
+          host: '0.0.0.0',
+          protocol: 'wss'
+        },
+        cors: true
       },
       appType: 'custom',
       optimizeDeps: {
