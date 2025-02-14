@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -13,7 +12,7 @@ export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
     host: "0.0.0.0",
-    port: 5173,
+    port: 3001, // Changed from 5173 to avoid conflict
     strictPort: true,
     hmr: {
       clientPort: 443,
@@ -34,7 +33,13 @@ export default defineConfig({
     },
   },
   css: {
-    postcss: "./postcss.config.js",
+    postcss: {
+      plugins: [
+        require("tailwindcss"),
+        require("autoprefixer"),
+        require("postcss-nesting"),
+      ],
+    },
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
@@ -44,7 +49,7 @@ export default defineConfig({
   },
   preview: {
     host: "0.0.0.0",
-    port: 5173,
+    port: 3001,
     strictPort: true,
   },
   base: "./",
