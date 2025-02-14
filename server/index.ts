@@ -165,6 +165,7 @@ app.use((req, res, next) => {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
   const isDevServerRequest = req.path.match(/^\/@(vite|fs|id|react-refresh)/);
+  const isSourceFile = req.path.startsWith('/src/') || req.path.match(/\.(js|ts|tsx|css|json)$/);
   const isOptionsRequest = req.method === 'OPTIONS';
 
   console.log(`[Auth Debug] Request details:
@@ -174,9 +175,10 @@ app.use((req, res, next) => {
     Is Development: ${isDevelopment}
     Is Public Path: ${isPublicPath}
     Is Options: ${isOptionsRequest}
+    Is Source: ${isSourceFile}
   `);
 
-  if (isOptionsRequest || isPublicPath || isDevServerRequest || (isDevelopment && req.path === '/')) {
+  if (isOptionsRequest || isPublicPath || isDevServerRequest || isSourceFile || (isDevelopment && req.path === '/')) {
     console.log(`[Auth Debug] Allowing access to: ${req.path}`);
     return next();
   }
