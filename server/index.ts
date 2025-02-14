@@ -210,8 +210,6 @@ if (process.env.NODE_ENV === "development") {
   app.use(express.static('dist/client', {
     index: false
   }));
-    }
-  });
 }
 
 
