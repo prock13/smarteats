@@ -1,6 +1,9 @@
-export default {
+module.exports = {
   plugins: {
-    tailwindcss: {},
+    'tailwindcss/nesting': {},
+    tailwindcss: {
+      config: './tailwind.config.ts'
+    },
     autoprefixer: {},
     cssnano: process.env.NODE_ENV === 'production' ? {
       preset: ['default', {
