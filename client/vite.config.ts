@@ -23,27 +23,26 @@ export default defineConfig({
   },
   css: {
     devSourcemap: true,
-    postcss: "./postcss.config.js",
+    postcss: {
+      plugins: ['tailwindcss', 'autoprefixer']
+    }
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/public"),
     emptyOutDir: true,
     sourcemap: true,
     cssCodeSplit: false,
-    cssMinify: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', '@tanstack/react-query'],
-        },
+        manualChunks: undefined,
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'assets/index-[hash].css';
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/styles.css';
           }
-          return 'assets/[name].[hash][ext]';
+          return 'assets/[name].[hash].[ext]';
         },
         chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js'
       }
     },
     minify: 'terser',

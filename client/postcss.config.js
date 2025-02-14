@@ -1,17 +1,16 @@
 export default {
   plugins: {
-    'postcss-import': {}, // Handle imports first
-    'tailwindcss/nesting': 'postcss-nesting', // Use postcss-nesting for Tailwind
-    'tailwindcss': {}, // Process Tailwind directives
-    'autoprefixer': {}, // Add vendor prefixes
-    'cssnano': { // Minify CSS
+    'tailwindcss': {},
+    'autoprefixer': {},
+    'cssnano': {
       preset: ['default', {
         discardComments: {
           removeAll: true,
         },
-        normalizeWhitespace: true,
-        minifyFontValues: true,
-        colormin: true
+        normalizeWhitespace: false,
+        minifyFontValues: false,
+        colormin: false,
+        calc: false
       }],
     },
   },
