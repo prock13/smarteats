@@ -99,7 +99,9 @@ if (process.env.NODE_ENV === "development") {
         protocol: 'ws',
         host: '0.0.0.0',
         port: 24678
-      }
+      },
+      host: '0.0.0.0',
+      allowedHosts: ['*.replit.dev', '*.spock.replit.dev']
     }
   }).then(vite => {
     // Serve Vite client and source files without auth
