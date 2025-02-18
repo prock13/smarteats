@@ -57,6 +57,7 @@ Format your response as a JSON object with this exact structure:
 {
   "name": "Recipe name",
   "description": "Brief description",
+  "ingredients": ["List of ingredients with quantities"],
   "instructions": "Step-by-step instructions",
   "servingSize": "Serving size in detail (e.g., '2 cups', '1 large portion', '4 servings')",
   "macros": {
