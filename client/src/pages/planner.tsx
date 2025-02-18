@@ -532,6 +532,7 @@ export default function Planner() {
                     meal={{
                       name: meal.name,
                       description: meal.description,
+                      ingredients: meal.ingredients || [],
                       instructions: meal.instructions,
                       macros: {
                         carbs: meal.macros.carbs,
