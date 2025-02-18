@@ -310,7 +310,6 @@ export default function Recipes() {
                 {createMutation.isPending ? "Loading..." : "Show More Recipes"}
               </Button>
             </Box>
-          )}
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="text.secondary">
