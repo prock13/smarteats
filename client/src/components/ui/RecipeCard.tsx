@@ -31,6 +31,7 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Close as CloseIcon,
+  ShoppingCart as ShoppingCartIcon,
 } from "@mui/icons-material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -218,7 +219,7 @@ export function RecipeCard({
         title: "Success",
         description: "Meal added to calendar",
       });
-      
+
     },
     onError: (error: Error) => {
       toast({
@@ -333,6 +334,26 @@ export function RecipeCard({
     });
   };
 
+  const generateShoppingList = (instructions: string): string[] => {
+    // Implement your shopping list generation logic here
+    // This is a placeholder, replace with your actual logic
+    const ingredients = instructions.split(".").map((line) => line.trim());
+    return ingredients;
+  };
+
+  const downloadShoppingList = (ingredients: string[], filename: string) => {
+    // Implement your shopping list download logic here.
+    // This is a placeholder, replace with your actual logic
+    const blob = new Blob([ingredients.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
   return (
     <>
       <Card
@@ -386,13 +407,31 @@ export function RecipeCard({
               }}
             >
               {onShare && (
-                <IconButton
-                  onClick={(e) => onShare(e, meal)}
-                  color="primary"
-                  size="small"
-                >
-                  <ShareIcon />
-                </IconButton>
+                <>
+                  <IconButton
+                    onClick={(e) => onShare(e, meal)}
+                    color="primary"
+                    size="small"
+                  >
+                    <ShareIcon />
+                  </IconButton>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<ShoppingCartIcon />}
+                    onClick={() => {
+                      const ingredients = generateShoppingList(meal.instructions);
+                      downloadShoppingList(ingredients, `${meal.name}-shopping-list.txt`);
+                    }}
+                    sx={{
+                      minWidth: "auto",
+                      whiteSpace: "nowrap",
+                      px: 2,
+                    }}
+                  >
+                    Shopping List
+                  </Button>
+                </>
               )}
               {showAddToCalendar && (
                 <Button
@@ -676,7 +715,7 @@ export function RecipeCard({
                   )}
                   {meal.macros.calories !== undefined && meal.macros.calories !== null && (
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text/secondary">
                         Calories: {meal.macros.calories}kcal
                       </Typography>
                     </Grid>
