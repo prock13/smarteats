@@ -28,7 +28,7 @@ export default function Recipes() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: recipes, isLoading } = useQuery<Recipe[]>({
-    queryKey: ['/api/recipes'],
+    queryKey: ["/api/recipes"],
     retry: false,
   });
 
@@ -38,7 +38,7 @@ export default function Recipes() {
       const response = await apiRequest("POST", "/api/recipes", data);
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create recipe');
+        throw new Error(errorData.message || "Failed to create recipe");
       }
       return response.json();
     },
@@ -57,7 +57,7 @@ export default function Recipes() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const updateMutation = useMutation({
@@ -67,7 +67,7 @@ export default function Recipes() {
       const response = await apiRequest("PUT", `/api/recipes/${id}`, recipe);
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update recipe');
+        throw new Error(errorData.message || "Failed to update recipe");
       }
       return response.json();
     },
@@ -86,7 +86,7 @@ export default function Recipes() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const deleteMutation = useMutation({
@@ -95,7 +95,7 @@ export default function Recipes() {
       const response = await apiRequest("DELETE", `/api/recipes/${id}`);
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete recipe');
+        throw new Error(errorData.message || "Failed to delete recipe");
       }
       return response.json();
     },
@@ -113,7 +113,7 @@ export default function Recipes() {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleEdit = (recipe: Recipe) => {
@@ -152,29 +152,35 @@ export default function Recipes() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ maxWidth: '6xl', mx: 'auto', mb: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h3" component="h1"
+      <Box sx={{ maxWidth: "6xl", mx: "auto", mb: 8 }}>
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <Typography
+            variant="h3"
+            component="h1"
             sx={{
-              background: 'linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1
-            }}>
+              background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
             Recipe Management
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            Create and manage your custom recipes with macro nutrient information
+            Create and manage your custom recipes with macro nutrient
+            information
           </Typography>
         </Box>
 
         <Paper elevation={2} sx={{ p: 3 }}>
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
             <Typography variant="h6">Your Recipes</Typography>
             <Button
               fullWidth
@@ -187,13 +193,14 @@ export default function Recipes() {
                 background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                 color: "white",
                 "&:hover": {
-                  background: "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
+                  background:
+                    "linear-gradient(45deg, #1B5E20 30%, #0D47A1 90%)",
                 },
               }}
             >
               {createMutation.isPending ? (
                 <>
-                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit"/>
+                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
                   Generating Recipe...
                 </>
               ) : (
@@ -203,7 +210,7 @@ export default function Recipes() {
           </Box>
 
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <CircularProgress />
             </Box>
           ) : recipes && recipes.length > 0 ? (
@@ -213,9 +220,16 @@ export default function Recipes() {
                   <Paper
                     key={recipe.id}
                     elevation={1}
-                    sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}
+                    sx={{ p: 2, mb: 2, bgcolor: "background.paper" }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 1,
+                      }}
+                    >
                       <Box>
                         <Typography variant="h6">{recipe.name}</Typography>
                         <Typography color="text.secondary" sx={{ mt: 1 }}>
@@ -233,7 +247,11 @@ export default function Recipes() {
                         <IconButton
                           size="small"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this recipe?')) {
+                            if (
+                              confirm(
+                                "Are you sure you want to delete this recipe?",
+                              )
+                            ) {
                               deleteMutation.mutate(recipe.id);
                             }
                           }}
@@ -246,7 +264,11 @@ export default function Recipes() {
                     <Grid container spacing={2} sx={{ mt: 1 }}>
                       {recipe.servingSize && (
                         <Grid item xs={12}>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: "medium" }}
+                          >
                             Serving Size: {recipe.servingSize}
                           </Typography>
                         </Grid>
@@ -280,10 +302,8 @@ export default function Recipes() {
               </Box>
             </>
           ) : (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography color="text.secondary">
-                No recipes yet. Click the "Add Recipe" button to create your first recipe.
-              </Typography>
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Typography color="text.secondary">No recipes yet.</Typography>
             </Box>
           )}
 
@@ -319,10 +339,8 @@ export default function Recipes() {
               </Button>
             </Box>
           ) : (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography color="text.secondary">
-                No recipes yet. Click the "Add Recipe" button to create your first recipe.
-              </Typography>
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Typography color="text.secondary">No recipes yet.</Typography>
             </Box>
           )}
         </Paper>
@@ -332,23 +350,44 @@ export default function Recipes() {
         open={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-        initialData={editingRecipe ? {
-          name: editingRecipe.name,
-          description: editingRecipe.description,
-          instructions: editingRecipe.instructions,
-          carbs: editingRecipe.carbs,
-          protein: editingRecipe.protein,
-          fats: editingRecipe.fats,
-          calories: editingRecipe.calories,
-          servingSize: editingRecipe.servingSize,
-          fiber: editingRecipe.fiber,
-          sugar: editingRecipe.sugar,
-          cholesterol: editingRecipe.cholesterol,
-          sodium: editingRecipe.sodium,
-          cookingTime: editingRecipe.cookingTime as { prep: number | null; cook: number | null; total: number | null; } | null,
-          nutrients: editingRecipe.nutrients as { vitamins: string[] | null; minerals: string[] | null; } | null,
-          dietaryRestriction: editingRecipe.dietaryRestriction as "none" | "vegetarian" | "vegan" | "pescatarian" | "keto" | "paleo" | "gluten-free" | "dairy-free" | "halal" | "kosher"
-        } : undefined}
+        initialData={
+          editingRecipe
+            ? {
+                name: editingRecipe.name,
+                description: editingRecipe.description,
+                instructions: editingRecipe.instructions,
+                carbs: editingRecipe.carbs,
+                protein: editingRecipe.protein,
+                fats: editingRecipe.fats,
+                calories: editingRecipe.calories,
+                servingSize: editingRecipe.servingSize,
+                fiber: editingRecipe.fiber,
+                sugar: editingRecipe.sugar,
+                cholesterol: editingRecipe.cholesterol,
+                sodium: editingRecipe.sodium,
+                cookingTime: editingRecipe.cookingTime as {
+                  prep: number | null;
+                  cook: number | null;
+                  total: number | null;
+                } | null,
+                nutrients: editingRecipe.nutrients as {
+                  vitamins: string[] | null;
+                  minerals: string[] | null;
+                } | null,
+                dietaryRestriction: editingRecipe.dietaryRestriction as
+                  | "none"
+                  | "vegetarian"
+                  | "vegan"
+                  | "pescatarian"
+                  | "keto"
+                  | "paleo"
+                  | "gluten-free"
+                  | "dairy-free"
+                  | "halal"
+                  | "kosher",
+              }
+            : undefined
+        }
         isSubmitting={createMutation.isPending || updateMutation.isPending}
       />
     </Container>
