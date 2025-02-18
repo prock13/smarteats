@@ -104,6 +104,7 @@ Include detailed nutritional information, precise serving size, and cooking time
     return {
       name: parsedContent.name,
       description: parsedContent.description,
+      ingredients: parsedContent.ingredients,
       instructions: parsedContent.instructions,
       servingSize: parsedContent.servingSize,
       carbs: parsedContent.macros.carbs,
