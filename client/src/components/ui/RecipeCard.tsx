@@ -3,6 +3,9 @@ import {
   Card,
   CardContent,
   CardHeader,
+  List,
+  ListItem,
+  ListItemText,
   Typography,
   Box,
   Button,
@@ -683,6 +686,23 @@ export function RecipeCard({
                 </Box>
               )}
 
+              <Box sx={{ mb: 3 }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <RestaurantIcon fontSize="small" />
+                  Ingredients
+                </Typography>
+                <List>
+                  {meal.ingredients?.map((ingredient, index) => (
+                    <ListItem key={index}>
+                      <ListItemText primary={ingredient} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
               <Box sx={{ mb: 3 }}>
                 <Typography
                   variant="h6"
