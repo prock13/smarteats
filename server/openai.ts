@@ -174,6 +174,7 @@ export async function generateMealSuggestions(
     {
       "name": "Recipe name",
       "description": "Brief description",
+      "ingredients": ["List of ingredients with quantities"],
       "instructions": "Step-by-step instructions",
       "servingSize": "Serving size (e.g., '1 cup' or '2 servings')",
       "macros": {
@@ -263,6 +264,7 @@ ${format}`;
       const storedMeals = matchingStoredRecipes.map(recipe => ({
         name: recipe.name,
         description: recipe.description,
+        ingredients: recipe.ingredients,
         instructions: recipe.instructions,
         servingSize: recipe.servingSize,
         macros: {
