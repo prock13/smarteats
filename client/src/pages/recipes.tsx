@@ -177,6 +177,7 @@ export default function Recipes() {
           }}>
             <Typography variant="h6">Your Recipes</Typography>
             <Button
+              fullWidth
               variant="contained"
               startIcon={createMutation.isPending ? null : <AddIcon />}
               onClick={handleOpenModal}
@@ -294,7 +295,7 @@ export default function Recipes() {
                 align="center"
                 sx={{ mb: 2 }}
               >
-                Please wait while we generate your personalized recipe suggestions...
+                Please wait while we save your recipe...
               </Typography>
               <LinearProgress />
             </Box>
