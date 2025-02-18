@@ -205,109 +205,111 @@ export default function Recipes() {
               <CircularProgress />
             </Box>
           ) : recipes && recipes.length > 0 ? (
-            <Box sx={{ mt: 2 }}>
-              {recipes?.map((recipe: Recipe) => (
-                <Paper
-                  key={recipe.id}
-                  elevation={1}
-                  sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box>
-                      <Typography variant="h6">{recipe.name}</Typography>
-                      <Typography color="text.secondary" sx={{ mt: 1 }}>
-                        {recipe.description}
-                      </Typography>
+            <>
+              <Box sx={{ mt: 2 }}>
+                {recipes?.map((recipe: Recipe) => (
+                  <Paper
+                    key={recipe.id}
+                    elevation={1}
+                    sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                      <Box>
+                        <Typography variant="h6">{recipe.name}</Typography>
+                        <Typography color="text.secondary" sx={{ mt: 1 }}>
+                          {recipe.description}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(recipe)}
+                          sx={{ mr: 1 }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this recipe?')) {
+                              deleteMutation.mutate(recipe.id);
+                            }
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
                     </Box>
-                    <Box>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEdit(recipe)}
-                        sx={{ mr: 1 }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this recipe?')) {
-                            deleteMutation.mutate(recipe.id);
-                          }
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
 
-                  <Grid container spacing={2} sx={{ mt: 1 }}>
-                    {recipe.servingSize && (
-                      <Grid item xs={12}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-                          Serving Size: {recipe.servingSize}
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                      {recipe.servingSize && (
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                            Serving Size: {recipe.servingSize}
+                          </Typography>
+                        </Grid>
+                      )}
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Carbs: {recipe.carbs}g
                         </Typography>
                       </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Protein: {recipe.protein}g
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Fats: {recipe.fats}g
+                        </Typography>
+                      </Grid>
+                    </Grid>
+
+                    {recipe.dietaryRestriction !== "none" && (
+                      <Chip
+                        label={recipe.dietaryRestriction}
+                        size="small"
+                        sx={{ mt: 2 }}
+                      />
                     )}
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Carbs: {recipe.carbs}g
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Protein: {recipe.protein}g
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Fats: {recipe.fats}g
-                      </Typography>
-                    </Grid>
-                  </Grid>
-
-                  {recipe.dietaryRestriction !== "none" && (
-                    <Chip
-                      label={recipe.dietaryRestriction}
-                      size="small"
-                      sx={{ mt: 2 }}
-                    />
-                  )}
-                </Paper>
-              ))}
-            </Box>
-
-            {createMutation.isPending && (
-              <Box sx={{ width: "100%", mt: 4 }}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  align="center"
-                  sx={{ mb: 2 }}
-                >
-                  Please wait while we generate your personalized recipe suggestions...
-                </Typography>
-                <LinearProgress />
+                  </Paper>
+                ))}
               </Box>
-            )}
 
-            {!isLoading && recipes && recipes.length > 0 && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                <Button
-                  onClick={() => handleOpenModal()}
-                  variant="outlined"
-                  disabled={createMutation.isPending}
-                  startIcon={
-                    createMutation.isPending ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      <AddIcon />
-                    )
-                  }
-                >
-                  {createMutation.isPending ? "Loading..." : "Show More Recipes"}
-                </Button>
-              </Box>
-            )}
+              {createMutation.isPending && (
+                <Box sx={{ width: "100%", mt: 4 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    align="center"
+                    sx={{ mb: 2 }}
+                  >
+                    Please wait while we generate your personalized recipe suggestions...
+                  </Typography>
+                  <LinearProgress />
+                </Box>
+              )}
+
+              {!isLoading && recipes && recipes.length > 0 && (
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                  <Button
+                    onClick={() => handleOpenModal()}
+                    variant="outlined"
+                    disabled={createMutation.isPending}
+                    startIcon={
+                      createMutation.isPending ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <AddIcon />
+                      )
+                    }
+                  >
+                    {createMutation.isPending ? "Loading..." : "Show More Recipes"}
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="text.secondary">
