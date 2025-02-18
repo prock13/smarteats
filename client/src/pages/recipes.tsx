@@ -177,9 +177,11 @@ export default function Recipes() {
             <Typography variant="h6">Your Recipes</Typography>
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={createMutation.isPending ? null : <AddIcon />}
               onClick={handleOpenModal}
+              disabled={createMutation.isPending}
               sx={{
+                py: 1.5,
                 background: "linear-gradient(45deg, #2E7D32 30%, #1565C0 90%)",
                 color: "white",
                 "&:hover": {
@@ -187,7 +189,14 @@ export default function Recipes() {
                 },
               }}
             >
-              Add Recipe
+              {createMutation.isPending ? (
+                <>
+                  <CircularProgress size={24} sx={{ mr: 1 }} />
+                  Generating Recipe...
+                </>
+              ) : (
+                "Add Recipe"
+              )}
             </Button>
           </Box>
 
@@ -266,6 +275,39 @@ export default function Recipes() {
                 </Paper>
               ))}
             </Box>
+
+            {createMutation.isPending && (
+              <Box sx={{ width: "100%", mt: 4 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ mb: 2 }}
+                >
+                  Please wait while we generate your personalized recipe suggestions...
+                </Typography>
+                <LinearProgress />
+              </Box>
+            )}
+
+            {!isLoading && recipes && recipes.length > 0 && (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                <Button
+                  onClick={() => handleOpenModal()}
+                  variant="outlined"
+                  disabled={createMutation.isPending}
+                  startIcon={
+                    createMutation.isPending ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <AddIcon />
+                    )
+                  }
+                >
+                  {createMutation.isPending ? "Loading..." : "Show More Recipes"}
+                </Button>
+              </Box>
+            )}
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="text.secondary">
