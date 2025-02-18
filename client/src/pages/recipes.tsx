@@ -14,6 +14,7 @@ import {
   Chip,
   CircularProgress,
   Button,
+  LinearProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -277,6 +278,12 @@ export default function Recipes() {
                 ))}
               </Box>
             </>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography color="text.secondary">
+                No recipes yet. Click the "Add Recipe" button to create your first recipe.
+              </Typography>
+            </Box>
           )}
 
           {createMutation.isPending && (
@@ -293,7 +300,7 @@ export default function Recipes() {
             </Box>
           )}
 
-          {!isLoading && recipes && recipes.length > 0 && (
+          {!isLoading && recipes && recipes.length > 0 ? (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Button
                 onClick={() => handleOpenModal()}
