@@ -276,40 +276,41 @@ export default function Recipes() {
                   </Paper>
                 ))}
               </Box>
-
-              {createMutation.isPending && (
-                <Box sx={{ width: "100%", mt: 4 }}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    align="center"
-                    sx={{ mb: 2 }}
-                  >
-                    Please wait while we generate your personalized recipe suggestions...
-                  </Typography>
-                  <LinearProgress />
-                </Box>
-              )}
-
-              {!isLoading && recipes && recipes.length > 0 && (
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                  <Button
-                    onClick={() => handleOpenModal()}
-                    variant="outlined"
-                    disabled={createMutation.isPending}
-                    startIcon={
-                      createMutation.isPending ? (
-                        <CircularProgress size={20} />
-                      ) : (
-                        <AddIcon />
-                      )
-                    }
-                  >
-                    {createMutation.isPending ? "Loading..." : "Show More Recipes"}
-                  </Button>
-                </Box>
-              )}
             </>
+          )}
+
+          {createMutation.isPending && (
+            <Box sx={{ width: "100%", mt: 4 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="center"
+                sx={{ mb: 2 }}
+              >
+                Please wait while we generate your personalized recipe suggestions...
+              </Typography>
+              <LinearProgress />
+            </Box>
+          )}
+
+          {!isLoading && recipes && recipes.length > 0 && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <Button
+                onClick={() => handleOpenModal()}
+                variant="outlined"
+                disabled={createMutation.isPending}
+                startIcon={
+                  createMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <AddIcon />
+                  )
+                }
+              >
+                {createMutation.isPending ? "Loading..." : "Show More Recipes"}
+              </Button>
+            </Box>
+          )}
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography color="text.secondary">
