@@ -200,7 +200,7 @@ export default function Recipes() {
             >
               {createMutation.isPending ? (
                 <>
-                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                  <CircularProgress size={24} sx={{ mr: 1 }} />
                   Generating Recipe...
                 </>
               ) : (
@@ -327,15 +327,18 @@ export default function Recipes() {
                 onClick={() => handleOpenModal()}
                 variant="outlined"
                 disabled={createMutation.isPending}
-                startIcon={
-                  createMutation.isPending ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <AddIcon />
-                  )
-                }
               >
-                {createMutation.isPending ? "Loading..." : "Show More Recipes"}
+                {createMutation.isPending ? (
+                  <>
+                    <CircularProgress size={24} sx={{ mr: 1 }} />
+                    Generating Recipe...
+                  </>
+                ) : (
+                  <>
+                    <AddIcon sx={{ mr: 1 }} />
+                    Add Another Recipe
+                  </>
+                )}
               </Button>
             </Box>
           ) : (
