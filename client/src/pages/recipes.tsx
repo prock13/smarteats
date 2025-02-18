@@ -199,10 +199,10 @@ export default function Recipes() {
               }}
             >
               {createMutation.isPending ? (
-                <>
-                  <CircularProgress size={24} sx={{ mr: 1 }} />
-                  Generating Recipe...
-                </>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                  <span>Generating Recipe...</span>
+                </Box>
               ) : (
                 "Add Recipe"
               )}
