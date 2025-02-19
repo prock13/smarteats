@@ -374,7 +374,7 @@ export function RecipeCard({
         <body>
           <h1>${meal.name}</h1>
           <p>${meal.description}</p>
-          
+
           ${meal.cookingTime ? `
             <div class="section">
               <h2>Cooking Time</h2>
@@ -724,7 +724,9 @@ export function RecipeCard({
               {meal.cookingTime && (
                 <Box sx={{ mb: 3 }}>
                   <Typography
-                    variant="h6"
+                    component="div"
+                    variant="subtitle1"
+                    fontWeight="medium"
                     gutterBottom
                     sx={{ display: "flex", alignItems: "center", gap: 1 }}
                   >
