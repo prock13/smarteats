@@ -154,7 +154,7 @@ export async function generateMealSuggestions(
         if (excludeRecipes.includes(recipe.name)) return false;
 
         // Check if recipe meets any of the dietary preferences
-        if (!dietaryPreferences.includes("none") &&
+        if (!dietaryPreferences.includes("none") && 
             !dietaryPreferences.includes(recipe.dietaryRestriction)) {
           return false;
         }
@@ -207,8 +207,8 @@ export async function generateMealSuggestions(
 - Main fat: ${pantryItems.fatSource}
 
 The recipe should be suitable for: ${mealTypes[0]}
-${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none")
-  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}`
+${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") 
+  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` 
   : ''}
 
 ${format}`;
@@ -224,8 +224,8 @@ ${format}`;
 - Fats: ${fats}g
 
 ${excludeRecipes.length > 0 ? `\nDo not suggest these recipes: ${excludeRecipes.join(', ')}` : ''}
-${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none")
-  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}`
+${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") 
+  ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` 
   : ''}
 ${mealTypes.length > 0 ? `\nMeal types: ${mealTypes.join(', ')}` : ''}
 
@@ -290,66 +290,6 @@ ${format}`;
     return parsedContent;
   } catch (error: any) {
     console.error("Error in generateMealSuggestions:", error);
-    throw error;
-  }
-}
-
-export async function generateIngredientSubstitutions({
-  ingredient,
-  dietaryPreferences = ["none"],
-  quantity,
-  unit,
-}: {
-  ingredient: string;
-  dietaryPreferences?: string[];
-  quantity?: number;
-  unit?: string;
-}) {
-  try {
-    checkRateLimit();
-
-    const prompt = `Suggest substitutes for ${quantity ? `${quantity} ${unit} of ` : ""}${ingredient}
-${dietaryPreferences.length > 0 && !dietaryPreferences.includes("none") ? `\nDietary Preferences: ${dietaryPreferences.join(", ")}` : ''}
-
-Format your response as a JSON object with this exact structure:
-{
-  "substitutes": [
-    {
-      "ingredient": "Name of substitute ingredient",
-      "quantity": number,
-      "unit": "Measurement unit",
-      "conversion": "How to convert from original (e.g., '1:1 replacement' or '2 tbsp for every 1 tbsp')",
-      "nutritionalSimilarity": "Description of how nutritionally similar it is",
-      "cookingAdjustments": "Any needed adjustments to cooking method or time",
-      "tasteImpact": "How it affects the taste of the dish",
-      "dietaryInfo": ["Array of dietary categories this fits (e.g., vegan, gluten-free)"]
-    }
-  ]
-}
-
-Provide 3-5 practical substitutes that match any dietary preferences. Focus on common ingredients that people might have at home.`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional chef and nutritionist specializing in ingredient substitutions. Provide practical, readily available substitutes that maintain the dish's integrity while accommodating dietary restrictions. Consider nutritional value, cooking properties, and taste impact in your suggestions."
-        },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content received from OpenAI");
-    }
-
-    const parsedContent = JSON.parse(content);
-    return parsedContent;
-  } catch (error: any) {
-    console.error("Error in generateIngredientSubstitutions:", error);
     throw error;
   }
 }
