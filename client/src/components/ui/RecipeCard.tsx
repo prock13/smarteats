@@ -758,7 +758,8 @@ export const RecipeCard = ({
                   Ingredients
                 </Typography>
                 <List sx={{ py: 0 }}>
-                  {meal.ingredients?.map((ingredient, index) => (
+                  {Array.isArray(meal.ingredients) && meal.ingredients.length > 0 ? (
+                  meal.ingredients.map((ingredient, index) => (
                     <ListItem key={index} sx={{ py: 0.5 }}>
                       <ListItemText
                         primary={ingredient}
@@ -768,7 +769,12 @@ export const RecipeCard = ({
                         }}
                       />
                     </ListItem>
-                  ))}
+                  ))
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="No ingredients available" />
+                  </ListItem>
+                )}
                 </List>
               </Box>
               <Box sx={{ mb: 3 }}>
