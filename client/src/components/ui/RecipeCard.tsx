@@ -476,79 +476,81 @@ export function RecipeCard({
             >
               {onShare && (
                 <>
-                  <IconButton
-                    onClick={(e) => onShare(e, meal)}
-                    color="primary"
-                    size="small"
-                  >
-                    <ShareIcon />
-                  </IconButton>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<ShoppingCartIcon />}
-                    onClick={() => {
-                      const ingredients = generateShoppingList(meal);
-                      downloadShoppingList(ingredients, meal.name);
-                    }}
-                    sx={{
-                      minWidth: "auto",
-                      whiteSpace: "nowrap",
-                      px: 2,
-                    }}
-                  >
-                    Shopping List
-                  </Button>
+                  <Tooltip title="Share Recipe" arrow>
+                    <IconButton
+                      onClick={(e) => onShare(e, meal)}
+                      color="primary"
+                      size="small"
+                    >
+                      <ShareIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Download Shopping List" arrow>
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        const ingredients = generateShoppingList(meal);
+                        downloadShoppingList(ingredients, meal.name);
+                      }}
+                    >
+                      <ShoppingCartIcon />
+                    </IconButton>
+                  </Tooltip>
                 </>
               )}
               {showAddToCalendar && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CalendarIcon />}
-                  onClick={handleAddToCalendar}
-                  sx={{
-                    minWidth: "auto",
-                    whiteSpace: "nowrap",
-                    px: 2,
-                  }}
-                >
-                  Add to Calendar
-                </Button>
+                <Tooltip title="Add to Calendar" arrow>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleAddToCalendar}
+                  >
+                    <CalendarIcon />
+                  </IconButton>
+                </Tooltip>
               )}
-              <IconButton onClick={handlePrint} color="primary" size="small">
-                <PrintIcon />
-              </IconButton>
-              {!meal.isStoredRecipe && favorites && !showDelete ? (
-                <IconButton
-                  color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
-                  onClick={() => {
-                    if (!favorites?.some((f) => f.name === meal.name)) {
-                      favoriteMutation.mutate(meal);
-                    }
-                  }}
-                  disabled={
-                    favoriteMutation.isPending ||
-                    favorites?.some((f) => f.name === meal.name)
-                  }
-                  size="small"
-                >
-                  {favorites?.some((f) => f.name === meal.name) ? (
-                    <FavoriteIcon />
-                  ) : (
-                    <FavoriteBorder />
-                  )}
+              <Tooltip title="Print Recipe" arrow>
+                <IconButton onClick={handlePrint} color="primary" size="small">
+                  <PrintIcon />
                 </IconButton>
+              </Tooltip>
+              {!meal.isStoredRecipe && favorites && !showDelete ? (
+                <Tooltip title={favorites?.some((f) => f.name === meal.name) ? "Added to Favorites" : "Add to Favorites"} arrow>
+                  <span>
+                    <IconButton
+                      color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
+                      onClick={() => {
+                        if (!favorites?.some((f) => f.name === meal.name)) {
+                          favoriteMutation.mutate(meal);
+                        }
+                      }}
+                      disabled={
+                        favoriteMutation.isPending ||
+                        favorites?.some((f) => f.name === meal.name)
+                      }
+                      size="small"
+                    >
+                      {favorites?.some((f) => f.name === meal.name) ? (
+                        <FavoriteIcon />
+                      ) : (
+                        <FavoriteBorder />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
               ) : null}
               {showDelete && (
-                <IconButton
-                  color="error"
-                  onClick={handleDelete}
-                  disabled={deleteFavoriteMutation.isPending}
-                  size="small"
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <Tooltip title="Delete Recipe" arrow>
+                  <IconButton
+                    color="error"
+                    onClick={handleDelete}
+                    disabled={deleteFavoriteMutation.isPending}
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
               )}
             </Box>
           }
