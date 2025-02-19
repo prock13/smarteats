@@ -14,6 +14,7 @@ import {
   Chip,
   CircularProgress,
   Button,
+  LinearProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -277,7 +278,7 @@ export default function Recipes() {
                 ))}
               </Box>
             </>
-          )}
+          ) : null}
 
           {createMutation.isPending && (
             <Box sx={{ width: "100%", mt: 4 }}>
