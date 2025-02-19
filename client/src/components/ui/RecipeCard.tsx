@@ -469,17 +469,9 @@ export function RecipeCard({
             <Box
               sx={{
                 display: "flex",
-                flexWrap: "wrap",
-                gap: 1,
+                gap: 1.5,
                 alignItems: "center",
                 pr: 1,
-                "& .MuiButton-root": {
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  padding: { xs: "4px 8px", sm: "6px 16px" },
-                },
-                "& .MuiIconButton-root": {
-                  padding: { xs: 1, sm: 1.5 },
-                },
               }}
             >
               {onShare && (
@@ -561,19 +553,7 @@ export function RecipeCard({
             </Box>
           }
         />
-        <CardContent sx={{ 
-          flexGrow: 1, 
-          p: { xs: 2, sm: 3 },
-          "& .MuiTypography-h6": {
-            fontSize: { xs: "1rem", sm: "1.25rem" }
-          },
-          "& .MuiTypography-body1": {
-            fontSize: { xs: "0.875rem", sm: "1rem" }
-          },
-          "& .MuiTypography-body2": {
-            fontSize: { xs: "0.75rem", sm: "0.875rem" }
-          }
-        }}>
+        <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Box
             sx={{
               display: "flex",
