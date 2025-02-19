@@ -44,13 +44,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    hmr: {
-      clientPort: 443,
-      path: '/hmr/',
-      timeout: 5000,
-      overlay: false,
-      protocol: 'wss'
-    },
+    hmr: false, // Explicitly disable HMR
     watch: {
       usePolling: true,
       interval: 1000
