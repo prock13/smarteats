@@ -69,10 +69,10 @@ export function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
-      return done(null, user);
+      done(null, user);
     } catch (error) {
       console.error("Session error:", error);
-      return done(error);
+      done(error);
     }
   });
 
