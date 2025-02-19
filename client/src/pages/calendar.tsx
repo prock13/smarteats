@@ -282,9 +282,9 @@ export default function CalendarPage() {
                           description: plan.meal.description,
                           instructions: plan.meal.instructions || "",
                           macros: {
-                            carbs: plan.meal.carbs,
-                            protein: plan.meal.protein,
-                            fats: plan.meal.fats,
+                            carbs: plan.meal.carbs || plan.meal.macros?.carbs || 0,
+                            protein: plan.meal.protein || plan.meal.macros?.protein || 0,
+                            fats: plan.meal.fats || plan.meal.macros?.fats || 0,
                             calories: plan.meal.macros?.calories || plan.meal.calories || null,
                             fiber: plan.meal.macros?.fiber || plan.meal.fiber || null,
                             sugar: plan.meal.macros?.sugar || plan.meal.sugar || null,
