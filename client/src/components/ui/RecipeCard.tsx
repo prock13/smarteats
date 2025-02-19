@@ -337,21 +337,20 @@ export function RecipeCard({
     });
   };
 
-  const generateShoppingList = (instructions: string): string[] => {
-    // Implement your shopping list generation logic here
-    // This is a placeholder, replace with your actual logic
-    const ingredients = instructions.split(".").map((line) => line.trim());
-    return ingredients;
+  const generateShoppingList = (meal: Meal): string[] => {
+    if (!meal.ingredients || meal.ingredients.length === 0) {
+      return ["No ingredients available"];
+    }
+    return meal.ingredients;
   };
 
-  const downloadShoppingList = (ingredients: string[], filename: string) => {
-    // Implement your shopping list download logic here.
-    // This is a placeholder, replace with your actual logic
-    const blob = new Blob([ingredients.join("\n")], { type: "text/plain" });
+  const downloadShoppingList = (ingredients: string[], recipeName: string) => {
+    const content = `Shopping List for ${recipeName}\n\n${ingredients.join("\n")}`;
+    const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.download = `${recipeName.toLowerCase().replace(/\s+/g, "-")}-shopping-list.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -423,8 +422,8 @@ export function RecipeCard({
                     size="small"
                     startIcon={<ShoppingCartIcon />}
                     onClick={() => {
-                      const ingredients = generateShoppingList(meal.instructions);
-                      downloadShoppingList(ingredients, `${meal.name}-shopping-list.txt`);
+                      const ingredients = generateShoppingList(meal);
+                      downloadShoppingList(ingredients, meal.name);
                     }}
                     sx={{
                       minWidth: "auto",
