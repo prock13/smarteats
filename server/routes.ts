@@ -140,9 +140,12 @@ export function registerRoutes(app: Express): Server {
       console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
 
       const { meal, userId, date, mealType } = plan;
+      const mealIngredients = Array.isArray(meal.ingredients) ? meal.ingredients : [];
+      console.log('Processing meal ingredients:', mealIngredients);
+
       const mealWithMacros = {
         ...meal,
-        ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : (typeof meal.ingredients === 'string' ? [meal.ingredients] : []),
+        ingredients: mealIngredients,
         carbs: meal.carbs || meal.nutrients?.carbohydrates || 0,
         protein: meal.protein || meal.nutrients?.protein || 0,
         fats: meal.fats || meal.nutrients?.fats || 0,
