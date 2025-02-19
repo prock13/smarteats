@@ -132,7 +132,9 @@ export default function Planner() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to get meal suggestions");
+          throw new Error(
+            errorData.message || "Failed to get meal suggestions",
+          );
         }
 
         const responseData = await response.json();
@@ -197,7 +199,7 @@ export default function Planner() {
   const onSubmit = (data: MacroInput) => {
     console.log("Submitting macro input:", data);
     setSuggestions(null);
-    
+
     if (!data.mealTypes || data.mealTypes.length === 0) {
       toast({
         title: "Error",
@@ -566,7 +568,11 @@ export default function Planner() {
                   >
                     {mutation.isPending ? (
                       <>
-                        <CircularProgress size={24} sx={{ mr: 1 }} />
+                        <CircularProgress
+                          size={24}
+                          sx={{ mr: 1 }}
+                          color="inherit"
+                        />
                         Generating Suggestions...
                       </>
                     ) : (
