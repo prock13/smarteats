@@ -155,8 +155,8 @@ export class DatabaseStorage implements IStorage {
   async saveMealPlan(plan: MealPlan & { meal: { name: string; description: string; instructions?: string; servingSize?: string | null; carbs: number; protein: number; fats: number; calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; cookingTime?: any; nutrients?: any; dietaryRestriction?: string; macros?: { calories?: number | null; fiber?: number | null; sugar?: number | null; cholesterol?: number | null; sodium?: number | null; }; ingredients?: string[]; } }): Promise<MealPlan> {
     console.log('Saving meal plan:', JSON.stringify(plan, null, 2));
 
-    console.log('Raw meal ingredients:', plan.meal.ingredients);
     const ingredients = Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [];
+    console.log('Raw meal ingredients:', plan.meal.ingredients);
     console.log('Processed ingredients to save:', ingredients);
 
     const meal = {
@@ -177,7 +177,7 @@ export class DatabaseStorage implements IStorage {
       cookingTime: plan.meal.cookingTime || null,
       nutrients: plan.meal.nutrients || { vitamins: null, minerals: null },
       dietaryRestriction: plan.meal.dietaryRestriction || "none",
-      ingredients: ingredients
+      ingredients: plan.meal.ingredients || []
     };
 
     const [savedPlan] = await db
