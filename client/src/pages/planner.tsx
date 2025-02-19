@@ -104,35 +104,44 @@ export default function Planner() {
 
   const mutation = useMutation({
     mutationFn: async (data: MacroInput & { appendResults?: boolean }) => {
-      const requestData = {
-        targetCarbs: data.targetCarbs,
-        targetProtein: data.targetProtein,
-        targetFats: data.targetFats,
-        mealCount: data.mealCount,
-        dietaryPreferences: data.dietaryPreferences,
-        mealTypes: data.mealTypes,
-        includeUserRecipes: data.includeUserRecipes,
-        excludeRecipes:
-          data.appendResults && suggestions?.meals
-            ? suggestions.meals.map((meal: any) => meal.name)
-            : [],
-      };
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 75000);
 
-      console.log("Sending meal suggestions request with data:", requestData);
+      try {
+        const requestData = {
+          targetCarbs: data.targetCarbs,
+          targetProtein: data.targetProtein,
+          targetFats: data.targetFats,
+          mealCount: data.mealCount,
+          dietaryPreferences: data.dietaryPreferences,
+          mealTypes: data.mealTypes,
+          includeUserRecipes: data.includeUserRecipes,
+          excludeRecipes:
+            data.appendResults && suggestions?.meals
+              ? suggestions.meals.map((meal: any) => meal.name)
+              : [],
+        };
 
-      const res = await apiRequest(
-        "POST",
-        "/api/meal-suggestions",
-        requestData,
-      );
+        console.log("Sending meal suggestions request with data:", requestData);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Meal suggestions request failed:", errorData);
-        throw new Error(errorData.message || "Failed to get meal suggestions");
+        const response = await apiRequest(
+          "POST",
+          "/api/meal-suggestions",
+          requestData,
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to get meal suggestions");
+        }
+
+        const responseData = await response.json();
+        clearTimeout(timeoutId);
+        return { response: responseData, appendResults: data.appendResults };
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
       }
-
-      return { response: await res.json(), appendResults: data.appendResults };
     },
     onSuccess: (data) => {
       const { response, appendResults } = data;
@@ -164,16 +173,21 @@ export default function Planner() {
       });
     },
     onError: (error: Error) => {
+      console.error("Mutation error:", error);
       setShowingMore(false);
-      let description = error.message;
-      if (error.message.includes("Rate limit exceeded")) {
+      let errorMessage = error.message;
+
+      if (error.name === "AbortError") {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (error.message.includes("Rate limit exceeded")) {
         const waitTimeMatch = error.message.match(/wait (\d+) seconds/);
         const waitTime = waitTimeMatch ? waitTimeMatch[1] : "a few";
-        description = `You've made too many requests. Please wait ${waitTime} seconds before trying again.`;
+        errorMessage = `You've made too many requests. Please wait ${waitTime} seconds before trying again.`;
       }
+
       toast({
         title: "Error",
-        description,
+        description: errorMessage,
         variant: "destructive",
       });
       setSuggestions(null);
@@ -181,6 +195,9 @@ export default function Planner() {
   });
 
   const onSubmit = (data: MacroInput) => {
+    console.log("Submitting macro input:", data);
+    setSuggestions(null);
+    
     if (!data.mealTypes || data.mealTypes.length === 0) {
       toast({
         title: "Error",
@@ -215,7 +232,6 @@ export default function Planner() {
     }
 
     data.mealCount = data.mealTypes.length;
-    console.log("Submitting macro input:", data);
     mutation.mutate(data);
   };
 
