@@ -241,7 +241,7 @@ export function RecipeCard({
         name: meal.name,
         description: meal.description,
         instructions: meal.instructions,
-        ingredients: meal.ingredients || [],
+        ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
