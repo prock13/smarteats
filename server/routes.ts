@@ -139,7 +139,7 @@ export function registerRoutes(app: Express): Server {
       const plan = mealPlanSchema.parse(req.body);
       console.log('Parsed meal plan:', JSON.stringify(plan, null, 2));
 
-      const { meal } = plan;
+      const { meal, userId, date, mealType } = plan;
       const mealWithMacros = {
         ...meal,
         ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : (typeof meal.ingredients === 'string' ? [meal.ingredients] : []),
@@ -148,12 +148,26 @@ export function registerRoutes(app: Express): Server {
         fats: meal.fats || meal.nutrients?.fats || 0,
       };
 
-      const saved = await storage.saveMealPlan({
-        ...plan,
-        meal: mealWithMacros,
-        userId: req.user!.id,
-        id: Date.now(), // Temporary ID for new meal plans
-      });
+      const mealPlan = {
+        userId,
+        date: new Date(date),
+        mealType,
+        meal: {
+          ...mealWithMacros,
+          ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
+          macros: {
+            carbs: mealWithMacros.carbs || 0,
+            protein: mealWithMacros.protein || 0,
+            fats: mealWithMacros.fats || 0,
+            calories: meal.calories || meal.macros?.calories || null,
+            fiber: meal.fiber || meal.macros?.fiber || null,
+            sugar: meal.sugar || meal.macros?.sugar || null,
+            cholesterol: meal.cholesterol || meal.macros?.cholesterol || null,
+            sodium: meal.sodium || meal.macros?.sodium || null
+          }
+        }
+      };
+      const saved = await storage.saveMealPlan(mealPlan);
 
       console.log('Saved meal plan:', JSON.stringify(saved, null, 2));
       res.json(saved);
