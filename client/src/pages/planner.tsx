@@ -571,7 +571,7 @@ export default function Planner() {
                         <CircularProgress
                           size={24}
                           sx={{ mr: 1 }}
-                          color="inherit"
+                          color="whitesmoke"
                         />
                         Generating Suggestions...
                       </>
