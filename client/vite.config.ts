@@ -22,9 +22,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     hmr: false,
-    watch: {
-      usePolling: false
-    }
+    watch: false,
+    middlewareMode: "ssr"
   },
   resolve: {
     alias: {
