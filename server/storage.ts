@@ -177,7 +177,7 @@ export class DatabaseStorage implements IStorage {
       cookingTime: plan.meal.cookingTime || null,
       nutrients: plan.meal.nutrients || { vitamins: null, minerals: null },
       dietaryRestriction: plan.meal.dietaryRestriction || "none",
-      ingredients: ingredients
+      ingredients: plan.meal.ingredients || []
     };
 
     const [savedPlan] = await db
