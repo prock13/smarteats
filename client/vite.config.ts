@@ -45,6 +45,10 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    hmr: false
+    hmr: false,
+    watch: {
+      usePolling: false,
+      interval: 100
+    }
   }
 });
