@@ -1,6 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Container, Typography, Box, Grid, CircularProgress, Menu, MenuItem } from "@mui/material";
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Grid, 
+  CircularProgress, 
+  Menu, 
+  MenuItem,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  Paper
+} from "@mui/material";
+import { dietaryOptions } from "@/lib/constants";
 import { RecipeCard } from "@/components/ui/RecipeCard";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from 'react';
@@ -38,6 +52,9 @@ export default function Favorites() {
   const [shareAnchorEl, setShareAnchorEl] = useState<null | HTMLElement>(null);
   const [sharingRecipe, setSharingRecipe] = useState<Recipe | null>(null);
   const [expandedCards, setExpandedCards] = useState<{[key: number]: boolean}>({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDiet, setSelectedDiet] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
 
   const { data: favorites, isLoading, error } = useQuery<Recipe[]>({
     queryKey: ["/api/favorites"],
@@ -136,6 +153,52 @@ export default function Favorites() {
           </Typography>
         </Box>
 
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Search Recipes"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Dietary Restriction</InputLabel>
+                <Select
+                  value={selectedDiet}
+                  onChange={(e) => setSelectedDiet(e.target.value)}
+                  label="Dietary Restriction"
+                >
+                  <MenuItem value="all">All Diets</MenuItem>
+                  {dietaryOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Sort By</InputLabel>
+                <Select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  label="Sort By"
+                >
+                  <MenuItem value="name">Name</MenuItem>
+                  <MenuItem value="calories">Calories</MenuItem>
+                  <MenuItem value="protein">Protein</MenuItem>
+                  <MenuItem value="date">Date Added</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Paper>
+
         <Box sx={{ mt: 4 }}>
           {isLoading ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -143,7 +206,26 @@ export default function Favorites() {
             </Box>
           ) : favorites && favorites.length > 0 ? (
             <Grid container spacing={3}>
-              {favorites.map((recipe: Recipe, index: number) => (
+              {favorites
+                .filter((recipe: Recipe) => {
+                  const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesDiet = selectedDiet === "all" || recipe.dietaryRestriction === selectedDiet;
+                  return matchesSearch && matchesDiet;
+                })
+                .sort((a: Recipe, b: Recipe) => {
+                  switch (sortBy) {
+                    case "calories":
+                      return (b.calories || 0) - (a.calories || 0);
+                    case "protein":
+                      return b.protein - a.protein;
+                    case "date":
+                      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                    default:
+                      return a.name.localeCompare(b.name);
+                  }
+                })
+                .map((recipe: Recipe, index: number) => (
                 <Grid item xs={12} md={6} key={recipe.id}>
                   <RecipeCard
                     meal={{
