@@ -294,7 +294,7 @@ export default function Recipes() {
             </Box>
           )}
 
-          {!isLoading && recipes && recipes.length > 0 && (
+          {!isLoading && recipes && recipes.length > 0 ? (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Button
                 onClick={() => handleOpenModal()}
