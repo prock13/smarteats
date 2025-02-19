@@ -159,6 +159,7 @@ export class DatabaseStorage implements IStorage {
     const ingredients = Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [];
     console.log('Processed ingredients to save:', ingredients);
 
+    const ingredients = Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [];
     const meal = {
       name: plan.meal.name,
       description: plan.meal.description,
@@ -177,7 +178,7 @@ export class DatabaseStorage implements IStorage {
       cookingTime: plan.meal.cookingTime || null,
       nutrients: plan.meal.nutrients || { vitamins: null, minerals: null },
       dietaryRestriction: plan.meal.dietaryRestriction || "none",
-      ingredients: plan.meal.ingredients || []
+      ingredients: ingredients
     };
 
     const [savedPlan] = await db
