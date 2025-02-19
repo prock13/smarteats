@@ -159,7 +159,6 @@ export class DatabaseStorage implements IStorage {
     const ingredients = Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [];
     console.log('Processed ingredients to save:', ingredients);
 
-    const ingredients = Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [];
     const meal = {
       name: plan.meal.name,
       description: plan.meal.description,
