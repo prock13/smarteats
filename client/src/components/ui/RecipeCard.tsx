@@ -695,10 +695,16 @@ export function RecipeCard({
                   <RestaurantIcon fontSize="small" />
                   Ingredients
                 </Typography>
-                <List>
+                <List sx={{ py: 0 }}>
                   {meal.ingredients?.map((ingredient, index) => (
-                    <ListItem key={index}>
-                      <ListItemText primary={ingredient} />
+                    <ListItem key={index} sx={{ py: 0.5 }}>
+                      <ListItemText 
+                        primary={ingredient} 
+                        sx={{ 
+                          margin: 0,
+                          '& .MuiTypography-root': { lineHeight: 1.4 }
+                        }} 
+                      />
                     </ListItem>
                   ))}
                 </List>
