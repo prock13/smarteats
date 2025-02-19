@@ -150,6 +150,7 @@ export default function Favorites() {
                       name: recipe.name,
                       description: recipe.description,
                       instructions: recipe.instructions,
+                      ingredients: recipe.ingredients || [],
                       macros: {
                         carbs: recipe.carbs,
                         protein: recipe.protein,
