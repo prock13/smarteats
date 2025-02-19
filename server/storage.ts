@@ -134,13 +134,16 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Ensure ingredients are included in the response
-    const plansWithIngredients = plans.map(plan => ({
-      ...plan,
-      meal: {
-        ...plan.meal,
-        ingredients: Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : []
-      }
-    }));
+    const plansWithIngredients = plans.map(plan => {
+      const mealData = plan.meal as any;
+      return {
+        ...plan,
+        meal: {
+          ...mealData,
+          ingredients: Array.isArray(mealData.ingredients) ? mealData.ingredients : (mealData.ingredients ? [mealData.ingredients] : [])
+        }
+      };
+    });
 
     console.log('Retrieved meal plans:', JSON.stringify(plansWithIngredients, null, 2));
     return plansWithIngredients;
