@@ -528,7 +528,10 @@ export default function PantryPage() {
               {suggestions.meals.map((meal: any, index: number) => (
                 <Grid item xs={12} md={6} key={index}>
                   <RecipeCard
-                    meal={meal}
+                    meal={{
+                      ...meal,
+                      ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : []
+                    }}
                     onShare={handleShareClick}
                     targetMacros={{
                       carbs: meal.macros.carbs,
