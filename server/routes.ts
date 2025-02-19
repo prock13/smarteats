@@ -149,16 +149,16 @@ export function registerRoutes(app: Express): Server {
       };
 
       const mealPlan = {
-        userId,
+        userId: req.user!.id,
         date: new Date(date),
         mealType,
         meal: {
           ...mealWithMacros,
           ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
           macros: {
-            carbs: mealWithMacros.carbs || 0,
-            protein: mealWithMacros.protein || 0,
-            fats: mealWithMacros.fats || 0,
+            carbs: meal.carbs || meal.macros?.carbs || 0,
+            protein: meal.protein || meal.macros?.protein || 0,
+            fats: meal.fats || meal.macros?.fats || 0,
             calories: meal.calories || meal.macros?.calories || null,
             fiber: meal.fiber || meal.macros?.fiber || null,
             sugar: meal.sugar || meal.macros?.sugar || null,
