@@ -29,9 +29,21 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },
+  optimizeDeps: {
+    force: false,
+    exclude: ['@replit/vite-plugin-runtime-error-modal'],
+    entries: ['src/**/*.{ts,tsx}'],
+    esbuildOptions: {
+      target: 'esnext'
+    }
+  },
   build: {
+    target: 'esnext',
     outDir: path.resolve(__dirname, "../dist/client"),
     emptyOutDir: true,
-    sourcemap: process.env.NODE_ENV === 'development'
+    sourcemap: process.env.NODE_ENV === 'development',
+    rollupOptions: {
+      cache: true
+    }
   }
 });
