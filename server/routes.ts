@@ -154,7 +154,7 @@ export function registerRoutes(app: Express): Server {
         mealType,
         meal: {
           ...mealWithMacros,
-          ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],
+          ingredients: mealWithMacros.ingredients,
           macros: {
             carbs: meal.carbs || meal.macros?.carbs || 0,
             protein: meal.protein || meal.macros?.protein || 0,
