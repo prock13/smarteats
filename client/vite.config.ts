@@ -21,14 +21,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
-    hmr: {
-      clientPort: 443,
-      protocol: 'wss',
-      host: process.env.REPL_SLUG ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : "0.0.0.0",
-      timeout: 120000,
-      overlay: false,
-      port: 443
-    }
+    hmr: false
   },
   resolve: {
     alias: {
