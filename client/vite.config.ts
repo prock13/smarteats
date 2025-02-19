@@ -21,8 +21,15 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
-    hmr: false,
-    watch: false,
+    hmr: {
+      clientPort: 443,
+      path: "/_vite/",
+      port: 443,
+      protocol: "wss",
+      host: "0.0.0.0",
+      timeout: 5000,
+      overlay: false
+    },
     middlewareMode: "ssr"
   },
   resolve: {
