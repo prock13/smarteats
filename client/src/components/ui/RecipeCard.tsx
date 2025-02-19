@@ -35,6 +35,7 @@ import {
   Add as AddIcon,
   Close as CloseIcon,
   ShoppingCart as ShoppingCartIcon,
+  Print as PrintIcon,
 } from "@mui/icons-material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -358,6 +359,25 @@ export function RecipeCard({
     URL.revokeObjectURL(url);
   };
 
+  const handlePrint = () => {
+    const printContent = `
+      <h1>${meal.name}</h1>
+      <p>${meal.description}</p>
+      <h2>Ingredients</h2>
+      <ul>
+        ${meal.ingredients?.map((ingredient) => `<li>${ingredient}</li>`).join('')}
+      </ul>
+      <h2>Instructions</h2>
+      <p>${meal.instructions}</p>
+    `;
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    }
+  };
 
   return (
     <>
@@ -453,6 +473,9 @@ export function RecipeCard({
                   Add to Calendar
                 </Button>
               )}
+              <IconButton onClick={handlePrint} color="primary" size="small">
+                <PrintIcon />
+              </IconButton>
               {!meal.isStoredRecipe && favorites && !showDelete ? (
                 <IconButton
                   color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
