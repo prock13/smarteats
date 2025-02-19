@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -45,10 +44,16 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    hmr: false,
+    hmr: {
+      clientPort: 443,
+      path: '/hmr/',
+      timeout: 5000,
+      overlay: false,
+      protocol: 'wss'
+    },
     watch: {
-      usePolling: false,
-      interval: 100
+      usePolling: true,
+      interval: 1000
     }
   }
 });

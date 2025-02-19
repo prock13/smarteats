@@ -60,18 +60,33 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
+    if (!user || typeof user.id !== 'number') {
+      console.error("Failed to serialize user:", user);
+      return done(new Error("Invalid user data for serialization"));
+    }
+    console.debug("Serializing user:", user.id);
     done(null, user.id);
   });
 
-  passport.deserializeUser(async (id: number, done) => {
+  passport.deserializeUser(async (id: unknown, done) => {
     try {
+      if (typeof id !== 'number') {
+        console.error("Invalid user ID in session:", id);
+        return done(new Error("Invalid user ID type in session"));
+      }
+
+      console.debug("Deserializing user ID:", id);
       const user = await storage.getUser(id);
+
       if (!user) {
+        console.error("User not found during deserialization:", id);
         return done(null, false);
       }
+
+      console.debug("Successfully deserialized user:", user.id);
       done(null, user);
     } catch (error) {
-      console.error("Session error:", error);
+      console.error("Session deserialization error:", error);
       done(error);
     }
   });
