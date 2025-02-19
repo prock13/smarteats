@@ -195,6 +195,7 @@ export const RecipeCard = ({
           description: meal.description,
           instructions: meal.instructions || "",
           servingSize: meal.macros.servingSize || "",
+          ingredients: meal.ingredients,
           macros: {
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
