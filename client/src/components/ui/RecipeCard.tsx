@@ -96,7 +96,7 @@ interface RecipeCardProps {
   mealType?: string;
 }
 
-export function RecipeCard({
+export const RecipeCard = ({
   meal,
   onShare,
   targetMacros,
@@ -107,7 +107,7 @@ export function RecipeCard({
   expanded = false,
   onExpandClick = () => {},
   mealType,
-}: RecipeCardProps) {
+}: RecipeCardProps) => {
   const { toast } = useToast();
   const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -194,7 +194,7 @@ export function RecipeCard({
           name: meal.name,
           description: meal.description,
           instructions: meal.instructions || "",
-          servingSize: meal.macros.servingSize || "", //Added default value
+          servingSize: meal.macros.servingSize || "",
           macros: {
             carbs: meal.macros.carbs,
             protein: meal.macros.protein,
@@ -206,7 +206,7 @@ export function RecipeCard({
             sodium: meal.macros.sodium,
           },
           cookingTime: meal.cookingTime,
-          nutrients: meal.nutrients || { vitamins: [], minerals: [] }, //Added default value
+          nutrients: meal.nutrients || { vitamins: [], minerals: [] },
           dietaryRestriction: meal.dietaryRestriction || "none",
           ingredients: meal.ingredients || [],
         },
@@ -226,7 +226,6 @@ export function RecipeCard({
         title: "Success",
         description: "Meal added to calendar",
       });
-
     },
     onError: (error: Error) => {
       toast({
@@ -466,6 +465,18 @@ export function RecipeCard({
             pb: 1,
             ...(mealType && { pl: 8 }),
           }}
+          title={
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                fontWeight: 600,
+                flexGrow: 1,
+              }}
+            >
+              {meal.name}
+            </Typography>
+          }
           action={
             <Box
               sx={{
@@ -557,29 +568,6 @@ export function RecipeCard({
           }
         />
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              borderBottom: "1px solid",
-              borderColor: "divider",
-              pb: 1.5,
-              mb: 2,
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{
-                fontWeight: 600,
-                flexGrow: 1,
-              }}
-            >
-              {meal.name}
-            </Typography>
-          </Box>
-
           <Typography
             variant="body1"
             paragraph
@@ -761,9 +749,9 @@ export function RecipeCard({
 
               <Box sx={{ mb: 3 }}>
                 <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  variant="subtitle1"
+                  component="div"
+                  sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: "bold", mb: 2 }}
                 >
                   <RestaurantIcon fontSize="small" />
                   Ingredients
@@ -771,12 +759,12 @@ export function RecipeCard({
                 <List sx={{ py: 0 }}>
                   {meal.ingredients?.map((ingredient, index) => (
                     <ListItem key={index} sx={{ py: 0.5 }}>
-                      <ListItemText 
-                        primary={ingredient} 
-                        sx={{ 
+                      <ListItemText
+                        primary={ingredient}
+                        sx={{
                           margin: 0,
-                          '& .MuiTypography-root': { lineHeight: 1.4 }
-                        }} 
+                          "& .MuiTypography-root": { lineHeight: 1.4 },
+                        }}
                       />
                     </ListItem>
                   ))}
@@ -784,9 +772,9 @@ export function RecipeCard({
               </Box>
               <Box sx={{ mb: 3 }}>
                 <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  variant="subtitle1"
+                  component="div"
+                  sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: "bold", mb: 2 }}
                 >
                   <RestaurantIcon fontSize="small" />
                   Instructions
@@ -801,7 +789,11 @@ export function RecipeCard({
               </Box>
 
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" gutterBottom>
+                <Typography
+                  variant="subtitle1"
+                  component="div"
+                  sx={{ fontWeight: "bold", mb: 2 }}
+                >
                   Nutritional Information
                 </Typography>
                 <Grid container spacing={2}>
@@ -814,7 +806,7 @@ export function RecipeCard({
                   )}
                   {meal.macros.calories !== undefined && meal.macros.calories !== null && (
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text/secondary">
+                      <Typography variant="body2" color="text.secondary">
                         Calories: {meal.macros.calories}kcal
                       </Typography>
                     </Grid>
@@ -854,7 +846,11 @@ export function RecipeCard({
               {meal.nutrients &&
                 (meal.nutrients.vitamins || meal.nutrients.minerals) && (
                   <Box>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      component="div"
+                      sx={{ fontWeight: "bold", mb: 2 }}
+                    >
                       Additional Nutrients
                     </Typography>
                     <Grid container spacing={2}>
@@ -884,7 +880,11 @@ export function RecipeCard({
 
               {showDelete && favorite && (
                 <Box sx={{ mt: 3 }}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    component="div"
+                    sx={{ fontWeight: "bold", mb: 2 }}
+                  >
                     Tags
                   </Typography>
                   <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
@@ -947,7 +947,9 @@ export function RecipeCard({
             alignItems: "center",
           }}
         >
-          Add to Calendar
+          <Typography variant="h6" component="div">
+            Add to Calendar
+          </Typography>
           <IconButton
             edge="end"
             color="inherit"
@@ -1000,4 +1002,4 @@ export function RecipeCard({
       </Dialog>
     </>
   );
-}
+};

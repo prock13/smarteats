@@ -131,7 +131,12 @@ export function ChatBot({ open, onClose }: ChatBotProps) {
           alt="Chef Nina"
           sx={{ width: 40, height: 40 }}
         />
-        <Typography variant="h6">Chat with Chef Nina</Typography>
+        <Typography 
+          component="div"
+          sx={{ typography: 'h6' }}
+        >
+          Chat with Chef Nina
+        </Typography>
         <IconButton
           onClick={onClose}
           sx={{ marginLeft: 'auto' }}
