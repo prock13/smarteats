@@ -74,6 +74,7 @@ interface Meal {
   nutrients?: Nutrients | null;
   isStoredRecipe?: boolean;
   dietaryRestriction?: string;
+  ingredients?: string[];
 }
 
 interface RecipeCardProps {
@@ -205,6 +206,7 @@ export function RecipeCard({
           cookingTime: meal.cookingTime,
           nutrients: meal.nutrients || { vitamins: [], minerals: [] }, //Added default value
           dietaryRestriction: meal.dietaryRestriction || "none",
+          ingredients: meal.ingredients || [],
         },
         mealType,
       };
@@ -239,6 +241,7 @@ export function RecipeCard({
         name: meal.name,
         description: meal.description,
         instructions: meal.instructions,
+        ingredients: meal.ingredients || [],
         carbs: meal.macros.carbs,
         protein: meal.macros.protein,
         fats: meal.macros.fats,
