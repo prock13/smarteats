@@ -145,6 +145,7 @@ export function registerRoutes(app: Express): Server {
         carbs: meal.nutrients?.carbohydrates || 0,
         protein: meal.nutrients?.protein || 0,
         fats: meal.nutrients?.fats || 0,
+        ingredients: meal.ingredients || [], // Ensure ingredients are included
       };
 
       const saved = await storage.saveMealPlan({
