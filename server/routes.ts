@@ -143,9 +143,9 @@ export function registerRoutes(app: Express): Server {
       const mealWithMacros = {
         ...meal,
         ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : (typeof meal.ingredients === 'string' ? [meal.ingredients] : []),
-        carbs: meal.nutrients?.carbohydrates || 0,
-        protein: meal.nutrients?.protein || 0,
-        fats: meal.nutrients?.fats || 0,
+        carbs: meal.carbs || meal.nutrients?.carbohydrates || 0,
+        protein: meal.protein || meal.nutrients?.protein || 0,
+        fats: meal.fats || meal.nutrients?.fats || 0,
       };
 
       const saved = await storage.saveMealPlan({
