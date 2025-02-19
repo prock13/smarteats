@@ -361,14 +361,57 @@ export function RecipeCard({
 
   const handlePrint = () => {
     const printContent = `
-      <h1>${meal.name}</h1>
-      <p>${meal.description}</p>
-      <h2>Ingredients</h2>
-      <ul>
-        ${meal.ingredients?.map((ingredient) => `<li>${ingredient}</li>`).join('')}
-      </ul>
-      <h2>Instructions</h2>
-      <p>${meal.instructions}</p>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            h1 { color: #2E7D32; }
+            .section { margin-bottom: 20px; }
+            .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          </style>
+        </head>
+        <body>
+          <h1>${meal.name}</h1>
+          <p>${meal.description}</p>
+          
+          ${meal.cookingTime ? `
+            <div class="section">
+              <h2>Cooking Time</h2>
+              <div class="grid">
+                ${meal.cookingTime.prep ? `<p>Prep: ${meal.cookingTime.prep} min</p>` : ''}
+                ${meal.cookingTime.cook ? `<p>Cook: ${meal.cookingTime.cook} min</p>` : ''}
+                ${meal.cookingTime.total ? `<p>Total: ${meal.cookingTime.total} min</p>` : ''}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="section">
+            <h2>Ingredients</h2>
+            <ul>
+              ${meal.ingredients?.map((ingredient) => `<li>${ingredient}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="section">
+            <h2>Instructions</h2>
+            <p>${meal.instructions}</p>
+          </div>
+
+          <div class="section">
+            <h2>Nutritional Information</h2>
+            <div class="grid">
+              <p>Carbs: ${meal.macros.carbs}g</p>
+              <p>Protein: ${meal.macros.protein}g</p>
+              <p>Fats: ${meal.macros.fats}g</p>
+              ${meal.macros.calories ? `<p>Calories: ${meal.macros.calories}kcal</p>` : ''}
+              ${meal.macros.fiber ? `<p>Fiber: ${meal.macros.fiber}g</p>` : ''}
+              ${meal.macros.sugar ? `<p>Sugar: ${meal.macros.sugar}g</p>` : ''}
+              ${meal.macros.cholesterol ? `<p>Cholesterol: ${meal.macros.cholesterol}mg</p>` : ''}
+              ${meal.macros.sodium ? `<p>Sodium: ${meal.macros.sodium}mg</p>` : ''}
+            </div>
+          </div>
+        </body>
+      </html>
     `;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
