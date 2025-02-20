@@ -457,35 +457,42 @@ export const RecipeCard = ({
             }}
           />
         )}
-        <CardHeader
+        <Box
           sx={{
             backgroundColor: "background.paper",
             borderBottom: "1px solid",
             borderColor: "divider",
-            pb: 1,
-            ...(mealType && { pl: 8 }),
+            position: "relative",
+            ...(mealType && { pt: 4 }),
           }}
-          title={
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: 600,
-                flexGrow: 1,
-              }}
-            >
-              {meal.name}
-            </Typography>
-          }
-          action={
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1.5,
-                alignItems: "center",
-                pr: 1,
-              }}
-            >
+        >
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              fontWeight: 600,
+              px: 3,
+              pt: 2,
+              pb: 1,
+            }}
+          >
+            {meal.name}
+          </Typography>
+          <CardHeader
+            sx={{
+              pt: 0,
+              pb: 1,
+              ...(mealType && { pl: 8 }),
+            }}
+            action={
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  alignItems: "center",
+                  pr: 1,
+                }}
+              >
               {onShare && (
                 <>
                   <Tooltip title="Share Recipe" arrow>
