@@ -59,9 +59,15 @@ export default function Navigation() {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           <Link href="/">SmartEats</Link>
         </Typography>
-        <Button color="inherit" onClick={() => logoutMutation.mutate()}>
-          Logout
-        </Button>
+        {user ? (
+          <Button color="inherit" onClick={() => logoutMutation.mutate()}>
+            Logout
+          </Button>
+        ) : (
+          <Button color="inherit" onClick={() => setLocation('/auth')}>
+            Login
+          </Button>
+        )}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}

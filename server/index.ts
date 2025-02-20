@@ -137,8 +137,8 @@ if (process.env.NODE_ENV === "development") {
       }
 
       // Check if the request is for a public route
-      const publicPaths = ['/auth', '/login', '/register'];
-      const isPublicPath = publicPaths.some(path => url.startsWith(path));
+      const publicPaths = ['/auth', '/login', '/register', '/', '/terms', '/about'];
+      const isPublicPath = publicPaths.some(path => url === path);
 
       try {
         const template = await fs.promises.readFile('client/index.html', 'utf-8');

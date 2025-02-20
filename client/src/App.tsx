@@ -46,7 +46,9 @@ function ThemedApp() {
         <Container maxWidth="lg" sx={{ py: { xs: 1, md: 4 }, flex: 1 }}>
           <Switch>
             <Route path="/auth" component={Auth} />
-            <ProtectedRoute path="/" component={Home} />
+            <Route path="/" component={Home} />
+            <Route path="/terms" component={Terms} />
+            <Route path="/about" component={About} />
             <ProtectedRoute path="/planner" component={Planner} />
             <ProtectedRoute path="/calendar" component={Calendar} />
             <ProtectedRoute path="/recipes" component={Recipes} />
@@ -54,10 +56,8 @@ function ThemedApp() {
             <ProtectedRoute path="/profile" component={Profile} />
             <ProtectedRoute path="/preferences" component={Preferences} />
             <ProtectedRoute path="/pantry" component={Pantry} />
-            <ProtectedRoute path="/terms" component={Terms} />
-            <ProtectedRoute path="/about" component={About} />
             <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
-            <Route path="/camera" component={CameraPage} /> {/* Added camera route */}
+            <Route path="/camera" component={CameraPage} />
             <Route component={NotFound} />
           </Switch>
         </Container>

@@ -131,8 +131,16 @@ export default function Home() {
     setSelectedFeature(null);
   };
 
+  const { user } = useAuth();
+  
   const handleNavigate = () => {
     if (selectedFeature) {
+      if (!user && !selectedFeature.isNina && selectedFeature.route !== '/about' && selectedFeature.route !== '/terms') {
+        setOpenDialog(false);
+        setLocation('/auth');
+        return;
+      }
+      
       if (selectedFeature.isNina) {
         setChatOpen(true);
         setOpenDialog(false);
