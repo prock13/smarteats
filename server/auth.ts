@@ -75,15 +75,12 @@ export function setupAuth(app: Express) {
         return done(new Error("Invalid user ID type in session"));
       }
 
-      console.debug("Deserializing user ID:", id);
       const user = await storage.getUser(id);
 
       if (!user) {
         console.error("User not found during deserialization:", id);
         return done(null, false);
       }
-
-      console.debug("Successfully deserialized user:", user.id);
       done(null, user);
     } catch (error) {
       console.error("Session deserialization error:", error);
