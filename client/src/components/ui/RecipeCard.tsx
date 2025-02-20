@@ -467,15 +467,10 @@ export const RecipeCard = ({
           }}
         >
           <CardHeader
-            title={meal.name}
             sx={{
               pt: 2,
               pb: 1,
               ...(mealType && { pl: 8 }),
-              '& .MuiCardHeader-title': {
-                fontWeight: 600,
-                fontSize: '1.25rem'
-              }
             }}
             action={
               <Box
@@ -568,6 +563,16 @@ export const RecipeCard = ({
           }
         />
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              fontWeight: 600,
+              mb: 2
+            }}
+          >
+            {meal.name}
+          </Typography>
           <Typography
             variant="body1"
             paragraph
