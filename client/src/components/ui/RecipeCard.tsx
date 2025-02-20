@@ -209,7 +209,6 @@ export const RecipeCard = ({
           cookingTime: meal.cookingTime,
           nutrients: meal.nutrients || { vitamins: [], minerals: [] },
           dietaryRestriction: meal.dietaryRestriction || "none",
-          ingredients: meal.ingredients || [],
         },
         mealType,
       };
