@@ -742,23 +742,25 @@ export function registerRoutes(app: Express): Server {
       const base64Image = file.data.toString('base64');
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4-vision-preview",
         messages: [
           {
             role: "user",
             content: [
-              { 
-                type: "text", 
-                text: "What food items are in this image? Please provide a description and estimate the nutritional content (calories, protein, carbs, fats)." 
+              {
+                type: "text",
+                text: "What food items are in this image? Please provide a description and estimate the nutritional content (calories, protein, carbs, fats)."
               },
               {
                 type: "image_url",
-                image_url: `data:${file.mimetype};base64,${base64Image}`
+                image_url: {
+                  url: `data:${file.mimetype};base64,${base64Image}`
+                }
               }
             ],
-          },
+          }
         ],
-        max_tokens: 500,
+        max_tokens: 500
       });
 
       const content = response.choices[0].message.content;
