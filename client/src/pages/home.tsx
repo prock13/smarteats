@@ -176,7 +176,7 @@ export default function Home() {
           <Button
             variant="contained"
             size="large"
-            onClick={() => setLocation("/planner")}
+            onClick={() => user ? setLocation("/planner") : setLocation("/auth")}
             startIcon={<Restaurant />}
             sx={{
               py: 1.5,
@@ -188,7 +188,7 @@ export default function Home() {
               },
             }}
           >
-            Start Planning
+            {user ? "Start Planning" : "Sign Up to Start"}
           </Button>
         </Box>
 
