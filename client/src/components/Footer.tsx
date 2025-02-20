@@ -56,14 +56,17 @@ export function Footer() {
               Contact Support
             </Link>
             <Box sx={{ ml: 2, display: 'flex', alignItems: 'center' }}>
-              Featured on{" "}
-              <Link
-                href="https://startupfa.me/s/smarteats?utm_source=smarteatsapp.com"
-                target="_blank"
-                sx={{ ml: 1 }}
-              >
-                Startup Fame
-              </Link>
+              <Typography variant="body2" component="span">
+                Featured on{" "}
+                <Link
+                  href="https://startupfa.me/s/smarteats?utm_source=smarteatsapp.com"
+                  target="_blank"
+                  variant="body2"
+                  sx={{ ml: 1 }}
+                >
+                  Startup Fame
+                </Link>
+              </Typography>
             </Box>
           </Box>
         </Box>
