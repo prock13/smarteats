@@ -723,5 +723,62 @@ export function registerRoutes(app: Express): Server {
   };
   app.post("/api/chat", chatHandler);
 
+  const analyzeFoodHandler: RouteHandler = async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!req.files || !req.files.image) {
+        return res.status(400).json({ message: "No image uploaded" });
+      }
+
+      const file = req.files.image;
+      if (Array.isArray(file)) {
+        return res.status(400).json({ message: "Multiple files not allowed" });
+      }
+
+      // Convert the image to base64
+      const base64Image = file.data.toString('base64');
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { 
+                type: "text", 
+                text: "What food items are in this image? Please provide a description and estimate the nutritional content (calories, protein, carbs, fats)." 
+              },
+              {
+                type: "image_url",
+                image_url: `data:${file.mimetype};base64,${base64Image}`
+              }
+            ],
+          },
+        ],
+        max_tokens: 500,
+      });
+
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("No content received from OpenAI");
+      }
+
+      res.json({
+        description: content,
+        // You might want to add more sophisticated parsing of the AI response
+        // to extract specific nutrient values
+      });
+    } catch (error) {
+      console.error("Error analyzing food image:", error);
+      const message = error instanceof Error ? error.message : "Failed to analyze image";
+      res.status(500).json({ message });
+    }
+  };
+
+  app.post("/api/analyze-food", analyzeFoodHandler);
+
   return server;
 }
