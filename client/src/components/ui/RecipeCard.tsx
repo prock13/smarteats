@@ -462,24 +462,26 @@ export const RecipeCard = ({
               <Box
                 sx={{
                   display: "flex",
-                  gap: 1.5,
                   alignItems: "center",
                   pr: 1,
                   ml: -1,
-                  width: "100%"
+                  width: "100%",
+                  justifyContent: "space-between"
                 }}
               >
-                {mealType && (
-                  <Chip
-                    label={mealType.charAt(0).toUpperCase() + mealType.slice(1)}
-                    color="primary"
-                    size="small"
-                    sx={{
-                      textTransform: "capitalize"
-                    }}
-                  />
-                )}
-                <Box sx={{ml: 'auto', display: 'flex', gap: 1.5, alignItems: 'center'}}>
+                <Box>
+                  {mealType && (
+                    <Chip
+                      label={mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                      color="primary"
+                      size="small"
+                      sx={{
+                        textTransform: "capitalize"
+                      }}
+                    />
+                  )}
+                </Box>
+                <Box sx={{display: 'flex', gap: 1.5, alignItems: 'center'}}>
                 {onShare && (
                   <>
                     <Tooltip title="Share Recipe" arrow>
