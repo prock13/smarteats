@@ -23,8 +23,13 @@ export function ProtectedRoute({
         }
 
         if (!user) {
-          window.location.href = "/auth";
-          return null;
+          // Use wouter's useLocation hook for navigation
+          window.location.replace("/auth");
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-border" />
+            </div>
+          );
         }
 
         return <Component />;
