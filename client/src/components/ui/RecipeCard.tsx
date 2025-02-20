@@ -465,7 +465,8 @@ export const RecipeCard = ({
                   gap: 1.5,
                   alignItems: "center",
                   pr: 1,
-                  ml: -1
+                  ml: -1,
+                  justifyContent: "flex-end" // Added to align actions to the right
                 }}
               >
                 {mealType && (
@@ -479,87 +480,90 @@ export const RecipeCard = ({
                     }}
                   />
                 )}
-              {onShare && (
-                <>
-                  <Tooltip title="Share Recipe" arrow>
+                <Box sx={{ml: 'auto'}}> {/* Added to push actions to the right */}
+                {onShare && (
+                  <>
+                    <Tooltip title="Share Recipe" arrow>
+                      <IconButton
+                        onClick={(e) => onShare(e, meal)}
+                        color="primary"
+                        size="small"
+                      >
+                        <ShareIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download Shopping List" arrow>
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          const ingredients = generateShoppingList(meal);
+                          downloadShoppingList(ingredients, meal.name);
+                        }}
+                      >
+                        <ShoppingCartIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )}
+                {showAddToCalendar && (
+                  <Tooltip title="Add to Calendar" arrow>
                     <IconButton
-                      onClick={(e) => onShare(e, meal)}
                       color="primary"
                       size="small"
+                      onClick={handleAddToCalendar}
                     >
-                      <ShareIcon />
+                      <CalendarIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Download Shopping List" arrow>
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        const ingredients = generateShoppingList(meal);
-                        downloadShoppingList(ingredients, meal.name);
-                      }}
-                    >
-                      <ShoppingCartIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              )}
-              {showAddToCalendar && (
-                <Tooltip title="Add to Calendar" arrow>
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={handleAddToCalendar}
-                  >
-                    <CalendarIcon />
+                )}
+                <Tooltip title="Print Recipe" arrow>
+                  <IconButton onClick={handlePrint} color="primary" size="small">
+                    <PrintIcon />
                   </IconButton>
                 </Tooltip>
-              )}
-              <Tooltip title="Print Recipe" arrow>
-                <IconButton onClick={handlePrint} color="primary" size="small">
-                  <PrintIcon />
-                </IconButton>
-              </Tooltip>
-              {!meal.isStoredRecipe && favorites && !showDelete ? (
-                <Tooltip title={favorites?.some((f) => f.name === meal.name) ? "Added to Favorites" : "Add to Favorites"} arrow>
-                  <span>
-                    <IconButton
-                      color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
-                      onClick={() => {
-                        if (!favorites?.some((f) => f.name === meal.name)) {
-                          favoriteMutation.mutate(meal);
+                {!meal.isStoredRecipe && favorites && !showDelete ? (
+                  <Tooltip title={favorites?.some((f) => f.name === meal.name) ? "Added to Favorites" : "Add to Favorites"} arrow>
+                    <span>
+                      <IconButton
+                        color={favorites?.some((f) => f.name === meal.name) ? "primary" : "default"}
+                        onClick={() => {
+                          if (!favorites?.some((f) => f.name === meal.name)) {
+                            favoriteMutation.mutate(meal);
+                          }
+                        }}
+                        disabled={
+                          favoriteMutation.isPending ||
+                          favorites?.some((f) => f.name === meal.name)
                         }
-                      }}
-                      disabled={
-                        favoriteMutation.isPending ||
-                        favorites?.some((f) => f.name === meal.name)
-                      }
+                        size="small"
+                      >
+                        {favorites?.some((f) => f.name === meal.name) ? (
+                          <FavoriteIcon />
+                        ) : (
+                          <FavoriteBorder />
+                        )}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                ) : null}
+                {showDelete && (
+                  <Tooltip title="Delete Recipe" arrow>
+                    <IconButton
+                      color="error"
+                      onClick={handleDelete}
+                      disabled={deleteFavoriteMutation.isPending}
                       size="small"
                     >
-                      {favorites?.some((f) => f.name === meal.name) ? (
-                        <FavoriteIcon />
-                      ) : (
-                        <FavoriteBorder />
-                      )}
+                      <DeleteIcon />
                     </IconButton>
-                  </span>
-                </Tooltip>
-              ) : null}
-              {showDelete && (
-                <Tooltip title="Delete Recipe" arrow>
-                  <IconButton
-                    color="error"
-                    onClick={handleDelete}
-                    disabled={deleteFavoriteMutation.isPending}
-                    size="small"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          }
-        />
+                  </Tooltip>
+                )}
+                </Box>
+              </Box>
+            }
+          />
+        </Box>
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography
             variant="h5"
