@@ -298,7 +298,18 @@ export default function CalendarPage() {
             const mealsForDate = mealsByDate?.[dateStr] || [];
 
             return mealsForDate.length > 0 ? (
-              <Box key={dateStr} sx={{ mb: 4 }}>
+              <Box 
+                key={dateStr} 
+                sx={{ 
+                  mb: 4,
+                  p: 3,
+                  borderRadius: 2,
+                  backgroundColor: (theme) => 
+                    displayDate.getDate() % 2 === 0 
+                      ? theme.palette.background.default
+                      : theme.palette.action.hover,
+                }}
+              >
                 <Typography variant="h6" gutterBottom>
                   {format(displayDate, "EEEE, MMMM d, yyyy")}
                 </Typography>
