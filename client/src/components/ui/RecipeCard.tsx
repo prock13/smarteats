@@ -466,23 +466,16 @@ export const RecipeCard = ({
             ...(mealType && { pt: 4 }),
           }}
         >
-          <Typography
-            variant="h6"
-            component="div"
+          <CardHeader
+            title={meal.name}
             sx={{
-              fontWeight: 600,
-              px: 3,
               pt: 2,
               pb: 1,
-            }}
-          >
-            {meal.name}
-          </Typography>
-          <CardHeader
-            sx={{
-              pt: 0,
-              pb: 1,
               ...(mealType && { pl: 8 }),
+              '& .MuiCardHeader-title': {
+                fontWeight: 600,
+                fontSize: '1.25rem'
+              }
             }}
             action={
               <Box
