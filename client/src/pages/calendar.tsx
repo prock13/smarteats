@@ -303,11 +303,9 @@ export default function CalendarPage() {
                 sx={{ 
                   mb: 4,
                   p: 3,
-                  borderRadius: 2,
-                  backgroundColor: (theme) => 
-                    displayDate.getDate() % 2 === 0 
-                      ? theme.palette.background.default
-                      : theme.palette.action.hover,
+                  borderTop: 1,
+                  borderBottom: 1,
+                  borderColor: 'divider'
                 }}
               >
                 <Typography variant="h6" gutterBottom>
