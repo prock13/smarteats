@@ -27,8 +27,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { UserProfileForm } from "@/pages/profile";
 
 export default function Navigation() {
+  const { user, logoutMutation } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { logoutMutation, user } = useAuth();
 
   const { data: profile } = useQuery<UserProfileForm>({
     queryKey: ["/api/user/profile"],
@@ -64,7 +64,7 @@ export default function Navigation() {
             Logout
           </Button>
         ) : (
-          <Button color="inherit" onClick={() => setLocation('/auth')}>
+          <Button color="inherit" onClick={() => window.location.href = '/auth'}>
             Login
           </Button>
         )}
@@ -80,52 +80,56 @@ export default function Navigation() {
             },
           }}
         >
-          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar 
-              src={profile?.profilePicture}
-              alt={user?.username}
-              sx={{ width: 40, height: 40 }}
-            >
-              {user?.username?.[0]?.toUpperCase()}
-            </Avatar>
-            <Typography variant="subtitle1">{user?.username}</Typography>
-          </Box>
-          <MenuItem component={Link} href="/calendar">
-            <ListItemIcon>
-              <CalendarMonth />
-            </ListItemIcon>
-            <ListItemText>Calendar</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/planner">
-            <ListItemIcon>
-              <Calculate />
-            </ListItemIcon>
-            <ListItemText>Macro Match</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/recipes">
-            <ListItemIcon>
-              <Restaurant />
-            </ListItemIcon>
-            <ListItemText>Recipes</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/favorites">
-            <ListItemIcon>
-              <Favorite />
-            </ListItemIcon>
-            <ListItemText>Favorites</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/pantry">
-            <ListItemIcon>
-              <Kitchen />
-            </ListItemIcon>
-            <ListItemText>Pantry Pal</ListItemText>
-          </MenuItem>
-          <MenuItem component={Link} href="/profile">
-            <ListItemIcon>
-              <Person />
-            </ListItemIcon>
-            <ListItemText>Profile</ListItemText>
-          </MenuItem>
+          {user && (
+            <>
+              <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar 
+                  src={profile?.profilePicture}
+                  alt={user?.username}
+                  sx={{ width: 40, height: 40 }}
+                >
+                  {user?.username?.[0]?.toUpperCase()}
+                </Avatar>
+                <Typography variant="subtitle1">{user?.username}</Typography>
+              </Box>
+              <MenuItem component={Link} href="/calendar">
+                <ListItemIcon>
+                  <CalendarMonth />
+                </ListItemIcon>
+                <ListItemText>Calendar</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/planner">
+                <ListItemIcon>
+                  <Calculate />
+                </ListItemIcon>
+                <ListItemText>Macro Match</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/recipes">
+                <ListItemIcon>
+                  <Restaurant />
+                </ListItemIcon>
+                <ListItemText>Recipes</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/favorites">
+                <ListItemIcon>
+                  <Favorite />
+                </ListItemIcon>
+                <ListItemText>Favorites</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/pantry">
+                <ListItemIcon>
+                  <Kitchen />
+                </ListItemIcon>
+                <ListItemText>Pantry Pal</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/profile">
+                <ListItemIcon>
+                  <Person />
+                </ListItemIcon>
+                <ListItemText>Profile</ListItemText>
+              </MenuItem>
+            </>
+          )}
         </Menu>
       </Toolbar>
     </AppBar>
