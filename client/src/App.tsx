@@ -24,6 +24,8 @@ import { Footer } from "@/components/Footer";
 import { Box, Container } from "@mui/material";
 import { useLocation } from "wouter";
 import MyFitnessPal from "@/pages/myfitnesspal";
+import CameraPage from "./pages/camera"; // Added import for CameraPage
+
 
 // Removed unused theme variable
 function ThemedApp() {
@@ -55,6 +57,7 @@ function ThemedApp() {
             <ProtectedRoute path="/terms" component={Terms} />
             <ProtectedRoute path="/about" component={About} />
             <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
+            <Route path="/camera" component={CameraPage} /> {/* Added camera route */}
             <Route component={NotFound} />
           </Switch>
         </Container>
