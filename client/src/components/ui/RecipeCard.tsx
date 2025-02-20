@@ -462,12 +462,11 @@ export const RecipeCard = ({
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  alignItems: { xs: 'stretch', sm: 'center' },
+                  alignItems: "center",
                   pr: 1,
                   ml: -1,
                   width: "100%",
-                  gap: 1
+                  gap: 0.5
                 }}
               >
                 {mealType && (
@@ -476,18 +475,15 @@ export const RecipeCard = ({
                     color="primary"
                     size="small"
                     sx={{
-                      textTransform: "capitalize",
-                      alignSelf: { xs: 'flex-start', sm: 'center' }
+                      textTransform: "capitalize"
                     }}
                   />
                 )}
                 <Box sx={{
                   display: 'flex', 
-                  gap: 1, 
-                  alignItems: 'center', 
-                  justifyContent: { xs: 'center', sm: 'flex-end' },
-                  ml: { xs: 0, sm: 'auto' },
-                  flexWrap: 'wrap'
+                  gap: 0.5, 
+                  alignItems: 'center',
+                  ml: 'auto'
                 }}>
                 {onShare && (
                   <>
