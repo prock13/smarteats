@@ -312,7 +312,7 @@ export default function CalendarPage() {
                 </Typography>
                 <Grid container spacing={3}>
                   {mealsForDate.map((plan: any) => (
-                    <Grid item xs={12} md={6} lg={4} key={plan.id}>
+                    <Grid item xs={12} md={6} lg={3} key={plan.id}>
                       <RecipeCard
                         meal={{
                           name: plan.meal.name,
