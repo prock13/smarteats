@@ -28,7 +28,8 @@ export default function CameraPage() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await apiRequest.post('/api/analyze-food', formData);
+      const response = await apiRequest('POST', '/api/analyze-food', formData);
+      const data = await response.json();
       setAnalysis(response.data);
     } catch (error) {
       console.error('Error analyzing food:', error);
