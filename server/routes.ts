@@ -742,7 +742,7 @@ export function registerRoutes(app: Express): Server {
       const base64Image = file.data.toString('base64');
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4-vision-preview-1106",
+        model: "gpt-4o",
         messages: [
           {
             role: "user",
