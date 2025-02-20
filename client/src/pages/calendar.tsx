@@ -303,7 +303,6 @@ export default function CalendarPage() {
                 sx={{ 
                   mb: 4,
                   p: 3,
-                  borderTop: 1,
                   borderBottom: 1,
                   borderColor: 'divider'
                 }}
