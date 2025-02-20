@@ -160,6 +160,7 @@ export const mealPlanSchema = z.object({
     name: z.string(),
     description: z.string(),
     instructions: z.string(),
+    ingredients: z.array(z.string()),
     servingSize: z.string().nullable(),
     macros: z.object({
       carbs: z.number(),

@@ -281,7 +281,7 @@ export default function CalendarPage() {
                           name: plan.meal.name,
                           description: plan.meal.description,
                           instructions: plan.meal.instructions || "",
-                          ingredients: plan.meal.ingredients || [],
+                          ingredients: Array.isArray(plan.meal.ingredients) ? plan.meal.ingredients : [],
                           macros: {
                             carbs: plan.meal.carbs || plan.meal.macros?.carbs || 0,
                             protein: plan.meal.protein || plan.meal.macros?.protein || 0,
