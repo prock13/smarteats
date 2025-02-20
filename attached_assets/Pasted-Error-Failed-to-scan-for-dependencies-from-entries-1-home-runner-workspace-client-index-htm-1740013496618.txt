@@ -1,0 +1,82 @@
+Error:   Failed to scan for dependencies from entries:
+[1]   /home/runner/workspace/client/index.html
+[1] 
+[1]   ✘ [ERROR] Unexpected closing "Card" tag does not match opening "Box" tag
+[1] 
+[1]     client/src/components/ui/RecipeCard.tsx:947:8:
+[1]       947 │       </Card>
+[1]           │         ~~~~
+[1]           ╵         Box
+[1] 
+[1]   The opening "Box" tag is here:
+[1] 
+[1]     client/src/components/ui/RecipeCard.tsx:460:9:
+[1]       460 │         <Box
+[1]           ╵          ~~~
+[1] 
+[1] 
+[1] ✘ [ERROR] Unexpected closing "Box" tag does not match opening "Card" tag
+[1] 
+[1]     client/src/components/ui/RecipeCard.tsx:948:8:
+[1]       948 │       </Box>
+[1]           │         ~~~
+[1]           ╵         Card
+[1] 
+[1]   The opening "Card" tag is here:
+[1] 
+[1]     client/src/components/ui/RecipeCard.tsx:427:7:
+[1]       427 │       <Card
+[1]           ╵        ~~~~
+[1] 
+[1] 
+[1]     at failureErrorWithLog (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+[1]     at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+[1]     at runOnEndCallbacks (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+[1]     at buildResponseToResult (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+[1]     at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:955:9
+[1]     at new Promise (<anonymous>)
+[1]     at requestCallbacks.on-end (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:954:54)
+[1]     at handleRequest (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:647:17)
+[1]     at handleIncomingPacket (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:672:7)
+[1]     at Socket.readFromStdout (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+[1]     at Socket.emit (node:events:518:28)
+[1]     at addChunk (node:internal/streams/readable:561:12)
+[1]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[1]     at Readable.push (node:internal/streams/readable:392:5)
+[1]     at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
+[1] 1:04:43 AM [vite] Pre-transform error: /home/runner/workspace/client/src/components/ui/RecipeCard.tsx: Expected corresponding JSX closing tag for <Box>. (947:6)
+[1] 
+[1]   945 |           </Collapse>
+[1]   946 |         </CardContent>
+[1] > 947 |       </Card>
+[1]       |       ^
+[1]   948 |       </Box>
+[1]   949 | 
+[1]   950 |       <Dialog
+[1] 1:04:43 AM [vite] Pre-transform error: /home/runner/workspace/client/src/components/ui/RecipeCard.tsx: Expected corresponding JSX closing tag for <Box>. (947:6)
+[1] 
+[1]   945 |           </Collapse>
+[1]   946 |         </CardContent>
+[1] > 947 |       </Card>
+[1]       |       ^
+[1]   948 |       </Box>
+[1]   949 | 
+[1]   950 |       <Dialog
+[1] 1:04:43 AM [vite] Pre-transform error: /home/runner/workspace/client/src/components/ui/RecipeCard.tsx: Expected corresponding JSX closing tag for <Box>. (947:6)
+[1] 
+[1]   945 |           </Collapse>
+[1]   946 |         </CardContent>
+[1] > 947 |       </Card>
+[1]       |       ^
+[1]   948 |       </Box>
+[1]   949 | 
+[1]   950 |       <Dialog
+[1] 1:04:43 AM [vite] Pre-transform error: /home/runner/workspace/client/src/components/ui/RecipeCard.tsx: Expected corresponding JSX closing tag for <Box>. (947:6)
+[1] 
+[1]   945 |           </Collapse>
+[1]   946 |         </CardContent>
+[1] > 947 |       </Card>
+[1]       |       ^
+[1]   948 |       </Box>
+[1]   949 | 
+[1]   950 |       <Dialog
