@@ -19,10 +19,22 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const apiUrl = getApiUrl(url);
+  const headers: Record<string, string> = {};
+  let body: string | FormData | undefined = undefined;
+
+  if (data) {
+    if (data instanceof FormData) {
+      body = data;
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(data);
+    }
+  }
+
   const res = await fetch(apiUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
     credentials: "include",
   });
 

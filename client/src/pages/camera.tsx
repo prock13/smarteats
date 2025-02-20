@@ -30,7 +30,7 @@ export default function CameraPage() {
 
       const response = await apiRequest('POST', '/api/analyze-food', formData);
       const data = await response.json();
-      setAnalysis(response.data);
+      setAnalysis(data);
     } catch (error) {
       console.error('Error analyzing food:', error);
     } finally {
