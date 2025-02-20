@@ -43,8 +43,6 @@ export default function Navigation() {
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (!user) return null;
-
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
