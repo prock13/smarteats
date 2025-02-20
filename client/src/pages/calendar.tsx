@@ -82,14 +82,18 @@ export default function CalendarPage() {
     },
   });
 
+  const [formDate, setFormDate] = useState<Date>(date);
+  const [formViewType, setFormViewType] = useState<ViewType>(viewType);
+  const [formMealTypes, setFormMealTypes] = useState<Set<string>>(selectedMealTypes);
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateString = `${e.target.value}T12:00:00`;
     const selectedDate = new Date(dateString);
-    setDate(startOfDay(selectedDate));
+    setFormDate(startOfDay(selectedDate));
   };
 
   const handleMealTypeToggle = (mealType: string) => {
-    setSelectedMealTypes((prev) => {
+    setFormMealTypes((prev) => {
       const newTypes = new Set(prev);
       if (newTypes.has(mealType)) {
         if (newTypes.size > 1) {
@@ -107,8 +111,15 @@ export default function CalendarPage() {
     newView: ViewType | null,
   ) => {
     if (newView) {
-      setViewType(newView);
+      setFormViewType(newView);
     }
+  };
+
+  const handleApply = () => {
+    setDate(formDate);
+    setViewType(formViewType);
+    setSelectedMealTypes(formMealTypes);
+    queryClient.invalidateQueries({ queryKey: ["/api/meal-plans"] });
   };
 
   const handleExpandClick = (planId: number) => {
@@ -212,7 +223,7 @@ export default function CalendarPage() {
               <TextField
                 type="date"
                 label="Select Date"
-                value={format(date, "yyyy-MM-dd")}
+                value={format(formDate, "yyyy-MM-dd")}
                 onChange={handleDateChange}
                 fullWidth
               />
@@ -220,7 +231,7 @@ export default function CalendarPage() {
 
             <Grid item xs={12} md={6}>
               <ToggleButtonGroup
-                value={viewType}
+                value={formViewType}
                 exclusive
                 onChange={handleViewChange}
                 aria-label="view type"
@@ -248,15 +259,32 @@ export default function CalendarPage() {
                     key={option.value}
                     control={
                       <Checkbox
-                        checked={selectedMealTypes.has(option.value)}
+                        checked={formMealTypes.has(option.value)}
                         onChange={() => handleMealTypeToggle(option.value)}
-                        disabled={selectedMealTypes.size === 1 && selectedMealTypes.has(option.value)}
+                        disabled={formMealTypes.size === 1 && formMealTypes.has(option.value)}
                       />
                     }
                     label={option.label}
                   />
                 ))}
               </FormGroup>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                onClick={handleApply}
+                fullWidth
+                sx={{
+                  background: "linear-gradient(45deg, #4CAF50 30%, #2196F3 90%)",
+                  color: "white",
+                  "&:hover": {
+                    background: "linear-gradient(45deg, #45a049 30%, #1976d2 90%)",
+                  },
+                }}
+              >
+                Apply Changes
+              </Button>
             </Grid>
           </Grid>
         </Paper>
