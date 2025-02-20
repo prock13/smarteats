@@ -466,7 +466,7 @@ export const RecipeCard = ({
                   alignItems: "center",
                   pr: 1,
                   ml: -1,
-                  justifyContent: "flex-end" // Added to align actions to the right
+                  width: "100%"
                 }}
               >
                 {mealType && (
@@ -475,12 +475,11 @@ export const RecipeCard = ({
                     color="primary"
                     size="small"
                     sx={{
-                      textTransform: "capitalize",
-                      marginRight: "auto"
+                      textTransform: "capitalize"
                     }}
                   />
                 )}
-                <Box sx={{ml: 'auto'}}> {/* Added to push actions to the right */}
+                <Box sx={{ml: 'auto', display: 'flex', gap: 1.5, alignItems: 'center'}}>
                 {onShare && (
                   <>
                     <Tooltip title="Share Recipe" arrow>
