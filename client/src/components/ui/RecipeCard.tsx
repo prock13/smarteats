@@ -945,6 +945,7 @@ export const RecipeCard = ({
           </Collapse>
         </CardContent>
       </Card>
+      </Box>
 
       <Dialog
         open={isCalendarDialogOpen}
