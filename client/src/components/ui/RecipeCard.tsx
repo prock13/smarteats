@@ -465,6 +465,7 @@ export const RecipeCard = ({
                   gap: 1.5,
                   alignItems: "center",
                   pr: 1,
+                  ml: -1
                 }}
               >
                 {mealType && (
@@ -474,6 +475,7 @@ export const RecipeCard = ({
                     size="small"
                     sx={{
                       textTransform: "capitalize",
+                      marginRight: "auto"
                     }}
                   />
                 )}
