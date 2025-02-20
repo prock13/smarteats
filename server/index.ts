@@ -145,11 +145,27 @@ if (process.env.NODE_ENV === "development") {
         const transformed = await vite.transformIndexHtml(url, template);
 
         // Only redirect to auth for protected paths when not authenticated
+        // Only check authentication for API routes and protected paths
+        if (url.startsWith('/api/')) {
+          if (!req.isAuthenticated()) {
+            return res.status(401).json({ message: "Not authenticated" });
+          }
+          return next();
+        }
+
+        // For non-API routes, only redirect specific protected paths
         const protectedPaths = ['/planner', '/calendar', '/recipes', '/favorites', '/profile', '/preferences', '/pantry', '/myfitnesspal'];
+        const publicPaths = ['/', '/auth', '/login', '/register', '/about', '/terms'];
+        
         const isProtectedPath = protectedPaths.some(path => url.startsWith(path));
+        const isPublicPath = publicPaths.some(path => url.startsWith(path));
 
         if (isProtectedPath && !req.isAuthenticated()) {
           return res.redirect('/auth');
+        }
+
+        if (!isProtectedPath || isPublicPath || req.isAuthenticated()) {
+          return res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
         }
 
         res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
