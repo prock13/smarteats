@@ -144,8 +144,11 @@ if (process.env.NODE_ENV === "development") {
         const template = await fs.promises.readFile('client/index.html', 'utf-8');
         const transformed = await vite.transformIndexHtml(url, template);
 
-        // Only redirect to auth for non-public paths when not authenticated
-        if (!isPublicPath && !req.isAuthenticated()) {
+        // Only redirect to auth for protected paths when not authenticated
+        const protectedPaths = ['/planner', '/calendar', '/recipes', '/favorites', '/profile', '/preferences', '/pantry', '/myfitnesspal'];
+        const isProtectedPath = protectedPaths.some(path => url.startsWith(path));
+
+        if (isProtectedPath && !req.isAuthenticated()) {
           return res.redirect('/auth');
         }
 
