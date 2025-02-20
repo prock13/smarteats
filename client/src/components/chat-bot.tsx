@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   Box, 
   TextField, 
@@ -26,6 +28,16 @@ interface ChatBotProps {
 }
 
 export function ChatBot({ open, onClose }: ChatBotProps) {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (open && !user) {
+      onClose();
+      setLocation('/auth');
+    }
+  }, [open, user, onClose, setLocation]);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
