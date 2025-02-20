@@ -443,27 +443,12 @@ export const RecipeCard = ({
           }),
         }}
       >
-        {mealType && (
-          <Chip
-            label={mealType.charAt(0).toUpperCase() + mealType.slice(1)}
-            color="primary"
-            size="small"
-            sx={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              zIndex: 1,
-              textTransform: "capitalize",
-            }}
-          />
-        )}
         <Box
           sx={{
             backgroundColor: "background.paper",
             borderBottom: "1px solid",
             borderColor: "divider",
-            position: "relative",
-            ...(mealType && { pt: 4 }),
+            position: "relative"
           }}
         >
           <CardHeader
@@ -482,6 +467,16 @@ export const RecipeCard = ({
                   pr: 1,
                 }}
               >
+                {mealType && (
+                  <Chip
+                    label={mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                    color="primary"
+                    size="small"
+                    sx={{
+                      textTransform: "capitalize",
+                    }}
+                  />
+                )}
               {onShare && (
                 <>
                   <Tooltip title="Share Recipe" arrow>
