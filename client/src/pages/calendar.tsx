@@ -284,7 +284,7 @@ export default function CalendarPage() {
                   },
                 }}
               >
-                Apply Changes
+                Update View
               </Button>
             </Grid>
           </Grid>
