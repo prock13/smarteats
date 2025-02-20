@@ -470,6 +470,7 @@ export const RecipeCard = ({
             sx={{
               pt: 2,
               pb: 1,
+              borderBottom: '1px solid #eee',
               ...(mealType && { pl: 8 }),
             }}
             action={
