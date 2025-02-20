@@ -88,20 +88,37 @@ export default function Navigation() {
         },
       }}
     >
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Avatar sx={{ width: 40, height: 40 }}>
-          {user.username?.[0]?.toUpperCase() || <AccountCircle />}
-        </Avatar>
-        <Typography variant="subtitle1">{user.username}</Typography>
-      </Box>
+      {user ? (
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Avatar sx={{ width: 40, height: 40 }}>
+            {user.username?.[0]?.toUpperCase() || <AccountCircle />}
+          </Avatar>
+          <Typography variant="subtitle1">{user.username}</Typography>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Avatar sx={{ width: 40, height: 40 }}>
+            <AccountCircle />
+          </Avatar>
+          <Typography variant="subtitle1">Guest</Typography>
+        </Box>
+      )}
 
       <Divider sx={{ mb: 1 }} />
 
@@ -111,7 +128,7 @@ export default function Navigation() {
           return (
             <ListItem key={item.text} disablePadding>
               <ListItemButton
-                onClick={() => handleNavigate(item.path)}
+                onClick={() => user ? handleNavigate(item.path) : handleNavigate("/auth")}
                 selected={isActive}
                 sx={{
                   py: 1.5,
@@ -141,41 +158,57 @@ export default function Navigation() {
 
         <Divider sx={{ my: 1 }} />
 
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => handleNavigate("/profile")}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon>
-              <Person />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-          </ListItemButton>
-        </ListItem>
+        {user ? (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigate("/profile")}
+                sx={{ py: 1.5 }}
+              >
+                <ListItemIcon>
+                  <Person />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => handleNavigate("/preferences")}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon>
-              <Settings />
-            </ListItemIcon>
-            <ListItemText primary="Preferences" />
-          </ListItemButton>
-        </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigate("/preferences")}
+                sx={{ py: 1.5 }}
+              >
+                <ListItemIcon>
+                  <Settings />
+                </ListItemIcon>
+                <ListItemText primary="Preferences" />
+              </ListItemButton>
+            </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => logoutMutation.mutate()}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon>
-              <Logout />
-            </ListItemIcon>
-            <ListItemText primary={logoutMutation.isPending ? "Logging out..." : "Logout"} />
-          </ListItemButton>
-        </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => logoutMutation.mutate()}
+                sx={{ py: 1.5 }}
+              >
+                <ListItemIcon>
+                  <Logout />
+                </ListItemIcon>
+                <ListItemText primary={logoutMutation.isPending ? "Logging out..." : "Logout"} />
+              </ListItemButton>
+            </ListItem>
+          </>
+        ) : (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleNavigate("/auth")}
+              sx={{ py: 1.5 }}
+            >
+              <ListItemIcon>
+                <Person />
+              </ListItemIcon>
+              <ListItemText primary="Sign In" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Drawer>
   );
