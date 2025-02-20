@@ -1,3 +1,4 @@
+
 import { Link } from "wouter";
 import {
   AppBar,
@@ -64,7 +65,7 @@ export default function Navigation() {
             Logout
           </Button>
         ) : (
-          <Button color="inherit" onClick={() => window.location.href = '/auth'}>
+          <Button color="inherit" component={Link} href="/auth">
             Login
           </Button>
         )}
@@ -80,7 +81,7 @@ export default function Navigation() {
             },
           }}
         >
-          {user && (
+          {user ? (
             <>
               <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar 
@@ -127,6 +128,21 @@ export default function Navigation() {
                   <Person />
                 </ListItemIcon>
                 <ListItemText>Profile</ListItemText>
+              </MenuItem>
+            </>
+          ) : (
+            <>
+              <MenuItem component={Link} href="/recipes">
+                <ListItemIcon>
+                  <Restaurant />
+                </ListItemIcon>
+                <ListItemText>Browse Recipes</ListItemText>
+              </MenuItem>
+              <MenuItem component={Link} href="/auth">
+                <ListItemIcon>
+                  <Person />
+                </ListItemIcon>
+                <ListItemText>Sign In</ListItemText>
               </MenuItem>
             </>
           )}
