@@ -191,6 +191,18 @@ export default function AuthPage() {
             )}
           </CardContent>
         </Card>
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Typography variant="body2" component="span" sx={{ color: 'text.secondary' }}>
+            Featured on{" "}
+            <Link
+              href="https://startupfa.me/s/smarteats?utm_source=smarteatsapp.com"
+              target="_blank"
+              sx={{ color: 'primary.main' }}
+            >
+              Startup Fame
+            </Link>
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );
