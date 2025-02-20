@@ -310,34 +310,36 @@ export default function Navigation() {
               </IconButton>
               <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <IconButton
-                  onClick={handleMenu}
+                  onClick={user ? handleMenu : () => handleNavigate("/auth")}
                   color="inherit"
                 >
                   <AccountCircle />
                 </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                >
-                  <MenuItem onClick={() => handleNavigate("/profile")}>
-                    Profile
-                  </MenuItem>
-                  <MenuItem onClick={() => handleNavigate("/preferences")}>
-                    Preferences
-                  </MenuItem>
-                  <MenuItem onClick={() => logoutMutation.mutate()}>
-                    {logoutMutation.isPending ? "Logging out..." : "Logout"}
-                  </MenuItem>
-                </Menu>
+                {user && (
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                  >
+                    <MenuItem onClick={() => handleNavigate("/profile")}>
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={() => handleNavigate("/preferences")}>
+                      Preferences
+                    </MenuItem>
+                    <MenuItem onClick={() => logoutMutation.mutate()}>
+                      {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                    </MenuItem>
+                  </Menu>
+                )}
               </Box>
             </Box>
           </Toolbar>
