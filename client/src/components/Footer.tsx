@@ -55,6 +55,18 @@ export function Footer() {
             >
               Contact Support
             </Link>
+            <Box component="a" 
+              href="https://startupfa.me/s/smarteats?utm_source=smarteatsapp.com" 
+              target="_blank"
+              sx={{ ml: 2, display: 'flex', alignItems: 'center' }}
+            >
+              <img 
+                src="https://startupfa.me/badges/featured-badge-small.webp" 
+                alt="SmartEats - Intelligent Meal Planning for Healthy Living | Startup Fame" 
+                width="224" 
+                height="36" 
+              />
+            </Box>
           </Box>
         </Box>
       </Container>
