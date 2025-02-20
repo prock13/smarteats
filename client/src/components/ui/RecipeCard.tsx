@@ -944,7 +944,6 @@ export const RecipeCard = ({
             </Box>
           </Collapse>
         </CardContent>
-      </Box>
       </Card>
 
       <Dialog
