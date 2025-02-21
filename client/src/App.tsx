@@ -49,15 +49,31 @@ function ThemedApp() {
             <Route path="/" component={Home} />
             <Route path="/terms" component={Terms} />
             <Route path="/about" component={About} />
-            <ProtectedRoute path="/planner" component={Planner} />
-            <ProtectedRoute path="/calendar" component={Calendar} />
-            <ProtectedRoute path="/recipes" component={Recipes} />
-            <ProtectedRoute path="/favorites" component={Favorites} />
-            <ProtectedRoute path="/profile" component={Profile} />
-            <ProtectedRoute path="/preferences" component={Preferences} />
-            <ProtectedRoute path="/pantry" component={Pantry} />
-            <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
             <Route path="/camera" component={CameraPage} />
+            <Route path="/planner">
+              <ProtectedRoute path="/planner" component={Planner} />
+            </Route>
+            <Route path="/calendar">
+              <ProtectedRoute path="/calendar" component={Calendar} />
+            </Route>
+            <Route path="/recipes">
+              <ProtectedRoute path="/recipes" component={Recipes} />
+            </Route>
+            <Route path="/favorites">
+              <ProtectedRoute path="/favorites" component={Favorites} />
+            </Route>
+            <Route path="/profile">
+              <ProtectedRoute path="/profile" component={Profile} />
+            </Route>
+            <Route path="/preferences">
+              <ProtectedRoute path="/preferences" component={Preferences} />
+            </Route>
+            <Route path="/pantry">
+              <ProtectedRoute path="/pantry" component={Pantry} />
+            </Route>
+            <Route path="/myfitnesspal">
+              <ProtectedRoute path="/myfitnesspal" component={MyFitnessPal} />
+            </Route>
             <Route component={NotFound} />
           </Switch>
         </Container>
