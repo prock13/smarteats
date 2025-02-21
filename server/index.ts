@@ -205,10 +205,15 @@ if (process.env.NODE_ENV === "development") {
   // SPA route handler for production
   app.get('*', (req, res) => {
     const url = req.originalUrl;
-    const publicPaths = ['/auth', '/login', '/register'];
-    const isPublicPath = publicPaths.some(path => url.startsWith(path));
+    
+    // Define public and protected paths
+    const publicPaths = ['/', '/auth', '/login', '/register', '/about', '/terms'];
+    const protectedPaths = ['/planner', '/calendar', '/recipes', '/favorites', '/profile', '/preferences', '/pantry', '/myfitnesspal'];
+    
+    const isPublicPath = publicPaths.some(path => url === path);
+    const isProtectedPath = protectedPaths.some(path => url.startsWith(path));
 
-    if (!isPublicPath && !req.isAuthenticated()) {
+    if (isProtectedPath && !req.isAuthenticated()) {
       return res.redirect('/auth');
     }
 
