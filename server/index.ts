@@ -272,6 +272,11 @@ server.on('error', (error: NodeJS.ErrnoException) => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server starting up at http://0.0.0.0:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
+}).on('error', (error: NodeJS.ErrnoException) => {
+  console.error('Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  }
 });
 
 export default app;
