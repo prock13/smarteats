@@ -39,6 +39,7 @@ export const setupVite = async (
       optimizeDeps: {
         force: true,
       },
+      root: path.resolve(__dirname, '../client'),
       plugins: [
         {
           name: 'theme-config-override',
