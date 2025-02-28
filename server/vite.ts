@@ -40,29 +40,35 @@ export const setupVite = async (
       },
       plugins: [
         {
-          name: 'theme-config-override',
-          config: () => ({
-            resolve: {
-              alias: {
-                './theme.json': path.resolve(__dirname, '../client/theme.json')
-              }
-            }
-          })
-        },
-        {
           name: 'vite-plugin-theme-json-override',
-          configResolved(config) {
-            // Find the themePlugin and modify its configuration
-            const plugins = config.plugins;
-            for (const plugin of plugins) {
-              if (plugin.name === 'vite-plugin-theme') {
-                // Override the file path for the theme.json
-                (plugin as any).options = {
-                  ...(plugin as any).options,
-                  filePath: path.resolve(__dirname, '../client/theme.json')
-                };
-              }
+          enforce: 'pre',
+          config() {
+            return {
+              plugins: [
+                {
+                  name: 'shadcn-theme-json-config',
+                  config() {
+                    return {
+                      resolve: {
+                        alias: {
+                          './theme.json': path.resolve(__dirname, '../client/theme.json')
+                        }
+                      }
+                    };
+                  }
+                }
+              ]
+            };
+          },
+          transformIndexHtml() {
+            // Make sure theme.json is properly loaded
+            const themeJsonPath = path.resolve(__dirname, '../client/theme.json');
+            if (!fs.existsSync(themeJsonPath)) {
+              viteLogger.warn(`Theme file not found at ${themeJsonPath}`);
+            } else {
+              viteLogger.info(`Using theme file from ${themeJsonPath}`);
             }
+            return null;
           }
         }
       ],
