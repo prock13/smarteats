@@ -27,8 +27,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+import { registerHealthRoutes } from "./routes/health";
+
 export function registerRoutes(app: Express): Server {
   const server = createServer(app);
+  
+  // Register health routes
+  registerHealthRoutes(app);
 
   // Set up file upload middleware
   app.use(fileUpload({
