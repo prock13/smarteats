@@ -1,4 +1,3 @@
-
 import express, { type Express } from "express";
 import fs from "fs";
 import path, { dirname } from "path";
@@ -39,6 +38,18 @@ export const setupVite = async (
       optimizeDeps: {
         force: true,
       },
+      plugins: [
+        {
+          name: 'theme-config-override',
+          config: () => ({
+            resolve: {
+              alias: {
+                './theme.json': path.resolve(__dirname, '../client/theme.json')
+              }
+            }
+          })
+        }
+      ],
       ...config
     });
 
