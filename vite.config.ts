@@ -8,13 +8,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export default defineConfig({
-  plugins: [
-    react(), 
-    runtimeErrorOverlay(), 
-    themePlugin({
-      filePath: path.resolve(__dirname, "client", "theme.json")
-    })
-  ],
+  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   server: {
     host: '0.0.0.0',
     allowedHosts: 'all',
