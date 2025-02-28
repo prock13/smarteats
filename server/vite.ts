@@ -48,6 +48,22 @@ export const setupVite = async (
               }
             }
           })
+        },
+        {
+          name: 'vite-plugin-theme-json-override',
+          configResolved(config) {
+            // Find the themePlugin and modify its configuration
+            const plugins = config.plugins;
+            for (const plugin of plugins) {
+              if (plugin.name === 'vite-plugin-theme') {
+                // Override the file path for the theme.json
+                (plugin as any).options = {
+                  ...(plugin as any).options,
+                  filePath: path.resolve(__dirname, '../client/theme.json')
+                };
+              }
+            }
+          }
         }
       ],
       ...config
