@@ -1,6 +1,13 @@
+
 node_modules
 dist
 .DS_Store
 server/public
 vite.config.ts.*
 *.tar.gz
+temp-vite
+uploads
+.env
+uv.lock
+attached_assets
+cookies.txt
